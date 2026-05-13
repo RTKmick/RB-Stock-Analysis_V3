@@ -102,3 +102,5 @@ class Insight(TypedDict, total=False):
     total_whale_values: List[float]
     top6_details: List[Dict[str, Any]]
     signals: Signals
+    whale_layers: Dict[str, Any]
+    headline: Dict[str, Any]

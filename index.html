@@ -137,6 +137,14 @@
   }
 
   function el(id){ return document.getElementById(id); }
+  function escapeHtml(s){
+    if (s == null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
   function normText(s){
     return String(s || '').trim().toLowerCase();
   }
@@ -246,6 +254,32 @@
     if (stock.probe_date) html += '<div class="update-time">分點參考日：' + stock.probe_date + '</div>';
     html += '</div><div class="text-end"><span class="badge bg-warning text-dark mb-1">Top 6 核心大戶監控 (10日)</span>';
     html += '<div class="' + statusCls + '">' + (stock.status || '') + '</div><div class="led-group mt-2">' + ledHtml + '</div></div></div>';
+
+    var hl = stock.headline || null;
+    if (hl && hl.summary) {
+      var actMap = { BUY_ZONE: '佈局／買區觀察', HOLD_WATCH: '持有觀望', EXIT_ALERT: '降風險／退出警戒', NEUTRAL: '中性' };
+      var actZh = actMap[hl.action_signal] || (hl.action_signal || '');
+      html += '<div class="metric-card mb-3" style="text-align:left;border-left:4px solid #f1c40f;background:#141414;">';
+      html += '<div class="metric-label mb-1">📰 一句話結論（Phase 0 headline）</div>';
+      html += '<div style="font-size:1.05rem;line-height:1.55;color:#e5e7eb;">' + escapeHtml(hl.summary) + '</div>';
+      html += '<div class="mt-2"><span class="tag-pill">訊號：' + escapeHtml(actZh) + '</span>';
+      if (hl.confidence != null && hl.confidence !== '') {
+        html += '<span class="tag-pill">信心度 ' + escapeHtml(String(hl.confidence)) + '</span>';
+      }
+      html += '</div>';
+      if (hl.key_events && hl.key_events.length) {
+        html += '<ul class="mb-0 mt-2 ps-3" style="font-size:0.88rem;color:#cbd5e1;">';
+        hl.key_events.slice(0, 5).forEach(function(ev){
+          html += '<li>' + escapeHtml(String(ev)) + '</li>';
+        });
+        html += '</ul>';
+      }
+      html += '</div>';
+    } else {
+      html += '<div class="mb-3 px-2 py-2 rounded" style="font-size:0.85rem;color:#6b7280;background:#1a1a1a;border:1px dashed #444;">';
+      html += '💡 此 JSON 尚無 <code>headline</code>：請在本機專案根目錄執行 <code>python scraper_chip.py --stock_id ' + escapeHtml(String(stock.id || '6239')) + '</code> 重新產生 <code>data/' + escapeHtml(String(stock.id || '')) + '_whale_track.json</code> 後推送或覆蓋 <code>data/</code>。';
+      html += '</div>';
+    }
 
     const chipScore = sig.chip_score != null ? sig.chip_score : null;
     const chipLight = sig.chip_light || 'red';
@@ -791,7 +825,8 @@
       history_labels: raw.history_labels || [],
       whale_data: raw.whale_data || [],
       total_whale_values: raw.total_whale_values || [],
-      top6_details: raw.top6_details || []
+      top6_details: raw.top6_details || [],
+      headline: raw.headline && typeof raw.headline === 'object' ? raw.headline : null
     };
   }
 

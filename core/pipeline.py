@@ -30,6 +30,272 @@ from core.broker_archetype import apply_broker_archetype
 from core.signals.institutional import compute_institutional_and_margin_signals
 
 
+# --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
+
+
+def _classify_whale_behavior(n1: float, n5: float, sb: int, ss: int) -> str:
+    """ACCUMULATING / REDUCING / HOLDING / FLIPPING"""
+    eps = 1e-6
+    if (n1 > eps and n5 < -eps) or (n1 < -eps and n5 > eps):
+        return "FLIPPING"
+    if n5 > eps:
+        if sb >= 3 or n1 >= -eps:
+            return "ACCUMULATING"
+        return "HOLDING"
+    if n5 < -eps:
+        if ss >= 3 or n1 <= eps:
+            return "REDUCING"
+        return "HOLDING"
+    if abs(n1) > eps and ((n1 > 0 and ss >= 1) or (n1 < 0 and sb >= 1)):
+        return "FLIPPING"
+    return "HOLDING"
+
+
+def _position_vs_price(avg_cost: float, close_last: float | None) -> str:
+    if close_last is None or avg_cost <= 0 or close_last <= 0:
+        return ""
+    pct = (close_last - avg_cost) / avg_cost * 100.0
+    sign = "+" if pct >= 0 else ""
+    return f"{sign}{pct:.1f}%"
+
+
+def _is_tier3_day_style(m: dict) -> bool:
+    """短線／隔日沖風格：一日與五日淨額反向，且規模夠大。"""
+    n1 = float(m.get("net_1d_lot", m.get("net_1d", 0)) or 0)
+    n5 = float(m.get("net_5d_lot", m.get("net_5d", 0)) or 0)
+    if n1 * n5 >= 0:
+        return False
+    return max(abs(n1), abs(n5)) >= 25.0
+
+
+def _layer_consensus(members: list[dict]) -> tuple[str, str]:
+    """(consensus, direction) direction: BUY / SELL / NEUTRAL"""
+    if not members:
+        return "UNKNOWN", "NEUTRAL"
+    nets = [float(m.get("net_5d_lot", 0) or 0) for m in members]
+    pos_c = sum(1 for x in nets if x > 0)
+    neg_c = sum(1 for x in nets if x < 0)
+    total = sum(nets)
+    n = len(members)
+    if pos_c == n and neg_c == 0:
+        cons = "STRONG_BUY"
+    elif neg_c == n and pos_c == 0:
+        cons = "STRONG_SELL"
+    elif total > 0:
+        cons = "WEAK_BUY" if neg_c else "STRONG_BUY"
+    elif total < 0:
+        cons = "WEAK_SELL" if pos_c else "STRONG_SELL"
+    else:
+        cons = "MIXED"
+    direction = "BUY" if total > 0 else ("SELL" if total < 0 else "NEUTRAL")
+    return cons, direction
+
+
+def _cost_range_from_members(members: list[dict]) -> list[float] | None:
+    costs = [float(m["avg_cost"]) for m in members if m.get("avg_cost")]
+    if not costs:
+        return None
+    return [round(min(costs), 2), round(max(costs), 2)]
+
+
+def _build_whale_layers_phase0(top6_details: list[dict], signals: dict) -> dict:
+    enh = signals.get("enhanced") or {}
+    close_last: float | None
+    try:
+        cl = enh.get("close_last")
+        close_last = float(cl) if cl is not None else None
+    except Exception:
+        close_last = None
+
+    enriched: list[dict] = []
+    for row in top6_details:
+        n5 = float(row.get("net_5d", 0) or 0)
+        n1 = float(row.get("net_1d", 0) or 0)
+        sb = int(row.get("streak_buy", 0) or 0)
+        ss = int(row.get("streak_sell", 0) or 0)
+        avg_c = float(row.get("avg_price", 0) or 0)
+        org = str(row.get("broker_org_type", "unknown") or "unknown").lower()
+        if org not in ("foreign", "local"):
+            org = "unknown"
+        m = {
+            "name": str(row.get("broker_name", "") or ""),
+            "broker_id": str(row.get("broker_id", "") or ""),
+            "type": org,
+            "net_5d_lot": round(n5, 1),
+            "net_1d_lot": round(n1, 1),
+            "avg_cost": round(avg_c, 2) if avg_c > 0 else None,
+            "streak_buy": sb,
+            "streak_sell": ss,
+            "position_vs_price": _position_vs_price(avg_c, close_last),
+            "behavior": _classify_whale_behavior(n1, n5, sb, ss),
+        }
+        enriched.append(m)
+
+    tier3_ids: set[str] = set()
+    for m in enriched:
+        if _is_tier3_day_style(m):
+            tier3_ids.add(m["broker_id"])
+
+    tier3_members = [m for m in enriched if m["broker_id"] in tier3_ids]
+    tier1_members = [m for m in enriched if m["type"] == "foreign" and m["broker_id"] not in tier3_ids]
+    tier2_members = [m for m in enriched if m["type"] == "local" and m["broker_id"] not in tier3_ids]
+    unk = [m for m in enriched if m["type"] == "unknown" and m["broker_id"] not in tier3_ids]
+    tier2_members.extend(unk)
+
+    c1, d1 = _layer_consensus(tier1_members)
+    c2, d2 = _layer_consensus(tier2_members)
+    rng1 = _cost_range_from_members(tier1_members)
+    rng2 = _cost_range_from_members(tier2_members)
+
+    tier3_alert = (
+        "未偵測到隔日沖大戶介入"
+        if not tier3_members
+        else f"偵測到 {len(tier3_members)} 家分點呈短線翻向特徵，宜搭配量能觀察"
+    )
+
+    return {
+        "tier1_institutional": {
+            "label": "外資法人",
+            "members": tier1_members,
+            "layer_summary": {
+                "total_net_5d": round(sum(float(x.get("net_5d_lot", 0) or 0) for x in tier1_members), 1),
+                "direction": d1,
+                "avg_cost_range": rng1,
+                "consensus": c1,
+            },
+        },
+        "tier2_local_major": {
+            "label": "本土主力",
+            "members": tier2_members,
+            "layer_summary": {
+                "total_net_5d": round(sum(float(x.get("net_5d_lot", 0) or 0) for x in tier2_members), 1),
+                "direction": d2,
+                "avg_cost_range": rng2,
+                "consensus": c2,
+            },
+        },
+        "tier3_day_trader": {
+            "label": "短線／隔日沖",
+            "members": tier3_members,
+            "alert": tier3_alert,
+        },
+    }
+
+
+def _derive_action_signal_phase0(signals: dict, diverge_fb: bool) -> str:
+    """BUY_ZONE / HOLD_WATCH / EXIT_ALERT / NEUTRAL（沿用既有分數與監控狀態，Phase 1 再換四維公式）"""
+    grade = str(signals.get("final_grade", "C") or "C").upper()
+    try:
+        chip = float(signals.get("chip_score", 50) or 50)
+    except Exception:
+        chip = 50.0
+    mon = str(signals.get("monitor_state", "NEUTRAL") or "NEUTRAL").upper()
+    trend = str(signals.get("trend", "") or "")
+
+    if mon == "DISTRIBUTION" or chip < 38.0 or grade == "D" or "偏空" in trend:
+        return "EXIT_ALERT"
+    if grade in ("A", "B") and chip >= 58.0 and (not diverge_fb) and mon in (
+        "ACCUMULATION",
+        "MARKUP",
+        "NEUTRAL",
+    ):
+        return "BUY_ZONE"
+    if diverge_fb or grade == "C" or (45.0 <= chip < 58.0):
+        return "HOLD_WATCH"
+    return "NEUTRAL"
+
+
+def _build_headline_phase0(
+    stock_id: str,
+    whale_layers: dict,
+    signals: dict,
+) -> dict:
+    enh = signals.get("enhanced") or {}
+    c_low = enh.get("cost_low")
+    c_high = enh.get("cost_high")
+    close_l = enh.get("close_last")
+
+    f5 = float(signals.get("foreign_net_5d", 0) or 0)
+    l5 = float(signals.get("local_net_5d", 0) or 0)
+    diverge_fb = (f5 > 0 and l5 < 0) or (f5 < 0 and l5 > 0)
+
+    t1 = whale_layers["tier1_institutional"]["members"]
+    s1 = whale_layers["tier1_institutional"]["layer_summary"]
+    t2 = whale_layers["tier2_local_major"]["members"]
+    s2 = whale_layers["tier2_local_major"]["layer_summary"]
+
+    parts: list[str] = []
+    if t1:
+        lead = "、".join(m["name"] for m in t1[:4])
+        if len(t1) > 4:
+            lead += f"等{len(t1)}家"
+        parts.append(
+            f"外資主力共{len(t1)}家（{lead}），五日淨{s1.get('direction', '')}約{float(s1.get('total_net_5d', 0) or 0):.0f}張"
+        )
+    else:
+        parts.append("外資主力在 Top6 中不明顯")
+
+    if t2:
+        parts.append(
+            f"本土分點共{len(t2)}家，五日淨{s2.get('direction', '')}約{float(s2.get('total_net_5d', 0) or 0):.0f}張"
+        )
+
+    if c_low is not None and c_high is not None and close_l is not None:
+        try:
+            parts.append(
+                f"估算大戶成本區 {float(c_low):.0f}~{float(c_high):.0f}，現價 {float(close_l):.0f}"
+            )
+        except Exception:
+            pass
+
+    if diverge_fb:
+        parts.append("外資與本土五日方向分歧")
+
+    summary = "；".join(parts) if parts else f"{stock_id} 籌碼摘要資料不足"
+
+    action = _derive_action_signal_phase0(signals, diverge_fb)
+    try:
+        confidence = int(round(float(signals.get("chip_score", signals.get("final_score", 50) or 50))))
+    except Exception:
+        confidence = 50
+    confidence = max(0, min(100, confidence))
+
+    key_events: list[str] = []
+    for m in sorted(t1, key=lambda x: float(x.get("net_5d_lot", 0) or 0), reverse=True)[:3]:
+        nm = m.get("name", "")
+        nb = float(m.get("net_5d_lot", 0) or 0)
+        sb = int(m.get("streak_buy", 0) or 0)
+        if nm and nb > 0 and sb >= 2:
+            key_events.append(f"{nm} 連買{sb}天，五日累積+{nb:.0f}張")
+        elif nm and abs(nb) >= 30:
+            key_events.append(f"{nm} 五日淨額 {nb:+.0f} 張")
+
+    if diverge_fb:
+        key_events.append("外資／本土五日淨額方向相反")
+
+    if c_low is not None and c_high is not None and close_l is not None:
+        try:
+            mid = (float(c_low) + float(c_high)) / 2.0
+            if mid > 0:
+                dev = (float(close_l) - mid) / mid * 100.0
+                key_events.append(f"現價相對大戶成本中位 {dev:+.1f}%")
+        except Exception:
+            pass
+
+    tags = signals.get("tags") or []
+    if isinstance(tags, list):
+        for t in tags[:2]:
+            if isinstance(t, str) and t and t not in key_events:
+                key_events.append(t)
+
+    return {
+        "summary": summary,
+        "action_signal": action,
+        "confidence": confidence,
+        "key_events": key_events[:6],
+    }
+
+
 # -----------------------------------------------------------------------------
 def analyze_whale_trajectory(
     frames: list[pd.DataFrame],
@@ -519,12 +785,17 @@ def analyze_whale_trajectory(
     signals["chip_light"] = chip_light
     signals["chip_comment"] = chip_comment
 
+    whale_layers = _build_whale_layers_phase0(top6_details, signals)
+    headline = _build_headline_phase0(stock_id, whale_layers, signals)
+
     insight: Insight = {
         "history_labels": [d[5:] for d in date_10d],  # MM-DD
         "whale_data": whale_data,
         "total_whale_values": total_whale_values,
         "top6_details": top6_details,
         "signals": signals,
+        "whale_layers": whale_layers,
+        "headline": headline,
     }
 
     boss_list_df = agg_10d.sort_values("net_buy", ascending=False).head(20).reset_index(drop=True)
