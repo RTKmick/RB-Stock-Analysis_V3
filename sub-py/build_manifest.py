@@ -37,7 +37,7 @@ def main():
     }
     with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
-    print(f"✅ 已寫入 {MANIFEST_PATH}，共 {len(ids)} 檔: {ids}")
+    print(f"OK wrote {MANIFEST_PATH}, {len(ids)} stocks: {ids}")
 
 if __name__ == "__main__":
     main()
