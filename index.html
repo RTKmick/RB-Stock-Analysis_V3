@@ -64,12 +64,13 @@
         <input id="stockSearch"
                class="form-control form-control-lg bg-dark text-white border-secondary"
                style="max-width:220px; font-size:1.4rem;"
-               placeholder="輸入代號或名稱，如 2610 / 華航" />
+               placeholder="過濾用：如 6239、力成（清空＝顯示全部）" />
         <select id="stockSelect" class="form-select form-select-lg bg-dark text-white border-secondary"
                 style="max-width:260px; font-size:1.4rem;">
           <option value="">載入中…</option>
         </select>
       </div>
+      <div class="text-secondary small mt-2 px-1">選單會依左方搜尋框<strong>即時過濾</strong>；找不到代號時請<strong>刪光搜尋框</strong>或按 F5 重新整理。</div>
     </div>
   </div>
 
@@ -892,6 +893,9 @@
           return;
         }
 
+        if (input){
+          input.value = '';
+        }
         renderOptions('');
 
         sel.addEventListener('change', function(){
