@@ -1,68 +1,82 @@
 @echo off
-setlocal
+setlocal EnableExtensions
 
-rem Project root (auto-detect：本檔已在專案根目錄)
+rem ---------------------------------------------------------------------------
+rem 上傳變更到 GitHub：遠端 rtkmick / 分支 main（RB-Stock-Analysis_V3）
+rem 本檔須放在專案根目錄執行。
+rem ---------------------------------------------------------------------------
+
 set "ROOT=%~dp0"
 for %%I in ("%ROOT%") do set "ROOT=%%~fI"
 
-if not exist "%ROOT%" (
-    echo Project root "%ROOT%" not found.
-    pause
-    exit /b 1
-)
+set "REMOTE=rtkmick"
+set "BRANCH=main"
 
 cd /d "%ROOT%"
 if errorlevel 1 (
-    echo Failed to change directory to "%ROOT%".
+    echo Failed to cd to "%ROOT%".
     pause
     exit /b 1
 )
 
-echo Preparing to upload changes to msung-data-mining...
+if not exist "%ROOT%\.git" (
+    echo Not a git repository: "%ROOT%"
+    pause
+    exit /b 1
+)
 
-rem Append log (stored under ztemp\Log.txt)
-if not exist "%ROOT%\ztemp" mkdir "%ROOT%\ztemp"
-echo %date% %time% - Run [Backup Upload] (upl_rb) >> "%ROOT%\ztemp\Log.txt"
+git remote get-url %REMOTE% >nul 2>&1
+if errorlevel 1 (
+    echo Remote "%REMOTE%" is not configured. Add it with:
+    echo   git remote add %REMOTE% https://github.com/RTKmick/RB-Stock-Analysis_V3.git
+    pause
+    exit /b 1
+)
 
-rem Default local/remote branch
-set "REMOTE_BRANCH=msung-data-mining"
+echo Preparing to push to %REMOTE% / %BRANCH% ...
 
-rem Stage current changes（只加主要程式與設定，避免 venv 等雜檔）
+rem Log（Bat 目錄已於 .gitignore 排除 Bat/Log.txt 類型時可視需要調整）
+if not exist "%ROOT%\Bat" mkdir "%ROOT%\Bat"
+echo %date% %time% - Run [upl_rb] push %REMOTE% %BRANCH% >> "%ROOT%\Bat\Log.txt"
+
 git status
 echo.
-echo [upl_rb] Staging tracked source files...
-git add core sub-py templates index.html README.md requirements.txt *.bat .gitignore Version.txt data\*.json data\*.html
+echo [upl_rb] Staging main sources (no venv / no .env)...
+git add core sub-py templates ^
+    index.html README.md requirements.txt ^
+    scraper_chip.py rb_tv_app.py ^
+    *.bat .gitignore Version.txt ^
+    data\*.json data\*.html data\manifest.json 2>nul
+
 git status
 
-set "BRANCH="
-for /f "tokens=*" %%i in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set BRANCH=%%i
-if "%BRANCH%"=="" set BRANCH=%REMOTE_BRANCH%
+for /f "tokens=*" %%i in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "CUR=%%i"
+if "%CUR%"=="" set "CUR=%BRANCH%"
 
-rem Create simple auto commit message (no fixed version number)
 git commit -m "%date% %time% - auto upload (upl_rb)" 2>nul
 if errorlevel 1 (
-    echo No changes to commit, or already up to date.
+    echo No changes to commit, or commit failed ^(see above^).
 ) else (
     echo Commit created.
 )
 
-rem Rebase with remote and autostash local changes
-git pull --rebase --autostash origin %REMOTE_BRANCH%
+echo [upl_rb] Pull --rebase %REMOTE%/%BRANCH% ...
+git pull --rebase --autostash %REMOTE% %BRANCH%
 if errorlevel 1 (
-    echo Pull failed, please resolve conflicts and retry.
+    echo Pull failed. Resolve conflicts then retry.
     pause
     exit /b 1
 )
 
-rem Push to origin msung-data-mining
-git push origin %BRANCH%:%REMOTE_BRANCH%
+echo [upl_rb] Push to %REMOTE% %BRANCH% ...
+git push %REMOTE% %CUR%:%BRANCH%
 if errorlevel 1 (
-    echo Push failed, please check remote branch %REMOTE_BRANCH%.
+    echo Push failed. Check: git remote -v  and  git branch -vv
     pause
     exit /b 1
 )
 
-echo Upload and log update complete!
+echo Upload complete.
 pause
 
 endlocal
