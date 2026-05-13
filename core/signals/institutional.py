@@ -208,40 +208,6 @@ def compute_institutional_and_margin_signals(
 
             sf, st, sd = _sign(f5), _sign(t5), _sign(d5)
             out["inst_three_align_5d"] = sf if sf == st == sd and sf != 0 else 0
-
-        def _last_n_sum(s: pd.Series, n: int) -> float:
-            if s.empty:
-                return 0.0
-            return float(s.tail(n).sum())
-
-        out["inst_foreign_net_5d"] = _last_n_sum(foreign, 5)
-        out["inst_trust_net_5d"] = _last_n_sum(trust, 5)
-        out["inst_three_net_5d"] = _last_n_sum(three, 5)
-
-        out["inst_foreign_net_20d"] = _last_n_sum(foreign, 20)
-        out["inst_trust_net_20d"] = _last_n_sum(trust, 20)
-        out["inst_three_net_20d"] = _last_n_sum(three, 20)
-
-        out["inst_foreign_net_60d"] = _last_n_sum(foreign, 60)
-        out["inst_trust_net_60d"] = _last_n_sum(trust, 60)
-        out["inst_three_net_60d"] = _last_n_sum(three, 60)
-
-        f5 = out["inst_foreign_net_5d"]
-        t5 = out["inst_trust_net_5d"]
-        d5 = _last_n_sum(dealer, 5)
-
-        def _sign(x: float) -> int:
-            if x > 0:
-                return 1
-            if x < 0:
-                return -1
-            return 0
-
-        sf, st, sd = _sign(f5), _sign(t5), _sign(d5)
-        if sf == st == sd and sf != 0:
-            out["inst_three_align_5d"] = sf
-        else:
-            out["inst_three_align_5d"] = 0
     else:
         # Graceful defaults
         out.update(
@@ -292,8 +258,16 @@ def compute_institutional_and_margin_signals(
         dfs["date"] = dfs["date"].astype(str)
         dfs = dfs.sort_values("date").reset_index(drop=True)
 
-        # 成交量（張），所有交易方式合計
-        vol = _numeric_col(dfs, ["volume"])
+        # 成交量（張）：同日多筆成交先加總，避免圖表 X 軸重複日期
+        vol_row = _numeric_col(dfs, ["volume"])
+        daily = (
+            pd.DataFrame({"date": dfs["date"].values, "volume": vol_row.values})
+            .groupby("date", as_index=False)["volume"]
+            .sum()
+            .sort_values("date")
+            .reset_index(drop=True)
+        )
+        vol = daily["volume"]
 
         def _last_n_sum_safe(s: pd.Series, n: int) -> float:
             if s.empty:
@@ -306,13 +280,11 @@ def compute_institutional_and_margin_signals(
 
         # 近 60 日逐日借券量序列（給 dashboard 畫「借券異常尖峰」）
         if not vol.empty:
-            tail_vol = vol.tail(60)
-            out["sbl_volume_series_60d"] = [float(x) for x in tail_vol.tolist()]
-            # 對應的日期標籤，預設使用 MM-DD 方便閱讀
-            tail_dates = dfs.loc[tail_vol.index, "date"].astype(str).tolist()
+            tail_daily = daily.tail(60)
+            out["sbl_volume_series_60d"] = [float(x) for x in tail_daily["volume"].tolist()]
             out["sbl_labels_60d"] = [
                 d[5:] if len(d) >= 10 and d[4] == "-" and d[7] == "-" else d
-                for d in tail_dates
+                for d in tail_daily["date"].astype(str).tolist()
             ]
 
         # 以 60 日平均為 baseline，最近 20 日是否明顯放大

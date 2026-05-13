@@ -37,6 +37,8 @@ def _classify_whale_behavior(n1: float, n5: float, sb: int, ss: int) -> str:
     """ACCUMULATING / REDUCING / HOLDING / FLIPPING"""
     eps = 1e-6
     if (n1 > eps and n5 < -eps) or (n1 < -eps and n5 > eps):
+        if abs(n5) > eps and abs(n1) < abs(n5) * 0.10:
+            return "HOLDING"
         return "FLIPPING"
     if n5 > eps:
         if sb >= 3 or n1 >= -eps:
@@ -47,6 +49,8 @@ def _classify_whale_behavior(n1: float, n5: float, sb: int, ss: int) -> str:
             return "REDUCING"
         return "HOLDING"
     if abs(n1) > eps and ((n1 > 0 and ss >= 1) or (n1 < 0 and sb >= 1)):
+        if abs(n5) > eps and abs(n1) < abs(n5) * 0.10:
+            return "HOLDING"
         return "FLIPPING"
     return "HOLDING"
 
@@ -60,12 +64,16 @@ def _position_vs_price(avg_cost: float, close_last: float | None) -> str:
 
 
 def _is_tier3_day_style(m: dict) -> bool:
-    """短線／隔日沖風格：一日與五日淨額反向，且規模夠大。"""
+    """短線／隔日沖風格：一日與五日淨額反向，且一日翻轉相對五日夠大。"""
     n1 = float(m.get("net_1d_lot", m.get("net_1d", 0)) or 0)
     n5 = float(m.get("net_5d_lot", m.get("net_5d", 0)) or 0)
     if n1 * n5 >= 0:
         return False
-    return max(abs(n1), abs(n5)) >= 25.0
+    if abs(n1) < 50.0:
+        return False
+    if abs(n5) > 0 and abs(n1) / abs(n5) < 0.20:
+        return False
+    return True
 
 
 def _layer_consensus(members: list[dict]) -> tuple[str, str]:
@@ -182,8 +190,10 @@ def _build_whale_layers_phase0(top6_details: list[dict], signals: dict) -> dict:
     }
 
 
-def _derive_action_signal_phase0(signals: dict, diverge_fb: bool) -> str:
-    """BUY_ZONE / HOLD_WATCH / EXIT_ALERT / NEUTRAL（沿用既有分數與監控狀態，Phase 1 再換四維公式）"""
+def _derive_action_signal_phase0(
+    signals: dict, diverge_fb: bool, whale_layers: dict
+) -> str:
+    """BUY_ZONE / HOLD_WATCH / EXIT_ALERT / NEUTRAL。EXIT 需配合籌碼面：Top6 外資+本土五日皆買時不因 chip 單獨過低判逃。"""
     grade = str(signals.get("final_grade", "C") or "C").upper()
     try:
         chip = float(signals.get("chip_score", 50) or 50)
@@ -192,7 +202,15 @@ def _derive_action_signal_phase0(signals: dict, diverge_fb: bool) -> str:
     mon = str(signals.get("monitor_state", "NEUTRAL") or "NEUTRAL").upper()
     trend = str(signals.get("trend", "") or "")
 
-    if mon == "DISTRIBUTION" or chip < 38.0 or grade == "D" or "偏空" in trend:
+    s1 = whale_layers.get("tier1_institutional", {}).get("layer_summary", {}) or {}
+    s2 = whale_layers.get("tier2_local_major", {}).get("layer_summary", {}) or {}
+    t1n = float(s1.get("total_net_5d", 0) or 0)
+    t2n = float(s2.get("total_net_5d", 0) or 0)
+    top6_both_buying = t1n > 0 and t2n > 0
+
+    if mon == "DISTRIBUTION" or grade == "D" or "偏空" in trend:
+        return "EXIT_ALERT"
+    if chip < 38.0 and not top6_both_buying:
         return "EXIT_ALERT"
     if grade in ("A", "B") and chip >= 58.0 and (not diverge_fb) and mon in (
         "ACCUMULATION",
@@ -203,6 +221,20 @@ def _derive_action_signal_phase0(signals: dict, diverge_fb: bool) -> str:
     if diverge_fb or grade == "C" or (45.0 <= chip < 58.0):
         return "HOLD_WATCH"
     return "NEUTRAL"
+
+
+def _dir_zh(code: str) -> str:
+    return {"BUY": "買超", "SELL": "賣超", "NEUTRAL": "持平"}.get(
+        str(code or "").upper(), str(code or "")
+    )
+
+
+def _any_member_position_vs_price(whale_layers: dict) -> bool:
+    for tier in ("tier1_institutional", "tier2_local_major", "tier3_day_trader"):
+        for m in (whale_layers.get(tier) or {}).get("members") or []:
+            if m.get("position_vs_price"):
+                return True
+    return False
 
 
 def _build_headline_phase0(
@@ -224,23 +256,31 @@ def _build_headline_phase0(
     t2 = whale_layers["tier2_local_major"]["members"]
     s2 = whale_layers["tier2_local_major"]["layer_summary"]
 
+    d1 = _dir_zh(str(s1.get("direction", "") or ""))
+    d2 = _dir_zh(str(s2.get("direction", "") or ""))
+
     parts: list[str] = []
     if t1:
         lead = "、".join(m["name"] for m in t1[:4])
         if len(t1) > 4:
             lead += f"等{len(t1)}家"
         parts.append(
-            f"外資主力共{len(t1)}家（{lead}），五日淨{s1.get('direction', '')}約{float(s1.get('total_net_5d', 0) or 0):.0f}張"
+            f"外資主力共{len(t1)}家（{lead}），五日淨{d1}約{float(s1.get('total_net_5d', 0) or 0):.0f}張"
         )
     else:
         parts.append("外資主力在 Top6 中不明顯")
 
     if t2:
         parts.append(
-            f"本土分點共{len(t2)}家，五日淨{s2.get('direction', '')}約{float(s2.get('total_net_5d', 0) or 0):.0f}張"
+            f"本土分點共{len(t2)}家，五日淨{d2}約{float(s2.get('total_net_5d', 0) or 0):.0f}張"
         )
 
-    if c_low is not None and c_high is not None and close_l is not None:
+    if (
+        c_low is not None
+        and c_high is not None
+        and close_l is not None
+        and _any_member_position_vs_price(whale_layers)
+    ):
         try:
             parts.append(
                 f"估算大戶成本區 {float(c_low):.0f}~{float(c_high):.0f}，現價 {float(close_l):.0f}"
@@ -253,7 +293,7 @@ def _build_headline_phase0(
 
     summary = "；".join(parts) if parts else f"{stock_id} 籌碼摘要資料不足"
 
-    action = _derive_action_signal_phase0(signals, diverge_fb)
+    action = _derive_action_signal_phase0(signals, diverge_fb, whale_layers)
     try:
         confidence = int(round(float(signals.get("chip_score", signals.get("final_score", 50) or 50))))
     except Exception:
@@ -273,7 +313,12 @@ def _build_headline_phase0(
     if diverge_fb:
         key_events.append("外資／本土五日淨額方向相反")
 
-    if c_low is not None and c_high is not None and close_l is not None:
+    if (
+        c_low is not None
+        and c_high is not None
+        and close_l is not None
+        and _any_member_position_vs_price(whale_layers)
+    ):
         try:
             mid = (float(c_low) + float(c_high)) / 2.0
             if mid > 0:
