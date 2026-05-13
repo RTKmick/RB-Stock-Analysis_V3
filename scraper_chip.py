@@ -66,6 +66,7 @@ def run_strategy(
     throttle_sec: float = 0.6,
     verify_ssl: bool = True,
     debug_tv: bool = False,
+    force: bool = False,
 ):
     load_dotenv()
     token = os.getenv("FINMIND_API_TOKEN", "").strip()
@@ -91,7 +92,7 @@ def run_strategy(
 
     # 簡單快取：若已有同一檔股票、且 probe_date 已是最近交易日，就不用重抓 FinMind
     json_path = os.path.join(DATA_PATH, f"{stock_id}_whale_track.json")
-    if os.path.exists(json_path):
+    if not force and os.path.exists(json_path):
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 existing = json.load(f)
@@ -103,7 +104,11 @@ def run_strategy(
             print(
                 f"[INFO] {stock_id} 已有最新資料（probe_date={existing_probe}），略過 FinMind 抓取與重新分析。"
             )
+            print("[HINT] 改程式後要重算 JSON：python scraper_chip.py --stock_id {0} --force".format(stock_id))
             return
+
+    if force:
+        print(f"[INFO] --force：將重新載入分點並跑 pipeline（probe 仍為最近交易日 {last_trading_date}）。")
 
     # ✅ Warm-up：強制用絕對路徑載入公司總部經緯度（避免 pipeline 用相對路徑失敗）
     _load_company_geo_map(
@@ -219,6 +224,11 @@ def main():
     parser.add_argument("--throttle", type=float, default=0.6, help="每次請求間隔秒數")
     parser.add_argument("--no_ssl_verify", action="store_true", help="關閉 SSL verify（公司網路憑證問題才用）")
     parser.add_argument("--debug_tv", action="store_true", help="印出 OHLCV / TV debug 資訊（並把 tv_debug 寫進 JSON）")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="略過「probe 已是最新」快取，強制重新跑 pipeline 並覆寫 whale_track.json（改程式後用）",
+    )
     args = parser.parse_args()
 
     run_strategy(
@@ -227,6 +237,7 @@ def main():
         throttle_sec=args.throttle,
         verify_ssl=not args.no_ssl_verify,
         debug_tv=args.debug_tv,
+        force=args.force,
     )
 
 

@@ -278,7 +278,7 @@
       html += '</div>';
     } else {
       html += '<div class="mb-3 px-2 py-2 rounded" style="font-size:0.85rem;color:#6b7280;background:#1a1a1a;border:1px dashed #444;">';
-      html += '💡 此 JSON 尚無 <code>headline</code>：請在本機專案根目錄執行 <code>python scraper_chip.py --stock_id ' + escapeHtml(String(stock.id || '6239')) + '</code> 重新產生 <code>data/' + escapeHtml(String(stock.id || '')) + '_whale_track.json</code> 後推送或覆蓋 <code>data/</code>。';
+      html += '💡 此 JSON 尚無 <code>headline</code>：請在本機專案根目錄執行 <code>python scraper_chip.py --stock_id ' + escapeHtml(String(stock.id || '6239')) + ' --force</code> 重新產生 <code>data/' + escapeHtml(String(stock.id || '')) + '_whale_track.json</code> 後推送或覆蓋 <code>data/</code>（probe 已是最新時須加 <code>--force</code>）。';
       html += '</div>';
     }
 
