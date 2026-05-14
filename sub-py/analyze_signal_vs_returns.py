@@ -278,7 +278,7 @@ def try_plot_figures(df: pd.DataFrame, figures_dir: str, ret_cols: list) -> list
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except ImportError:
-        print("⚠️ 未安裝 matplotlib，略過圖表。可執行：pip install matplotlib")
+        print("[WARN] 未安裝 matplotlib，略過圖表。可執行：pip install matplotlib")
         return []
 
     os.makedirs(figures_dir, exist_ok=True)
@@ -311,7 +311,7 @@ def try_plot_figures(df: pd.DataFrame, figures_dir: str, ret_cols: list) -> list
         if not data_by_bucket:
             continue
         fig, ax = plt.subplots(figsize=(8, 4))
-        ax.boxplot(data_by_bucket, labels=labels_bucket, patch_artist=True)
+        ax.boxplot(data_by_bucket, tick_labels=labels_bucket, patch_artist=True)
         ax.set_xlabel("Score 區間")
         ax.set_ylabel(col + " (報酬)")
         ax.axhline(0, color="#666", linestyle="--")
@@ -334,7 +334,7 @@ def try_plot_figures(df: pd.DataFrame, figures_dir: str, ret_cols: list) -> list
         if not data_by_state:
             continue
         fig, ax = plt.subplots(figsize=(9, 4))
-        ax.boxplot(data_by_state, labels=labels_used, patch_artist=True)
+        ax.boxplot(data_by_state, tick_labels=labels_used, patch_artist=True)
         ax.set_xlabel("Monitor state")
         ax.set_ylabel(col + " (報酬)")
         ax.axhline(0, color="#666", linestyle="--")
@@ -345,7 +345,7 @@ def try_plot_figures(df: pd.DataFrame, figures_dir: str, ret_cols: list) -> list
         files.append(fpath)
 
     if files:
-        print(f"📊 圖表已儲存至：{figures_dir}")
+        print(f"[INFO] 圖表已儲存至：{figures_dir}")
     return files
 
 
@@ -358,19 +358,19 @@ def main():
     args = parser.parse_args()
 
     if not os.path.exists(args.csv):
-        print(f"❌ 找不到 CSV：{args.csv}")
+        print(f"[ERR] 找不到 CSV：{args.csv}")
         print("請先執行：python SubPY/backtest_signals_60d.py --stock_ids 2317,2454,6239 --days 60")
         sys.exit(1)
 
     df = load_and_prepare(args.csv)
     ret_cols = [c for c in RET_COLS if c in df.columns]
     if not ret_cols:
-        print("❌ CSV 中沒有 ret_5d / ret_10d / ret_20d 欄位。")
+        print("[ERR] CSV 中沒有 ret_5d / ret_10d / ret_20d 欄位。")
         sys.exit(1)
 
     results = run_analysis(df, ret_cols)
     if results["n_total"] == 0:
-        print("⚠️ 沒有同時具備 signals 與未來報酬的樣本。")
+        print("[WARN] 沒有同時具備 signals 與未來報酬的樣本。")
         sys.exit(0)
 
     # Console 簡表
@@ -390,7 +390,7 @@ def main():
         fig_files = try_plot_figures(df, args.figures, ret_cols)
     write_html_report(results, args.output, args.figures, figure_files=fig_files)
 
-    print("\n✅ Phase 1 分析完成。請開啟 HTML 報告檢視：")
+    print("\n[OK] Phase 1 分析完成。請開啟 HTML 報告檢視：")
     print(f"   {os.path.abspath(args.output)}")
 
 
