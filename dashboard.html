@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phase 2 一眼看盤｜RUNBOR 大戶儀表板</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { background: #0a0a0a; color: #e8e8e8; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; }
+    .banner { background: linear-gradient(180deg, #141414 0%, #0a0a0a 100%); border-bottom: 1px solid #2a2a2a; padding: 1.5rem 0 2rem; }
+    .stock-title { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; color: #f1c40f; letter-spacing: 0.02em; }
+    .price-pill { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; color: #fff; }
+    .chip-num { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; color: #7dd3fc; line-height: 1; }
+    .chip-label { font-size: 0.85rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; }
+    .summary-lead { font-size: 1.05rem; line-height: 1.65; color: #d1d5db; max-width: 960px; }
+    .signal-badge { font-size: 0.75rem; vertical-align: middle; }
+    .lights { display: flex; gap: 1rem; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .light { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #333; opacity: 0.28; transition: opacity 0.2s, box-shadow 0.2s; }
+    .light.on { opacity: 1; box-shadow: 0 0 28px currentColor; }
+    .light.green { background: #15803d; color: #22c55e; }
+    .light.yellow { background: #a16207; color: #eab308; }
+    .light.red { background: #991b1b; color: #f87171; }
+    .layer-card { background: #121212; border: 1px solid #2d2d2d; border-radius: 14px; height: 100%; overflow: hidden; }
+    .layer-card .card-h { padding: 0.85rem 1rem; font-weight: 700; border-bottom: 1px solid #2a2a2a; font-size: 0.95rem; }
+    .layer-card .card-b { padding: 1rem; font-size: 0.9rem; }
+    .tier1 .card-h { background: linear-gradient(90deg, #4c1d95 0%, #1e1b4b 100%); color: #e9d5ff; }
+    .tier2 .card-h { background: linear-gradient(90deg, #14532d 0%, #052e16 100%); color: #bbf7d0; }
+    .tier3 .card-h { background: linear-gradient(90deg, #450a0a 0%, #1c1917 100%); color: #fecaca; }
+    .tier3.alert-hot { border-color: #dc2626; box-shadow: 0 0 0 1px #dc2626, 0 0 24px rgba(220,38,38,0.25); }
+    .dir-buy { color: #f87171; font-weight: 700; }
+    .dir-sell { color: #60a5fa; font-weight: 700; }
+    .dir-neu { color: #94a3b8; font-weight: 600; }
+    .chart-wrap { background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 14px; padding: 1rem; }
+    .chart-box { position: relative; height: min(420px, 55vh); width: 100%; }
+    .events-panel { background: #111; border: 1px solid #2a2a2a; border-radius: 14px; padding: 1rem; height: 100%; min-height: 280px; }
+    .events-panel h6 { color: #f1c40f; font-weight: 700; }
+    .events-panel li { margin-bottom: 0.5rem; color: #cbd5e1; font-size: 0.9rem; }
+    .meta-foot { font-size: 0.8rem; color: #6b7280; }
+    a.back-link { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <div class="container">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <a class="back-link small" href="index.html">← 返回戰情室</a>
+        <span class="meta-foot" id="probeMeta"></span>
+      </div>
+      <div class="row align-items-center g-4">
+        <div class="col-lg-8">
+          <div class="d-flex flex-wrap align-items-baseline gap-3 mb-2">
+            <span class="stock-title" id="stockTitle">載入中…</span>
+            <span class="text-secondary" id="stockIdBadge"></span>
+          </div>
+          <div class="d-flex flex-wrap align-items-end gap-4 mb-3">
+            <div>
+              <div class="chip-label">現價（收盤）</div>
+              <div class="price-pill" id="closePrice">—</div>
+            </div>
+            <div>
+              <div class="chip-label">籌碼分 chip_score</div>
+              <div class="chip-num" id="chipScore">—</div>
+            </div>
+          </div>
+          <p class="summary-lead mb-2" id="headlineSummary">載入 JSON…</p>
+          <div id="actionRow"></div>
+        </div>
+        <div class="col-lg-4 text-center">
+          <div class="chip-label mb-2">籌碼燈號</div>
+          <div class="lights mb-2" id="trafficLights" aria-label="chip 燈號">
+            <div class="light green" id="lightGreen" title="綠燈"></div>
+            <div class="light yellow" id="lightYellow" title="黃燈"></div>
+            <div class="light red" id="lightRed" title="紅燈"></div>
+          </div>
+          <div class="small text-secondary" id="chipComment"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-4">
+    <div id="loadErr" class="alert alert-danger d-none" role="alert"></div>
+
+    <h5 class="text-warning mb-3">大戶動向分層</h5>
+    <div class="row g-3 mb-4" id="layerCards">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-8">
+        <h5 class="text-warning mb-2">Top6 累積買賣超（千張）</h5>
+        <div class="chart-wrap chart-box mb-2">
+          <canvas id="whaleChart"></canvas>
+        </div>
+        <p class="meta-foot mb-0">資料來源：whale_data 累積值 + history_labels；與主站分數儀表板相同邏輯。</p>
+      </div>
+      <div class="col-lg-4">
+        <div class="events-panel">
+          <h6 class="mb-3">關鍵事件</h6>
+          <ul class="ps-3 mb-0" id="keyEventsList"><li class="text-secondary">載入中…</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      const stock = (params.get('stock') || '6239').trim();
+
+      const $ = function (id) { return document.getElementById(id); };
+
+      function dirZh(d) {
+        var x = String(d || '').toUpperCase();
+        if (x === 'BUY') return '買超';
+        if (x === 'SELL') return '賣超';
+        if (x === 'STRONG_BUY') return '強買';
+        if (x === 'STRONG_SELL') return '強賣';
+        return x || '—';
+      }
+
+      function dirClass(d) {
+        var x = String(d || '').toUpperCase();
+        if (x.indexOf('BUY') >= 0) return 'dir-buy';
+        if (x.indexOf('SELL') >= 0) return 'dir-sell';
+        return 'dir-neu';
+      }
+
+      function pickClose(signals) {
+        if (!signals) return null;
+        var e = signals.enhanced;
+        if (e && e.close_last != null && !isNaN(Number(e.close_last))) return Number(e.close_last);
+        return null;
+      }
+
+      function setLights(light) {
+        var g = $('lightGreen'), y = $('lightYellow'), r = $('lightRed');
+        [g, y, r].forEach(function (el) { el.classList.remove('on'); });
+        var k = String(light || '').toLowerCase();
+        if (k === 'green') g.classList.add('on');
+        else if (k === 'yellow') y.classList.add('on');
+        else r.classList.add('on');
+      }
+
+      function formatCostRange(arr) {
+        if (!arr || arr.length < 2) return '—';
+        var a = Number(arr[0]), b = Number(arr[1]);
+        if (isNaN(a) || isNaN(b)) return '—';
+        var lo = Math.min(a, b), hi = Math.max(a, b);
+        return lo.toFixed(2) + ' ~ ' + hi.toFixed(2);
+      }
+
+      function confluenceLine(wl) {
+        if (!wl) return '';
+        var s1 = wl.tier1_institutional && wl.tier1_institutional.layer_summary;
+        var s2 = wl.tier2_local_major && wl.tier2_local_major.layer_summary;
+        if (!s1 || !s2) return '';
+        var d1 = String(s1.direction || '').toUpperCase();
+        var d2 = String(s2.direction || '').toUpperCase();
+        var same = (d1.indexOf('BUY') >= 0 && d2.indexOf('BUY') >= 0) || (d1.indexOf('SELL') >= 0 && d2.indexOf('SELL') >= 0);
+        var div = (d1.indexOf('BUY') >= 0 && d2.indexOf('SELL') >= 0) || (d1.indexOf('SELL') >= 0 && d2.indexOf('BUY') >= 0);
+        if (same) return '<span class="text-success">外資與本土五日方向同向</span>';
+        if (div) return '<span class="text-warning">外資與本土五日方向分歧（Confluence 未成立）</span>';
+        return '<span class="text-secondary">外資／本土方向中性混搭</span>';
+      }
+
+      function buildLayerCards(wl) {
+        var host = $('layerCards');
+        host.innerHTML = '';
+        if (!wl) return;
+
+        function cardHtml(tierKey, tierCls, shortTag) {
+          var T = wl[tierKey] || {};
+          var label = T.label || tierKey;
+          var mem = T.members || [];
+          var sum = T.layer_summary || {};
+          var alertTxt = T.alert || '';
+          var isT3 = tierKey === 'tier3_day_trader';
+          var hot = isT3 && mem.length > 0;
+          var net = '—';
+          if (sum.total_net_5d != null) {
+            net = Number(sum.total_net_5d).toFixed(1);
+          } else if (isT3 && mem.length) {
+            var t = 0;
+            mem.forEach(function (m) { t += Number(m.net_5d_lot || 0); });
+            net = t.toFixed(1);
+          }
+          var dir = sum.direction;
+          var cr = formatCostRange(sum.avg_cost_range);
+          var extra = '';
+          if (tierKey === 'tier2_local_major') {
+            extra = '<div class="mt-2 small">' + confluenceLine(wl) + '</div>';
+          }
+          if (isT3) {
+            extra += '<div class="mt-2 small text-danger-emphasis">' + (alertTxt || (mem.length ? '短線／隔日沖特徵' : '')) + '</div>';
+          }
+          var body = '<div class="mb-1">五日淨額：<strong>' + net + '</strong> 千張</div>';
+          if (!isT3) {
+            body += '<div class="mb-1">方向：<span class="' + dirClass(dir) + '">' + dirZh(dir) + '</span>';
+            if (sum.consensus) body += ' <span class="text-secondary">(' + sum.consensus + ')</span>';
+            body += '</div>';
+            body += '<div class="mb-1">大戶成本區間：<strong>' + cr + '</strong></div>';
+          } else {
+            body += '<div class="mb-1 text-secondary small">此層為短線／隔日沖偵測，無單一「成本區間」彙總。</div>';
+          }
+          body += '<div class="small text-secondary mt-2">分點數：' + mem.length + '</div>';
+          body += extra;
+          var wrap = document.createElement('div');
+          wrap.className = 'col-md-4';
+          wrap.innerHTML =
+            '<div class="layer-card ' + tierCls + (hot ? ' tier3 alert-hot' : '') + '">' +
+            '<div class="card-h">' + shortTag + ' ' + label + '</div>' +
+            '<div class="card-b">' + body + '</div></div>';
+          return wrap;
+        }
+
+        host.appendChild(cardHtml('tier1_institutional', 'tier1', '[外資]'));
+        host.appendChild(cardHtml('tier2_local_major', 'tier2', '[本土]'));
+        host.appendChild(cardHtml('tier3_day_trader', 'tier3', '[短線]'));
+      }
+
+      function fillKeyEvents(headline) {
+        var ul = $('keyEventsList');
+        ul.innerHTML = '';
+        var ev = headline && headline.key_events ? headline.key_events : [];
+        if (!ev.length) {
+          ul.innerHTML = '<li class="text-secondary">無 key_events</li>';
+          return;
+        }
+        ev.forEach(function (t) {
+          var li = document.createElement('li');
+          li.textContent = t;
+          ul.appendChild(li);
+        });
+      }
+
+      var whaleChart = null;
+
+      function drawChart(payload) {
+        var ctx = $('whaleChart');
+        if (!ctx || !payload.whale_data || !payload.history_labels) return;
+        if (whaleChart) { whaleChart.destroy(); whaleChart = null; }
+        var labels = payload.history_labels.slice();
+        var ds = (payload.whale_data || []).map(function (w) {
+          return {
+            label: w.name,
+            data: (w.values || []).map(Number),
+            borderColor: w.color || '#888',
+            backgroundColor: 'transparent',
+            tension: 0.25,
+            borderWidth: 2,
+            pointRadius: 2
+          };
+        });
+        whaleChart = new Chart(ctx, {
+          type: 'line',
+          data: { labels: labels, datasets: ds },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { labels: { color: '#ccc' } },
+              title: { display: true, text: 'Top6 大戶累積買賣超（千張）', color: '#f1c40f' }
+            },
+            scales: {
+              x: { ticks: { color: '#9ca3af' }, grid: { color: '#2a2a2a' } },
+              y: { ticks: { color: '#9ca3af' }, grid: { color: '#2a2a2a' } }
+            }
+          }
+        });
+      }
+
+      function badgeForAction(sig) {
+        var s = String(sig || '').toUpperCase();
+        var map = {
+          'BUY_ZONE': ['success', 'BUY_ZONE'],
+          'HOLD_WATCH': ['warning', 'HOLD_WATCH'],
+          'EXIT_ALERT': ['danger', 'EXIT_ALERT'],
+          'NEUTRAL': ['secondary', 'NEUTRAL']
+        };
+        var m = map[s] || ['info', s || '—'];
+        return '<span class="badge bg-' + m[0] + ' signal-badge">' + m[1] + '</span>';
+      }
+
+      Promise.all([
+        fetch('data/manifest.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
+        fetch('data/' + stock + '_whale_track.json').then(function (r) {
+          if (!r.ok) throw new Error('找不到 data/' + stock + '_whale_track.json（HTTP ' + r.status + '）');
+          return r.json();
+        })
+      ]).then(function (parts) {
+        var manifest = parts[0] || {};
+        var data = parts[1] || {};
+        var name = data.stock_name || stock;
+        if (manifest.stocks && Array.isArray(manifest.stocks)) {
+          var hit = manifest.stocks.find(function (s) { return String(s.id) === String(stock); });
+          if (hit && hit.name) name = hit.name;
+        }
+        $('stockTitle').textContent = name;
+        $('stockIdBadge').textContent = '(' + stock + ')';
+
+        var sig = data.signals || {};
+        $('chipScore').textContent = sig.chip_score != null ? Number(sig.chip_score).toFixed(1) : '—';
+        setLights(sig.chip_light);
+        $('chipComment').textContent = sig.chip_comment || '';
+
+        var cl = pickClose(sig);
+        $('closePrice').textContent = cl != null ? cl.toFixed(2) : '—';
+
+        var hl = data.headline || {};
+        $('headlineSummary').textContent = hl.summary || '（無 headline.summary）';
+        var ar = $('actionRow');
+        ar.innerHTML = '<span class="me-2 text-secondary small">行動訊號</span> ' + badgeForAction(hl.action_signal) +
+          ' <span class="text-secondary small ms-2">信心 ' + (hl.confidence != null ? hl.confidence : '—') + '</span>';
+
+        $('probeMeta').textContent = 'probe: ' + (data.probe_date || '—') + ' ｜ 更新: ' + (data.last_update || '—');
+
+        buildLayerCards(data.whale_layers);
+        fillKeyEvents(hl);
+        drawChart(data);
+      }).catch(function (e) {
+        var el = $('loadErr');
+        el.classList.remove('d-none');
+        el.textContent = String(e.message || e);
+        $('stockTitle').textContent = '載入失敗';
+        $('headlineSummary').textContent = '';
+      });
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

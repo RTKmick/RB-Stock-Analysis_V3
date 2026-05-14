@@ -43,7 +43,7 @@ git status
 echo.
 echo [upl_rb] Staging main sources (no venv / no .env)...
 git add core sub-py templates ^
-    index.html README.md requirements.txt ^
+    index.html dashboard.html README.md requirements.txt ^
     scraper_chip.py rb_tv_app.py ^
     *.bat .gitignore Version.txt ^
     data\*.json data\*.html data\manifest.json 2>nul

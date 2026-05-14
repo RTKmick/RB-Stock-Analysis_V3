@@ -94,6 +94,13 @@ For RUMBOR Data Mining
    或雙擊 `bat/4_analyze_signal_vs_returns.bat`
 3. 開啟 `data/signal_vs_returns_report.html` 檢視：Score 區間 / Monitor state 的未來 5/10/20 日報酬統計與分佈圖，據此調整策略門檻。
 
+### Phase 2：一眼看盤（大戶儀表板）
+
+- 開啟 **`dashboard.html`**（與 `index.html` 同層，GitHub Pages 根路徑即可）。  
+- 預設載入 `data/6239_whale_track.json`；網址參數可切股：`dashboard.html?stock=2338`（需存在對應 `data/{id}_whale_track.json`）。  
+- 內容：頂部 **chip_score／燈號／headline.summary**、**whale_layers** 三張分層卡、**Chart.js** Top6 累積軌跡、`headline.key_events` 清單。  
+- 戰情室分頁列亦有 **「Phase 2 一眼看盤」** 連結。
+
 ### Phase 3：ML 勝率估計（整合）
 
 從 `data/backtest_signals_60d.csv` 用 RandomForest 估計「訊號 → 未來報酬 > 0」的勝率，並產出模型與特徵重要度供後續 pipeline 或報表使用。
