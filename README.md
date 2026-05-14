@@ -88,6 +88,9 @@ For RUMBOR Data Mining
    `python sub-py/backtest_signals_60d.py --stock_ids 2338 --days 60 --horizons 5,10,20`
 2. 再執行 Phase 1 分析：  
    `python sub-py/analyze_signal_vs_returns.py`  
+   可選流動性與交叉表參數（建議正式報告時開啟）：  
+   `python sub-py/analyze_signal_vs_returns.py --min-avg-volume-20d-lot 500 --liquidity-drop-bottom-pct 0.05 --min-score-state-n 8`  
+   （`avg_volume_20d_lot` 需由新版 `backtest_signals_60d.py` 寫入 CSV；舊檔僅會顯示提示並略過張數濾網。）  
    或雙擊 `bat/4_analyze_signal_vs_returns.bat`
 3. 開啟 `data/signal_vs_returns_report.html` 檢視：Score 區間 / Monitor state 的未來 5/10/20 日報酬統計與分佈圖，據此調整策略門檻。
 

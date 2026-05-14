@@ -2,14 +2,18 @@
 Phase 1：Signal vs 未來報酬 — 分析腳本
 
 讀取 backtest_signals_60d.csv，產出：
-- Score 區間（0-40 / 40-60 / 60-80 / 80+）的未來 5/10/20 日報酬統計與分佈
-- Monitor state（ACCUMULATION / MARKUP / ...）的報酬統計與分佈
-- HTML 報告（表格 + 圖表），方便判斷哪些訊號有 predictive power。
+- Score 區間（0-40 / 40-60 / 60-80 / 80+）的未來 5/10/20 日報酬統計與分佈（含盈虧比 pl_ratio）
+- Monitor state 的報酬統計
+- 分數區間 × Monitor state（Confluence）交叉表（樣本數門檻可調）
+- 可選流動性濾網：--min-avg-volume-20d-lot（張）、--liquidity-drop-bottom-pct（每日橫截面最低分位剔除）
+- HTML 報告（表格 + 圖表 + 策略解讀備註）
 
 使用方式：
   python SubPY/analyze_signal_vs_returns.py
   python SubPY/analyze_signal_vs_returns.py --csv data/backtest_signals_60d.csv --output data/signal_vs_returns_report.html
 """
+
+from __future__ import annotations
 
 import os
 import sys
@@ -84,6 +88,9 @@ def load_and_prepare(csv_path: str) -> pd.DataFrame:
     else:
         df["monitor_state"] = "NEUTRAL"
 
+    if "avg_volume_20d_lot" in df.columns:
+        df["avg_volume_20d_lot"] = pd.to_numeric(df["avg_volume_20d_lot"], errors="coerce")
+
     # Inst × Margin × SBL regime（若有新欄位則用 _regime_row 判斷，否則全部標為 OTHER）
     if (
         "inst_bull_no_short_pressure_flag" in df.columns
@@ -95,23 +102,134 @@ def load_and_prepare(csv_path: str) -> pd.DataFrame:
     return df
 
 
+def apply_liquidity_filters(
+    df: pd.DataFrame,
+    min_avg_volume_20d_lot: float | None,
+    liquidity_drop_bottom_pct: float | None,
+) -> tuple[pd.DataFrame, dict]:
+    """
+    流動性防呆：剔除均量過低樣本，或依 trade_date 橫截面剔除最低流動性分位（預設關閉）。
+    優先使用 avg_volume_20d_lot（backtest 新版欄位）；分位排名欄位優先用張數，否則退回 avg_turnover_20d。
+    """
+    meta: dict = {
+        "initial_rows": int(len(df)),
+        "excluded_min_volume": 0,
+        "excluded_bottom_quantile": 0,
+        "note_min_volume": "",
+        "note_quantile": "",
+        "liquidity_rank_col": "",
+    }
+    out = df.copy()
+    if min_avg_volume_20d_lot is not None and float(min_avg_volume_20d_lot) > 0:
+        thr = float(min_avg_volume_20d_lot)
+        if "avg_volume_20d_lot" in out.columns and out["avg_volume_20d_lot"].notna().any():
+            ok = out["avg_volume_20d_lot"].fillna(0) >= thr
+            meta["excluded_min_volume"] = int((~ok).sum())
+            out = out.loc[ok].copy()
+        else:
+            meta["note_min_volume"] = (
+                "CSV 無 avg_volume_20d_lot，略過「最低張數」濾網；請重跑 backtest_signals_60d.py 產出新 CSV。"
+            )
+
+    if liquidity_drop_bottom_pct is not None and float(liquidity_drop_bottom_pct) > 0:
+        pct = float(liquidity_drop_bottom_pct)
+        if "trade_date" not in out.columns:
+            meta["note_quantile"] = "無 trade_date，略過橫截面尾端剔除。"
+        else:
+            col = ""
+            if "avg_volume_20d_lot" in out.columns and out["avg_volume_20d_lot"].notna().sum() > 0:
+                col = "avg_volume_20d_lot"
+            elif "avg_turnover_20d" in out.columns:
+                col = "avg_turnover_20d"
+            if col:
+                rk = out.groupby("trade_date")[col].rank(pct=True, ascending=True, method="first")
+                bad = rk <= pct
+                meta["excluded_bottom_quantile"] = int(bad.sum())
+                meta["liquidity_rank_col"] = col
+                out = out.loc[~bad].copy()
+            else:
+                meta["note_quantile"] = "無 avg_volume_20d_lot / avg_turnover_20d，略過橫截面尾端剔除。"
+
+    meta["final_rows"] = int(len(out))
+    return out, meta
+
+
+def _summarize_return_series(s: pd.Series) -> dict:
+    s = pd.to_numeric(s, errors="coerce").dropna()
+    if s.empty:
+        return {}
+    wins = s[s > 0]
+    losses = s[s < 0]
+    n = int(len(s))
+    mean = float(s.mean())
+    median = float(s.median())
+    std = float(s.std()) if n > 1 else 0.0
+    wr = float((s > 0).mean() * 100.0)
+    avg_win = float(wins.mean()) if len(wins) else float("nan")
+    avg_loss = float(losses.mean()) if len(losses) else float("nan")
+    pl_ratio = float("nan")
+    if len(wins) and len(losses) and avg_loss != 0:
+        pl_ratio = float(avg_win / abs(avg_loss))
+    return {
+        "n": n,
+        "mean": mean,
+        "median": median,
+        "std": std,
+        "win_rate%": wr,
+        "avg_win": avg_win,
+        "avg_loss": avg_loss,
+        "pl_ratio": pl_ratio,
+    }
+
+
 def stats_by_group(df: pd.DataFrame, group_col: str, value_col: str) -> pd.DataFrame:
-    """對 group_col 分組，算 value_col 的 n, mean, median, std, win_rate%。"""
+    """對 group_col 分組：n, mean, median, std, win_rate%, 平均獲利/平均虧損, 盈虧比。"""
     valid = df[[group_col, value_col]].dropna()
     if valid.empty:
         return pd.DataFrame()
-    g = valid.groupby(group_col)[value_col]
-    n = g.count()
-    mean = g.mean()
-    median = g.median()
-    std = g.std().fillna(0)
-    win_rate = (g.apply(lambda x: (x > 0).mean() * 100))
-    out = pd.DataFrame({"n": n, "mean": mean, "median": median, "std": std, "win_rate%": win_rate})
+    recs: list[dict] = []
+    for name, grp in valid.groupby(group_col, dropna=False):
+        st = _summarize_return_series(grp[value_col])
+        if not st:
+            continue
+        row = {"_idx": name, **st}
+        recs.append(row)
+    out = pd.DataFrame(recs).set_index("_idx")
+    out.index.name = group_col
     return out.round(4)
 
 
-def run_analysis(df: pd.DataFrame, ret_cols: list) -> dict:
-    results = {"by_score": {}, "by_state": {}, "by_inst_regime": {}, "summary": []}
+def stats_by_score_state(df: pd.DataFrame, value_col: str, min_cell_n: int) -> pd.DataFrame:
+    """Score bucket × monitor_state 交叉統計（樣本數 >= min_cell_n 才列出）。"""
+    valid = df.dropna(subset=["score_bucket", "monitor_state", value_col]).copy()
+    if valid.empty:
+        return pd.DataFrame()
+    order_bucket = [lb for _, _, lb in SCORE_BUCKETS]
+    order_state = ["ACCUMULATION", "MARKUP", "FADING", "DISTRIBUTION", "NEUTRAL"]
+    recs: list[dict] = []
+    for sb in order_bucket:
+        for ms in order_state:
+            sub = valid[(valid["score_bucket"] == sb) & (valid["monitor_state"] == ms)]
+            st = _summarize_return_series(sub[value_col])
+            if not st or st["n"] < min_cell_n:
+                continue
+            label = f"{sb} | {ms}"
+            recs.append({"_idx": label, **st})
+    if not recs:
+        return pd.DataFrame()
+    out = pd.DataFrame(recs).set_index("_idx")
+    out.index.name = "score_x_state"
+    return out.round(4)
+
+
+def run_analysis(df: pd.DataFrame, ret_cols: list, min_cell_n: int = 8) -> dict:
+    results = {
+        "by_score": {},
+        "by_state": {},
+        "by_inst_regime": {},
+        "by_score_state": {},
+        "summary": [],
+    }
     df_clean = df.dropna(subset=ret_cols, how="all").copy()
     if df_clean.empty:
         return results
@@ -127,6 +245,8 @@ def run_analysis(df: pd.DataFrame, ret_cols: list) -> dict:
         order = ["ACCUMULATION", "MARKUP", "FADING", "DISTRIBUTION", "NEUTRAL"]
         by_state = by_state.reindex([s for s in order if s in by_state.index])
         results["by_state"][col] = by_state
+
+        results["by_score_state"][col] = stats_by_score_state(df_clean, col, min_cell_n=min_cell_n)
 
         # Inst × Margin × SBL regime（BULL_NO_SHORT / BEAR_WITH_SHORT / OTHER）
         if "inst_regime_flag" in df_clean.columns:
@@ -156,6 +276,44 @@ def write_html_report(
     html.append("<style>body{font-family:Segoe UI,Microsoft JhengHei,sans-serif;background:#1a1a1a;color:#e0e0e0;padding:24px;} h1,h2{color:#f1c40f;} h3{color:#ddd;} table{border-collapse:collapse;margin:12px 0;} th,td{border:1px solid #444;padding:8px 12px;text-align:right;} th{background:#333;color:#f1c40f;} .n{text-align:center;} .meta{color:#888;font-size:0.9em;} .fig{max-width:90%;margin:16px 0;border:1px solid #444;}</style></head><body>")
     html.append("<h1>報酬分析：訊號 vs 未來報酬</h1>")
     html.append(f"<p class=\"meta\">報告產生時間：{datetime.now().strftime('%Y-%m-%d %H:%M')} ｜ 有效樣本數：{results.get('n_total', 0)}</p>")
+    fm = results.get("filter_meta") or {}
+    if fm and (
+        int(fm.get("excluded_min_volume", 0) or 0) > 0
+        or int(fm.get("excluded_bottom_quantile", 0) or 0) > 0
+        or fm.get("note_min_volume")
+        or fm.get("note_quantile")
+        or int(fm.get("initial_rows", 0) or 0) != int(fm.get("final_rows", 0) or 0)
+    ):
+        irows = fm.get("initial_rows", results.get("n_total", 0))
+        frows = fm.get("final_rows", results.get("n_total", 0))
+        ex_v = fm.get("excluded_min_volume", 0)
+        ex_q = fm.get("excluded_bottom_quantile", 0)
+        lc = fm.get("liquidity_rank_col", "")
+        parts = [
+            f"流動性濾網：原始列數 {irows} -> 剩餘 {frows}（剔除均量過低 {ex_v} 筆、橫截面尾端 {ex_q} 筆）。"
+        ]
+        if lc:
+            parts.append(f"橫截面排序欄位：{lc}。")
+        if fm.get("note_min_volume"):
+            parts.append(str(fm["note_min_volume"]))
+        if fm.get("note_quantile"):
+            parts.append(str(fm["note_quantile"]))
+        html.append(f"<p class=\"meta\">{' '.join(parts)}</p>")
+
+    html.append("<h2>策略檢視說明（Quant Review）</h2>")
+    html.append(
+        "<ul class=\"meta\">"
+        "<li><b>分數區間</b>：特別比較 <code>60-80</code> 與 <code>80+</code>。"
+        "若極高分區間的短天期報酬反而較弱，可能反映過熱或主力佈局末期（需搭配量能／大盤驗證）。</li>"
+        "<li><b>盈虧比</b>：勝率僅為一維；<code>pl_ratio</code>＝「正報酬樣本平均 / |負報酬樣本平均|」。"
+        "勝率不高但 pl_ratio 顯著大於 1 時，仍可能具正期望值。</li>"
+        "<li><b>Confluence</b>：交叉表為「分數區間 | monitor_state」；可挑選例如「ACCUMULATION 且分數跨入 60-80」等組合（以樣本數與回測為準）。</li>"
+        "<li><b>流動性</b>：建議以 CLI <code>--min-avg-volume-20d-lot 500</code>（張）或"
+        "<code>--liquidity-drop-bottom-pct 0.05</code> 降低冷門股極端值扭曲；張數來自 backtest 之 <code>avg_volume_20d_lot</code>。</li>"
+        "<li><b>大盤 Regime（未來擴充）</b>：籌碼在系統性空頭常失效；後續可於母體加入大盤相對季線等旗標再分層統計。</li>"
+        "<li><b>下一步</b>：於交叉表尋找「ret_10d 中位數高且勝率&gt;55%」組合，作為儀表板 BUY_ZONE 等規則的實證依據。</li>"
+        "</ul>"
+    )
 
     # 映射 ret_* 欄位為中文說明
     ret_label = {
@@ -171,6 +329,9 @@ def write_html_report(
         "median": "中位數(median)",
         "std": "標準差(std)",
         "win_rate%": "勝率%(win_rate)",
+        "avg_win": "平均獲利(>0)",
+        "avg_loss": "平均虧損(<0)",
+        "pl_ratio": "盈虧比(pl_ratio)",
     }
 
     # Monitor state 狀態值中文化
@@ -218,7 +379,11 @@ def write_html_report(
         html.append(f"<h3>{title}（依分數區間）</h3>")
         html.append(_to_html_renamed(tb))
         html.append("<br/>")
-    html.append("<p class=\"meta\">解讀：平均值 / 中位數代表該分數區間的平均 / 典型報酬；勝率% 表示報酬 &gt; 0 的比例。可用來判斷「幾分以上進場，長期比較划算」。</p>")
+    html.append(
+        "<p class=\"meta\">解讀：平均值 / 中位數代表該分數區間的平均 / 典型報酬；勝率% 為報酬&gt;0 的比例；"
+        "盈虧比為正報酬子樣本均值除以負報酬子樣本均值的絕對值（兩側皆須有樣本）。"
+        "請一併檢視 <code>80+</code> 是否出現「過熱反轉」（短天期不如 <code>60-80</code>）。</p>"
+    )
     for fn in figure_files:
         if "ret_by_score_" in fn:
             name = os.path.basename(fn)
@@ -236,14 +401,33 @@ def write_html_report(
         html.append(f"<h3>{title}（不同狀態）</h3>")
         html.append(_to_html_renamed(tb, index_name="monitor_state"))
         html.append("<br/>")
-    html.append("<p class=\"meta\">解讀：比較 ACCUMULATION / MARKUP（吸籌、推升）與 NEUTRAL / DISTRIBUTION（中性、派發）的報酬差異，判斷哪些狀態適合當作進場 / 出場條件。</p>")
+    html.append(
+        "<p class=\"meta\">解讀：比較 ACCUMULATION / MARKUP 與 NEUTRAL / DISTRIBUTION 的報酬差異；"
+        "可與「三、分數×狀態」交叉表併讀，尋找 Confluence。</p>"
+    )
     for fn in figure_files:
         if "ret_by_state_" in fn:
             name = os.path.basename(fn)
             html.append(f"<p><img class=\"fig\" src=\"{rel_fig}/{name}\" alt=\"{name}\"/></p>")
 
+    # By Score × Monitor state (Confluence)
+    html.append("<h2>三、分數區間 × 主力狀態（Confluence）</h2>")
+    html.append(
+        "<p class=\"meta\">僅列出樣本數達門檻之組合；列名格式「分數區間 | monitor_state」。</p>"
+    )
+    for col in RET_COLS:
+        if col not in results.get("by_score_state", {}):
+            continue
+        tb = results["by_score_state"][col]
+        if tb is None or tb.empty:
+            continue
+        title = ret_label.get(col, col)
+        html.append(f"<h3>{title}（交叉表）</h3>")
+        html.append(_to_html_renamed(tb))
+        html.append("<br/>")
+
     # By Inst × Margin × SBL Regime
-    html.append("<h2>三、三大法人 × 融資 × 借券 狀態下的報酬</h2>")
+    html.append("<h2>四、三大法人 × 融資 × 借券 狀態下的報酬</h2>")
     for col in RET_COLS:
         if col not in results.get("by_inst_regime", {}):
             continue
@@ -355,6 +539,27 @@ def main():
     parser.add_argument("--output", type=str, default=os.path.join(DATA_PATH, "signal_vs_returns_report.html"), help="HTML 報告輸出路徑")
     parser.add_argument("--figures", type=str, default=FIG_DIR, help="圖表輸出目錄")
     parser.add_argument("--no-plot", action="store_true", help="不產出圖表（僅表格）")
+    parser.add_argument(
+        "--min-avg-volume-20d-lot",
+        type=float,
+        default=None,
+        metavar="N",
+        help="剔除 20 日均量（張）低於 N 的樣本；需 CSV 含 avg_volume_20d_lot（請重跑 backtest）",
+    )
+    parser.add_argument(
+        "--liquidity-drop-bottom-pct",
+        type=float,
+        default=None,
+        metavar="P",
+        help="每個 trade_date 橫截面，剔除流動性最低 P 比例列（0~1，例如 0.05）",
+    )
+    parser.add_argument(
+        "--min-score-state-n",
+        type=int,
+        default=8,
+        metavar="K",
+        help="分數×狀態交叉表最小樣本數（預設 8）",
+    )
     args = parser.parse_args()
 
     if not os.path.exists(args.csv):
@@ -363,12 +568,18 @@ def main():
         sys.exit(1)
 
     df = load_and_prepare(args.csv)
+    df, filter_meta = apply_liquidity_filters(
+        df,
+        args.min_avg_volume_20d_lot,
+        args.liquidity_drop_bottom_pct,
+    )
     ret_cols = [c for c in RET_COLS if c in df.columns]
     if not ret_cols:
         print("[ERR] CSV 中沒有 ret_5d / ret_10d / ret_20d 欄位。")
         sys.exit(1)
 
-    results = run_analysis(df, ret_cols)
+    results = run_analysis(df, ret_cols, min_cell_n=args.min_score_state_n)
+    results["filter_meta"] = filter_meta
     if results["n_total"] == 0:
         print("[WARN] 沒有同時具備 signals 與未來報酬的樣本。")
         sys.exit(0)
@@ -384,6 +595,13 @@ def main():
         if col in results.get("by_state", {}):
             print(f"\n{col}:")
             print(results["by_state"][col].to_string())
+    print("\n===== Score x State (Confluence) 摘要 =====")
+    for col in ret_cols:
+        if col in results.get("by_score_state", {}):
+            tb = results["by_score_state"][col]
+            if tb is not None and not tb.empty:
+                print(f"\n{col}:")
+                print(tb.to_string())
 
     fig_files = []
     if not args.no_plot:

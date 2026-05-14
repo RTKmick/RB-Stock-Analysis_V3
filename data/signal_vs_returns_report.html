@@ -2,7 +2,9 @@
 <title>報酬分析：訊號 vs 未來報酬</title>
 <style>body{font-family:Segoe UI,Microsoft JhengHei,sans-serif;background:#1a1a1a;color:#e0e0e0;padding:24px;} h1,h2{color:#f1c40f;} h3{color:#ddd;} table{border-collapse:collapse;margin:12px 0;} th,td{border:1px solid #444;padding:8px 12px;text-align:right;} th{background:#333;color:#f1c40f;} .n{text-align:center;} .meta{color:#888;font-size:0.9em;} .fig{max-width:90%;margin:16px 0;border:1px solid #444;}</style></head><body>
 <h1>報酬分析：訊號 vs 未來報酬</h1>
-<p class="meta">報告產生時間：2026-05-14 22:56 ｜ 有效樣本數：396</p>
+<p class="meta">報告產生時間：2026-05-14 23:22 ｜ 有效樣本數：396</p>
+<h2>策略檢視說明（Quant Review）</h2>
+<ul class="meta"><li><b>分數區間</b>：特別比較 <code>60-80</code> 與 <code>80+</code>。若極高分區間的短天期報酬反而較弱，可能反映過熱或主力佈局末期（需搭配量能／大盤驗證）。</li><li><b>盈虧比</b>：勝率僅為一維；<code>pl_ratio</code>＝「正報酬樣本平均 / |負報酬樣本平均|」。勝率不高但 pl_ratio 顯著大於 1 時，仍可能具正期望值。</li><li><b>Confluence</b>：交叉表為「分數區間 | monitor_state」；可挑選例如「ACCUMULATION 且分數跨入 60-80」等組合（以樣本數與回測為準）。</li><li><b>流動性</b>：建議以 CLI <code>--min-avg-volume-20d-lot 500</code>（張）或<code>--liquidity-drop-bottom-pct 0.05</code> 降低冷門股極端值扭曲；張數來自 backtest 之 <code>avg_volume_20d_lot</code>。</li><li><b>大盤 Regime（未來擴充）</b>：籌碼在系統性空頭常失效；後續可於母體加入大盤相對季線等旗標再分層統計。</li><li><b>下一步</b>：於交叉表尋找「ret_10d 中位數高且勝率&gt;55%」組合，作為儀表板 BUY_ZONE 等規則的實證依據。</li></ul>
 <h2>一、依分數區間看未來報酬</h2>
 <h3>5日報酬（ret_5d）（依分數區間）</h3>
 <table border="1" class="dataframe n">
@@ -14,9 +16,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">score_bucket</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -32,6 +40,9 @@
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th class="n">40-60</th>
@@ -40,6 +51,9 @@
       <td>0.0071</td>
       <td>0.1035</td>
       <td>53.4694</td>
+      <td>0.0851</td>
+      <td>-0.0506</td>
+      <td>1.6830</td>
     </tr>
     <tr>
       <th class="n">60-80</th>
@@ -48,9 +62,15 @@
       <td>0.0119</td>
       <td>0.0899</td>
       <td>59.6026</td>
+      <td>0.0700</td>
+      <td>-0.0596</td>
+      <td>1.1752</td>
     </tr>
     <tr>
       <th class="n">80+</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -70,9 +90,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">score_bucket</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -88,6 +114,9 @@
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th class="n">40-60</th>
@@ -96,6 +125,9 @@
       <td>0.0421</td>
       <td>0.1332</td>
       <td>67.2811</td>
+      <td>0.1202</td>
+      <td>-0.0641</td>
+      <td>1.8747</td>
     </tr>
     <tr>
       <th class="n">60-80</th>
@@ -104,9 +136,15 @@
       <td>0.0276</td>
       <td>0.1253</td>
       <td>66.1871</td>
+      <td>0.1023</td>
+      <td>-0.0878</td>
+      <td>1.1643</td>
     </tr>
     <tr>
       <th class="n">80+</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -126,9 +164,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">score_bucket</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -144,6 +188,9 @@
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th class="n">40-60</th>
@@ -152,6 +199,9 @@
       <td>0.0562</td>
       <td>0.1926</td>
       <td>61.7647</td>
+      <td>0.1997</td>
+      <td>-0.0907</td>
+      <td>2.2013</td>
     </tr>
     <tr>
       <th class="n">60-80</th>
@@ -160,9 +210,15 @@
       <td>0.1256</td>
       <td>0.1464</td>
       <td>84.9057</td>
+      <td>0.1805</td>
+      <td>-0.0921</td>
+      <td>1.9606</td>
     </tr>
     <tr>
       <th class="n">80+</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -172,10 +228,7 @@
   </tbody>
 </table>
 <br/>
-<p class="meta">解讀：平均值 / 中位數代表該分數區間的平均 / 典型報酬；勝率% 表示報酬 &gt; 0 的比例。可用來判斷「幾分以上進場，長期比較划算」。</p>
-<p><img class="fig" src="signal_vs_returns_figures/ret_by_score_ret_5d.png" alt="ret_by_score_ret_5d.png"/></p>
-<p><img class="fig" src="signal_vs_returns_figures/ret_by_score_ret_10d.png" alt="ret_by_score_ret_10d.png"/></p>
-<p><img class="fig" src="signal_vs_returns_figures/ret_by_score_ret_20d.png" alt="ret_by_score_ret_20d.png"/></p>
+<p class="meta">解讀：平均值 / 中位數代表該分數區間的平均 / 典型報酬；勝率% 為報酬&gt;0 的比例；盈虧比為正報酬子樣本均值除以負報酬子樣本均值的絕對值（兩側皆須有樣本）。請一併檢視 <code>80+</code> 是否出現「過熱反轉」（短天期不如 <code>60-80</code>）。</p>
 <h2>二、依主力監測狀態看報酬（Whale Trend Monitor）</h2>
 <h3>5日報酬（ret_5d）（不同狀態）</h3>
 <table border="1" class="dataframe n">
@@ -187,9 +240,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">monitor_state</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -205,6 +264,9 @@
       <td>-0.0139</td>
       <td>0.0081</td>
       <td>0.0000</td>
+      <td>NaN</td>
+      <td>-0.0140</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th class="n">FADING（退潮警戒）</th>
@@ -213,6 +275,9 @@
       <td>0.0143</td>
       <td>0.1165</td>
       <td>60.0000</td>
+      <td>0.0956</td>
+      <td>-0.0512</td>
+      <td>1.8661</td>
     </tr>
     <tr>
       <th class="n">DISTRIBUTION（派發警戒）</th>
@@ -221,6 +286,9 @@
       <td>-0.0012</td>
       <td>0.0375</td>
       <td>47.6190</td>
+      <td>0.0342</td>
+      <td>-0.0271</td>
+      <td>1.2630</td>
     </tr>
     <tr>
       <th class="n">NEUTRAL（中性觀察）</th>
@@ -229,6 +297,9 @@
       <td>0.0074</td>
       <td>0.0925</td>
       <td>55.3398</td>
+      <td>0.0741</td>
+      <td>-0.0623</td>
+      <td>1.1879</td>
     </tr>
   </tbody>
 </table>
@@ -243,9 +314,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">monitor_state</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -261,6 +338,9 @@
       <td>-0.0211</td>
       <td>0.0087</td>
       <td>0.0000</td>
+      <td>NaN</td>
+      <td>-0.0198</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th class="n">FADING（退潮警戒）</th>
@@ -269,6 +349,9 @@
       <td>0.0566</td>
       <td>0.1344</td>
       <td>75.9690</td>
+      <td>0.1224</td>
+      <td>-0.0659</td>
+      <td>1.8582</td>
     </tr>
     <tr>
       <th class="n">DISTRIBUTION（派發警戒）</th>
@@ -277,6 +360,9 @@
       <td>-0.0094</td>
       <td>0.0495</td>
       <td>45.2381</td>
+      <td>0.0512</td>
+      <td>-0.0340</td>
+      <td>1.5073</td>
     </tr>
     <tr>
       <th class="n">NEUTRAL（中性觀察）</th>
@@ -285,6 +371,9 @@
       <td>0.0316</td>
       <td>0.1375</td>
       <td>66.4835</td>
+      <td>0.1156</td>
+      <td>-0.0957</td>
+      <td>1.2084</td>
     </tr>
   </tbody>
 </table>
@@ -299,9 +388,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">monitor_state</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -317,6 +412,9 @@
       <td>0.0347</td>
       <td>0.0126</td>
       <td>100.0000</td>
+      <td>0.0315</td>
+      <td>NaN</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th class="n">FADING（退潮警戒）</th>
@@ -325,6 +423,9 @@
       <td>0.0854</td>
       <td>0.1775</td>
       <td>69.0722</td>
+      <td>0.1915</td>
+      <td>-0.1070</td>
+      <td>1.7895</td>
     </tr>
     <tr>
       <th class="n">DISTRIBUTION（派發警戒）</th>
@@ -333,6 +434,9 @@
       <td>0.0206</td>
       <td>0.0876</td>
       <td>52.5000</td>
+      <td>0.0897</td>
+      <td>-0.0629</td>
+      <td>1.4259</td>
     </tr>
     <tr>
       <th class="n">NEUTRAL（中性觀察）</th>
@@ -341,15 +445,283 @@
       <td>0.1223</td>
       <td>0.1893</td>
       <td>76.4706</td>
+      <td>0.2155</td>
+      <td>-0.0927</td>
+      <td>2.3252</td>
     </tr>
   </tbody>
 </table>
 <br/>
-<p class="meta">解讀：比較 ACCUMULATION / MARKUP（吸籌、推升）與 NEUTRAL / DISTRIBUTION（中性、派發）的報酬差異，判斷哪些狀態適合當作進場 / 出場條件。</p>
-<p><img class="fig" src="signal_vs_returns_figures/ret_by_state_ret_5d.png" alt="ret_by_state_ret_5d.png"/></p>
-<p><img class="fig" src="signal_vs_returns_figures/ret_by_state_ret_10d.png" alt="ret_by_state_ret_10d.png"/></p>
-<p><img class="fig" src="signal_vs_returns_figures/ret_by_state_ret_20d.png" alt="ret_by_state_ret_20d.png"/></p>
-<h2>三、三大法人 × 融資 × 借券 狀態下的報酬</h2>
+<p class="meta">解讀：比較 ACCUMULATION / MARKUP 與 NEUTRAL / DISTRIBUTION 的報酬差異；可與「三、分數×狀態」交叉表併讀，尋找 Confluence。</p>
+<h2>三、分數區間 × 主力狀態（Confluence）</h2>
+<p class="meta">僅列出樣本數達門檻之組合；列名格式「分數區間 | monitor_state」。</p>
+<h3>5日報酬（ret_5d）（交叉表）</h3>
+<table border="1" class="dataframe n">
+  <thead>
+    <tr style="text-align: right;">
+      <th class="n"></th>
+      <th class="n">樣本數(N)</th>
+      <th class="n">平均值(mean)</th>
+      <th class="n">中位數(median)</th>
+      <th class="n">標準差(std)</th>
+      <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
+    </tr>
+    <tr>
+      <th class="n">score_x_state</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th class="n">40-60 | FADING</th>
+      <td>136</td>
+      <td>0.0391</td>
+      <td>0.0140</td>
+      <td>0.1185</td>
+      <td>59.5588</td>
+      <td>0.0983</td>
+      <td>-0.0490</td>
+      <td>2.0050</td>
+    </tr>
+    <tr>
+      <th class="n">40-60 | DISTRIBUTION</th>
+      <td>30</td>
+      <td>-0.0023</td>
+      <td>-0.0082</td>
+      <td>0.0354</td>
+      <td>36.6667</td>
+      <td>0.0338</td>
+      <td>-0.0244</td>
+      <td>1.3824</td>
+    </tr>
+    <tr>
+      <th class="n">40-60 | NEUTRAL</th>
+      <td>79</td>
+      <td>0.0037</td>
+      <td>0.0000</td>
+      <td>0.0877</td>
+      <td>49.3671</td>
+      <td>0.0722</td>
+      <td>-0.0648</td>
+      <td>1.1152</td>
+    </tr>
+    <tr>
+      <th class="n">60-80 | FADING</th>
+      <td>9</td>
+      <td>0.0096</td>
+      <td>0.0458</td>
+      <td>0.0787</td>
+      <td>66.6667</td>
+      <td>0.0601</td>
+      <td>-0.0915</td>
+      <td>0.6570</td>
+    </tr>
+    <tr>
+      <th class="n">60-80 | DISTRIBUTION</th>
+      <td>12</td>
+      <td>0.0153</td>
+      <td>0.0174</td>
+      <td>0.0411</td>
+      <td>75.0000</td>
+      <td>0.0347</td>
+      <td>-0.0430</td>
+      <td>0.8084</td>
+    </tr>
+    <tr>
+      <th class="n">60-80 | NEUTRAL</th>
+      <td>127</td>
+      <td>0.0205</td>
+      <td>0.0112</td>
+      <td>0.0951</td>
+      <td>59.0551</td>
+      <td>0.0750</td>
+      <td>-0.0605</td>
+      <td>1.2407</td>
+    </tr>
+  </tbody>
+</table>
+<br/>
+<h3>10日報酬（ret_10d）（交叉表）</h3>
+<table border="1" class="dataframe n">
+  <thead>
+    <tr style="text-align: right;">
+      <th class="n"></th>
+      <th class="n">樣本數(N)</th>
+      <th class="n">平均值(mean)</th>
+      <th class="n">中位數(median)</th>
+      <th class="n">標準差(std)</th>
+      <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
+    </tr>
+    <tr>
+      <th class="n">score_x_state</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th class="n">40-60 | FADING</th>
+      <td>122</td>
+      <td>0.0796</td>
+      <td>0.0586</td>
+      <td>0.1359</td>
+      <td>76.2295</td>
+      <td>0.1245</td>
+      <td>-0.0646</td>
+      <td>1.9291</td>
+    </tr>
+    <tr>
+      <th class="n">40-60 | DISTRIBUTION</th>
+      <td>30</td>
+      <td>-0.0129</td>
+      <td>-0.0211</td>
+      <td>0.0424</td>
+      <td>26.6667</td>
+      <td>0.0470</td>
+      <td>-0.0347</td>
+      <td>1.3552</td>
+    </tr>
+    <tr>
+      <th class="n">40-60 | NEUTRAL</th>
+      <td>65</td>
+      <td>0.0575</td>
+      <td>0.0399</td>
+      <td>0.1446</td>
+      <td>69.2308</td>
+      <td>0.1243</td>
+      <td>-0.0976</td>
+      <td>1.2741</td>
+    </tr>
+    <tr>
+      <th class="n">60-80 | DISTRIBUTION</th>
+      <td>12</td>
+      <td>0.0482</td>
+      <td>0.0397</td>
+      <td>0.0385</td>
+      <td>91.6667</td>
+      <td>0.0543</td>
+      <td>-0.0192</td>
+      <td>2.8305</td>
+    </tr>
+    <tr>
+      <th class="n">60-80 | NEUTRAL</th>
+      <td>117</td>
+      <td>0.0394</td>
+      <td>0.0235</td>
+      <td>0.1336</td>
+      <td>64.9573</td>
+      <td>0.1105</td>
+      <td>-0.0948</td>
+      <td>1.1655</td>
+    </tr>
+  </tbody>
+</table>
+<br/>
+<h3>20日報酬（ret_20d）（交叉表）</h3>
+<table border="1" class="dataframe n">
+  <thead>
+    <tr style="text-align: right;">
+      <th class="n"></th>
+      <th class="n">樣本數(N)</th>
+      <th class="n">平均值(mean)</th>
+      <th class="n">中位數(median)</th>
+      <th class="n">標準差(std)</th>
+      <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
+    </tr>
+    <tr>
+      <th class="n">score_x_state</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th class="n">40-60 | FADING</th>
+      <td>92</td>
+      <td>0.0905</td>
+      <td>0.0820</td>
+      <td>0.1781</td>
+      <td>67.3913</td>
+      <td>0.1860</td>
+      <td>-0.1070</td>
+      <td>1.7380</td>
+    </tr>
+    <tr>
+      <th class="n">40-60 | DISTRIBUTION</th>
+      <td>28</td>
+      <td>-0.0056</td>
+      <td>-0.0530</td>
+      <td>0.0925</td>
+      <td>35.7143</td>
+      <td>0.1028</td>
+      <td>-0.0659</td>
+      <td>1.5612</td>
+    </tr>
+    <tr>
+      <th class="n">40-60 | NEUTRAL</th>
+      <td>50</td>
+      <td>0.1382</td>
+      <td>0.0635</td>
+      <td>0.2380</td>
+      <td>66.0000</td>
+      <td>0.2549</td>
+      <td>-0.0883</td>
+      <td>2.8858</td>
+    </tr>
+    <tr>
+      <th class="n">60-80 | DISTRIBUTION</th>
+      <td>12</td>
+      <td>0.0705</td>
+      <td>0.0710</td>
+      <td>0.0423</td>
+      <td>91.6667</td>
+      <td>0.0777</td>
+      <td>-0.0093</td>
+      <td>8.3558</td>
+    </tr>
+    <tr>
+      <th class="n">60-80 | NEUTRAL</th>
+      <td>86</td>
+      <td>0.1458</td>
+      <td>0.1801</td>
+      <td>0.1557</td>
+      <td>82.5581</td>
+      <td>0.1972</td>
+      <td>-0.0976</td>
+      <td>2.0202</td>
+    </tr>
+  </tbody>
+</table>
+<br/>
+<h2>四、三大法人 × 融資 × 借券 狀態下的報酬</h2>
 <h3>5日報酬（ret_5d）（不同資金壓力組合）</h3>
 <table border="1" class="dataframe n">
   <thead>
@@ -360,9 +732,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">inst_regime_flag</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -378,6 +756,9 @@
       <td>0.0041</td>
       <td>0.1162</td>
       <td>52.1739</td>
+      <td>0.0944</td>
+      <td>-0.0607</td>
+      <td>1.5545</td>
     </tr>
     <tr>
       <th class="n">BEAR_WITH_SHORT（偏空＋借券/空單壓力）</th>
@@ -386,6 +767,9 @@
       <td>0.0139</td>
       <td>0.0611</td>
       <td>64.7059</td>
+      <td>0.0590</td>
+      <td>-0.0368</td>
+      <td>1.6042</td>
     </tr>
     <tr>
       <th class="n">OTHER（訊號混雜／方向不明）</th>
@@ -394,6 +778,9 @@
       <td>0.0101</td>
       <td>0.0861</td>
       <td>57.7982</td>
+      <td>0.0704</td>
+      <td>-0.0490</td>
+      <td>1.4355</td>
     </tr>
   </tbody>
 </table>
@@ -408,9 +795,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">inst_regime_flag</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -426,6 +819,9 @@
       <td>0.0217</td>
       <td>0.1436</td>
       <td>59.4406</td>
+      <td>0.1116</td>
+      <td>-0.0843</td>
+      <td>1.3236</td>
     </tr>
     <tr>
       <th class="n">BEAR_WITH_SHORT（偏空＋借券/空單壓力）</th>
@@ -434,6 +830,9 @@
       <td>0.0298</td>
       <td>0.0875</td>
       <td>58.8235</td>
+      <td>0.0931</td>
+      <td>-0.0441</td>
+      <td>2.1134</td>
     </tr>
     <tr>
       <th class="n">OTHER（訊號混雜／方向不明）</th>
@@ -442,6 +841,9 @@
       <td>0.0483</td>
       <td>0.1217</td>
       <td>72.9592</td>
+      <td>0.1157</td>
+      <td>-0.0661</td>
+      <td>1.7518</td>
     </tr>
   </tbody>
 </table>
@@ -456,9 +858,15 @@
       <th class="n">中位數(median)</th>
       <th class="n">標準差(std)</th>
       <th class="n">勝率%(win_rate)</th>
+      <th class="n">平均獲利(&gt;0)</th>
+      <th class="n">平均虧損(&lt;0)</th>
+      <th class="n">盈虧比(pl_ratio)</th>
     </tr>
     <tr>
       <th class="n">inst_regime_flag</th>
+      <th class="n"></th>
+      <th class="n"></th>
+      <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
       <th class="n"></th>
@@ -474,6 +882,9 @@
       <td>0.0561</td>
       <td>0.1742</td>
       <td>68.4211</td>
+      <td>0.1671</td>
+      <td>-0.1100</td>
+      <td>1.5182</td>
     </tr>
     <tr>
       <th class="n">BEAR_WITH_SHORT（偏空＋借券/空單壓力）</th>
@@ -482,6 +893,9 @@
       <td>0.0683</td>
       <td>0.1742</td>
       <td>58.3333</td>
+      <td>0.2132</td>
+      <td>-0.0781</td>
+      <td>2.7293</td>
     </tr>
     <tr>
       <th class="n">OTHER（訊號混雜／方向不明）</th>
@@ -490,6 +904,9 @@
       <td>0.1076</td>
       <td>0.1787</td>
       <td>72.7811</td>
+      <td>0.2022</td>
+      <td>-0.0800</td>
+      <td>2.5279</td>
     </tr>
   </tbody>
 </table>

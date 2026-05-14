@@ -15,7 +15,7 @@ import time
 import json
 import argparse
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import urllib3
@@ -51,7 +51,7 @@ def fetch_price_window(
     start_date: str,
     end_date: str,
 ) -> pd.DataFrame:
-    """抓一段區間的 TaiwanStockPrice，只保留 date / close。"""
+    """抓一段區間的 TaiwanStockPrice，保留 date / close / volume（若有）。"""
     df = client.request_data(
         "TaiwanStockPrice",
         data_id=stock_id,
@@ -61,6 +61,13 @@ def fetch_price_window(
     if df.empty or "date" not in df.columns or "close" not in df.columns:
         return pd.DataFrame()
     out = df[["date", "close"]].copy()
+    vol_col = None
+    for c in ("Trading_Volume", "trading_volume", "volume", "Volume"):
+        if c in df.columns:
+            vol_col = c
+            break
+    if vol_col:
+        out["volume"] = pd.to_numeric(df[vol_col], errors="coerce").fillna(0.0)
     out["date"] = out["date"].astype(str)
     out["close"] = pd.to_numeric(out["close"], errors="coerce").fillna(0.0)
     out = out.sort_values("date").reset_index(drop=True)
@@ -103,6 +110,27 @@ def compute_forward_returns(
         p_h = float(price_df.loc[j, "close"])
         out[f"ret_{h}d"] = round((p_h - p0) / p0, 4)
     return out
+
+
+def compute_avg_volume_20d_lots(price_df: pd.DataFrame, trade_date: str) -> Optional[float]:
+    """
+    以 trade_date 當日收盤為視窗終點，計算前 20 個有資料的交易日之平均成交量（張）。
+    FinMind TaiwanStockPrice 之 volume 多為「股」；1 張 = 1000 股。
+    """
+    if price_df is None or price_df.empty or "volume" not in price_df.columns:
+        return None
+    df = price_df.copy()
+    df["date"] = df["date"].astype(str)
+    df = df.sort_values("date").reset_index(drop=True)
+    sel = df.index[df["date"] == trade_date].tolist()
+    if not sel:
+        return None
+    idx = int(sel[0])
+    lo = max(0, idx - 19)
+    win = pd.to_numeric(df.loc[lo:idx, "volume"], errors="coerce").dropna()
+    if win.empty:
+        return None
+    return round(float(win.mean()) / 1000.0, 4)
 
 
 def extract_signal_features(
@@ -354,6 +382,9 @@ def run_backtest(
             feature_row = extract_signal_features(stock_id, d, signals)
             ret_row = compute_forward_returns(price_df, d, horizons)
             feature_row.update(ret_row)
+            vlot = compute_avg_volume_20d_lots(price_df, d)
+            if vlot is not None:
+                feature_row["avg_volume_20d_lot"] = vlot
 
             rows.append(feature_row)
 
