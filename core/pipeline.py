@@ -689,16 +689,6 @@ def analyze_whale_trajectory(
     signals["score"] = signals["trend_score"]
     signals["score_unified"] = signals["trend_score"]
 
-    # ---------------------------------
-    def norm_pct(x):
-        try:
-            v = float(x or 0)
-        except Exception:
-            return 0.0
-        if 0 <= v <= 1:
-            v *= 100.0
-        return max(0.0, min(100.0, v))
-
     # -------------------------
     # Validation / Risk (MVP) - 使用專用模組
     validation = compute_validation_signals(price_df=ohlcv_20d, signals=signals, cfg=cfg)
