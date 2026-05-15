@@ -32,6 +32,125 @@ from core.signals.institutional import compute_institutional_and_margin_signals
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
 
+TIER3_HEAVY_LOT_THRESHOLD = 500.0
+INST_FLOW_LOT_EPS = 50.0
+
+
+def _sign_flow_lot(v: float, eps: float = INST_FLOW_LOT_EPS) -> int:
+    if v > eps:
+        return 1
+    if v < -eps:
+        return -1
+    return 0
+
+
+def _compute_chip_arbitration(signals: dict, whale_layers: dict) -> dict:
+    """三大法人（股→千張）vs Top6 分點大戶，統一矛盾解讀。"""
+    inst_lot = round(float(signals.get("inst_three_net_5d", 0) or 0) / 1000.0, 1)
+    s1 = whale_layers.get("tier1_institutional", {}).get("layer_summary", {}) or {}
+    s2 = whale_layers.get("tier2_local_major", {}).get("layer_summary", {}) or {}
+    t1 = float(s1.get("total_net_5d", 0) or 0)
+    t2 = float(s2.get("total_net_5d", 0) or 0)
+    top6_net = round(t1 + t2, 1)
+
+    sig_inst = _sign_flow_lot(inst_lot)
+    sig_top6 = _sign_flow_lot(top6_net)
+    sig_t2 = _sign_flow_lot(t2)
+    conflict = sig_inst != 0 and sig_top6 != 0 and sig_inst != sig_top6
+
+    mag = min(abs(inst_lot), abs(top6_net)) if conflict else 0.0
+    max_mag = max(abs(inst_lot), abs(top6_net))
+
+    if not conflict:
+        level = "ALIGNED"
+        index = max(0, int(12 - min(12.0, abs(inst_lot - top6_net) / 80.0)))
+        verdict = "三大法人與分點大戶五日方向大致一致，籌碼歸屬較清楚。"
+    elif max_mag < 300.0:
+        level = "MILD"
+        index = 35 + int(min(25.0, mag / 12.0))
+        verdict = "法人與分點方向略有分歧，宜觀察哪一邊量能延續。"
+    else:
+        level = "HIGH"
+        index = min(
+            100,
+            55 + int(min(45.0, mag / 18.0 + max_mag / 45.0)),
+        )
+        verdict = (
+            "三大法人 vs 分點大戶方向相反，籌碼歸屬不明，風險偏高；"
+            "不宜單邊重押，以觀望或減碼為宜。"
+        )
+
+    detail = (
+        f"三大法人 5日約 {inst_lot:+.0f} 千張；"
+        f"Top6 外資 {t1:+.0f}、本土 {t2:+.0f} 千張（合計 {top6_net:+.0f}）"
+    )
+    trust_hint = ""
+    if level == "HIGH":
+        if sig_inst < 0 and sig_t2 > 0:
+            trust_hint = "法人持續賣超、本土 Top6 接盤：中長期宜偏法人；短線勿假設本土能永遠撐盤。"
+        elif sig_inst > 0 and sig_t2 < 0:
+            trust_hint = "法人買、分點賣：留意分點倒貨是否抵銷法人買盤。"
+        else:
+            trust_hint = "方向矛盾時，優先參考三大法人＋借券／融資旗標，勿只看單一分層。"
+
+    return {
+        "inst_three_net_5d_lot": inst_lot,
+        "top6_net_5d_lot": top6_net,
+        "tier1_net_5d_lot": round(t1, 1),
+        "tier2_net_5d_lot": round(t2, 1),
+        "conflict_level": level,
+        "conflict_index": index,
+        "verdict": verdict,
+        "detail": detail,
+        "trust_hint": trust_hint,
+    }
+
+
+def _confidence_hint_text(
+    confidence: int,
+    arbitration: dict,
+    diverge_fb: bool,
+    signals: dict,
+) -> str:
+    mon = str(signals.get("monitor_state", "") or "").upper()
+    parts: list[str] = []
+    if confidence < 45:
+        parts.append("信心偏低：多項訊號相互矛盾，不宜重押或追高。")
+    if arbitration.get("conflict_level") == "HIGH":
+        parts.append(str(arbitration.get("verdict") or ""))
+    elif arbitration.get("conflict_level") == "MILD" and confidence < 55:
+        parts.append("法人與分點略有分歧，決策宜保守。")
+    if diverge_fb:
+        parts.append("外資／本土 Top6 五日方向亦相反，訊號抵觸。")
+    if mon == "FADING":
+        parts.append("Monitor FADING：主力群聚走弱，分數單日快照需搭配走勢圖判斷。")
+    elif mon == "DISTRIBUTION":
+        parts.append("Monitor DISTRIBUTION：留意倒貨，勿逆勢加碼。")
+    elif mon in ("ACCUMULATION", "MARKUP") and confidence >= 58:
+        parts.append("監控偏多頭階段，但仍需停損紀律。")
+    if not parts:
+        if confidence >= 60:
+            return "信心尚可：多數訊號同向，維持標準風控即可。"
+        return "信心中等：維持標準部位與停損，勿因單日分數過度加碼。"
+    return " ".join(p for p in parts if p)
+
+
+def _tier3_heavy_alerts(members: list[dict]) -> list[dict]:
+    out: list[dict] = []
+    for m in members:
+        n5 = float(m.get("net_5d_lot", 0) or 0)
+        if abs(n5) < TIER3_HEAVY_LOT_THRESHOLD:
+            continue
+        out.append(
+            {
+                "name": m.get("name", ""),
+                "net_5d_lot": round(n5, 1),
+                "side": "SELL" if n5 < 0 else "BUY",
+            }
+        )
+    out.sort(key=lambda x: abs(float(x.get("net_5d_lot", 0) or 0)), reverse=True)
+    return out
+
 
 def _classify_whale_behavior(n1: float, n5: float, sb: int, ss: int) -> str:
     """ACCUMULATING / REDUCING / HOLDING / FLIPPING"""
@@ -155,11 +274,21 @@ def _build_whale_layers_phase0(top6_details: list[dict], signals: dict) -> dict:
     rng1 = _cost_range_from_members(tier1_members)
     rng2 = _cost_range_from_members(tier2_members)
 
-    tier3_alert = (
-        "未偵測到隔日沖大戶介入"
-        if not tier3_members
-        else f"偵測到 {len(tier3_members)} 家分點呈短線翻向特徵，宜搭配量能觀察"
-    )
+    tier3_heavy = _tier3_heavy_alerts(tier3_members)
+    if tier3_heavy:
+        h0 = tier3_heavy[0]
+        n5v = float(h0["net_5d_lot"])
+        side_zh = "賣超" if n5v < 0 else "買超"
+        tier3_alert = (
+            f"⚠ 隔日沖大戶 {h0['name']} 五日淨{side_zh}{abs(n5v):.0f}張"
+            f"（≥{TIER3_HEAVY_LOT_THRESHOLD:.0f}張），影響力可能大於外資法人層"
+        )
+    elif not tier3_members:
+        tier3_alert = "未偵測到隔日沖大戶介入"
+    else:
+        tier3_alert = (
+            f"偵測到 {len(tier3_members)} 家分點呈短線翻向特徵，宜搭配量能觀察"
+        )
 
     return {
         "tier1_institutional": {
@@ -186,6 +315,7 @@ def _build_whale_layers_phase0(top6_details: list[dict], signals: dict) -> dict:
             "label": "短線／隔日沖",
             "members": tier3_members,
             "alert": tier3_alert,
+            "heavy_alerts": tier3_heavy,
         },
     }
 
@@ -313,6 +443,18 @@ def _build_headline_phase0(
     if diverge_fb:
         key_events.append("外資／本土五日淨額方向相反")
 
+    arbitration = _compute_chip_arbitration(signals, whale_layers)
+    if arbitration.get("conflict_level") == "HIGH":
+        key_events.insert(
+            0,
+            f"法人矛盾指數 {arbitration.get('conflict_index', 0)}：{arbitration.get('verdict', '')}",
+        )
+    for ha in (whale_layers.get("tier3_day_trader") or {}).get("heavy_alerts") or []:
+        side_zh = "賣超" if str(ha.get("side", "")).upper() == "SELL" else "買超"
+        key_events.append(
+            f"隔日沖大戶 {ha.get('name', '')} 五日淨{side_zh}{abs(float(ha.get('net_5d_lot', 0) or 0)):.0f}張（重倉警示）"
+        )
+
     if (
         c_low is not None
         and c_high is not None
@@ -333,11 +475,15 @@ def _build_headline_phase0(
             if isinstance(t, str) and t and t not in key_events:
                 key_events.append(t)
 
+    confidence_hint = _confidence_hint_text(confidence, arbitration, diverge_fb, signals)
+
     return {
         "summary": summary,
         "action_signal": action,
         "confidence": confidence,
-        "key_events": key_events[:6],
+        "confidence_hint": confidence_hint,
+        "chip_arbitration": arbitration,
+        "key_events": key_events[:8],
     }
 
 
@@ -822,6 +968,9 @@ def analyze_whale_trajectory(
 
     whale_layers = _build_whale_layers_phase0(top6_details, signals)
     headline = _build_headline_phase0(stock_id, whale_layers, signals)
+    signals["chip_arbitration"] = headline.get("chip_arbitration") or _compute_chip_arbitration(
+        signals, whale_layers
+    )
 
     insight: Insight = {
         "history_labels": [d[5:] for d in date_10d],  # MM-DD

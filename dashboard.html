@@ -45,6 +45,16 @@
     @keyframes risk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
     .stock-switch { max-width: 200px; font-size: 0.95rem; }
     .url-hint { font-size: 0.75rem; color: #6b7280; }
+    .arb-panel { background: #14100a; border: 1px solid #78350f; border-radius: 14px; padding: 1rem 1.15rem; }
+    .arb-panel.high { border-color: #dc2626; background: linear-gradient(135deg, #1a0a0a 0%, #141414 100%); box-shadow: 0 0 20px rgba(220,38,38,0.15); }
+    .arb-panel.mild { border-color: #ca8a04; }
+    .arb-panel.aligned { border-color: #166534; }
+    .conflict-meter { height: 8px; border-radius: 4px; background: #2a2a2a; overflow: hidden; }
+    .conflict-meter > span { display: block; height: 100%; background: linear-gradient(90deg, #22c55e, #eab308, #dc2626); transition: width 0.3s; }
+    .hint-box { background: #111827; border-left: 3px solid #6366f1; padding: 0.65rem 0.85rem; border-radius: 0 8px 8px 0; font-size: 0.88rem; color: #c7d2fe; }
+    .monitor-pill { display: inline-block; font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 6px; background: #1f2937; color: #fde68a; border: 1px solid #4b5563; }
+    .tier3-heavy-banner { font-size: 0.85rem; font-weight: 700; color: #fecaca; background: rgba(220,38,38,0.25); border: 1px solid #dc2626; border-radius: 8px; padding: 0.5rem 0.65rem; margin-top: 0.5rem; animation: risk-pulse 2s ease-in-out infinite; }
+    .score-trend-box { height: min(280px, 38vh); }
   </style>
 </head>
 <body>
@@ -95,6 +105,25 @@
   <div class="container py-4">
     <div id="loadErr" class="alert alert-danger d-none" role="alert"></div>
 
+    <div id="arbitrationPanel" class="arb-panel mb-4 d-none" role="region" aria-label="法人矛盾仲裁"></div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-lg-7">
+        <div class="hint-box" id="confidenceHint">信心度說明載入中…</div>
+      </div>
+      <div class="col-lg-5 d-flex flex-wrap align-items-center gap-2">
+        <span class="text-secondary small">Monitor</span>
+        <span class="monitor-pill" id="monitorState">—</span>
+        <span class="text-secondary small" id="monitorReasons"></span>
+      </div>
+    </div>
+
+    <h5 class="text-warning mb-2">籌碼／群聚走勢（近 20 日）</h5>
+    <p class="meta-foot mb-2">完整 chip_score 歷史需多日回測；下圖以 coherence（群聚）與今日 chip_score 對照，輔助判斷 FADING 是否延續。</p>
+    <div class="chart-wrap score-trend-box mb-4">
+      <canvas id="trendChart"></canvas>
+    </div>
+
     <h5 class="text-warning mb-3">大戶動向分層</h5>
     <div class="row g-3 mb-4" id="layerCards">
       <!-- filled by JS -->
@@ -122,7 +151,11 @@
       var DEFAULT_STOCK = '6239';
       var GRID_COLOR = 'rgba(255, 255, 255, 0.05)';
       var TICK_COLOR = '#d1d5db';
+      var TIER3_HEAVY_LOT = 500;
+      var INST_FLOW_EPS = 50;
       var manifestCache = null;
+      var whaleChart = null;
+      var trendChart = null;
 
       function getStockFromUrl() {
         var p = new URLSearchParams(window.location.search);
@@ -161,6 +194,138 @@
 
       function flagOn(v) {
         return v === 1 || v === '1' || v === true;
+      }
+
+      function signFlowLot(v, eps) {
+        eps = eps == null ? INST_FLOW_EPS : eps;
+        if (v > eps) return 1;
+        if (v < -eps) return -1;
+        return 0;
+      }
+
+      function computeChipArbitration(sig, wl) {
+        if (sig && sig.chip_arbitration) return sig.chip_arbitration;
+        if (!sig || !wl) return null;
+        var instLot = Math.round(Number(sig.inst_three_net_5d || 0) / 1000 * 10) / 10;
+        var s1 = (wl.tier1_institutional && wl.tier1_institutional.layer_summary) || {};
+        var s2 = (wl.tier2_local_major && wl.tier2_local_major.layer_summary) || {};
+        var t1 = Number(s1.total_net_5d || 0);
+        var t2 = Number(s2.total_net_5d || 0);
+        var top6 = Math.round((t1 + t2) * 10) / 10;
+        var si = signFlowLot(instLot);
+        var st = signFlowLot(top6);
+        var s2d = signFlowLot(t2);
+        var conflict = si !== 0 && st !== 0 && si !== st;
+        var maxMag = Math.max(Math.abs(instLot), Math.abs(top6));
+        var mag = conflict ? Math.min(Math.abs(instLot), Math.abs(top6)) : 0;
+        var level, index, verdict, trustHint = '';
+        if (!conflict) {
+          level = 'ALIGNED';
+          index = Math.max(0, Math.round(12 - Math.min(12, Math.abs(instLot - top6) / 80)));
+          verdict = '三大法人與分點大戶五日方向大致一致，籌碼歸屬較清楚。';
+        } else if (maxMag < 300) {
+          level = 'MILD';
+          index = 35 + Math.min(25, Math.round(mag / 12));
+          verdict = '法人與分點方向略有分歧，宜觀察哪一邊量能延續。';
+        } else {
+          level = 'HIGH';
+          index = Math.min(100, 55 + Math.min(45, Math.round(mag / 18 + maxMag / 45)));
+          verdict = '三大法人 vs 分點大戶方向相反，籌碼歸屬不明，風險偏高；不宜單邊重押，以觀望或減碼為宜。';
+          if (si < 0 && s2d > 0) {
+            trustHint = '法人持續賣超、本土 Top6 接盤：中長期宜偏法人；短線勿假設本土能永遠撐盤。';
+          } else if (si > 0 && s2d < 0) {
+            trustHint = '法人買、分點賣：留意分點倒貨是否抵銷法人買盤。';
+          } else {
+            trustHint = '方向矛盾時，優先參考三大法人＋借券／融資旗標。';
+          }
+        }
+        return {
+          inst_three_net_5d_lot: instLot,
+          top6_net_5d_lot: top6,
+          tier1_net_5d_lot: Math.round(t1 * 10) / 10,
+          tier2_net_5d_lot: Math.round(t2 * 10) / 10,
+          conflict_level: level,
+          conflict_index: index,
+          verdict: verdict,
+          detail: '三大法人 5日約 ' + instLot.toFixed(0) + ' 千張；Top6 外資 ' + t1.toFixed(0) + '、本土 ' + t2.toFixed(0) + ' 千張',
+          trust_hint: trustHint
+        };
+      }
+
+      function confidenceHintText(hl, sig, arb) {
+        if (hl && hl.confidence_hint) return hl.confidence_hint;
+        var conf = hl && hl.confidence != null ? Number(hl.confidence) : Number(sig.chip_score || 50);
+        var f5 = Number(sig.foreign_net_5d || 0);
+        var l5 = Number(sig.local_net_5d || 0);
+        var diverge = (f5 > 0 && l5 < 0) || (f5 < 0 && l5 > 0);
+        var parts = [];
+        if (conf < 45) parts.push('信心偏低：多項訊號相互矛盾，不宜重押或追高。');
+        if (arb && arb.conflict_level === 'HIGH') parts.push(arb.verdict);
+        if (diverge) parts.push('外資／本土 Top6 五日方向亦相反。');
+        var mon = String(sig.monitor_state || '').toUpperCase();
+        if (mon === 'FADING') parts.push('Monitor FADING：群聚走弱，請搭配下方走勢圖判斷是否延續。');
+        if (mon === 'DISTRIBUTION') parts.push('DISTRIBUTION：留意倒貨。');
+        return parts.length ? parts.join(' ') : '信心中等：維持標準部位與停損紀律。';
+      }
+
+      function monitorStateZh(st) {
+        var m = {
+          FADING: '退潮 FADING',
+          DISTRIBUTION: '出貨 DISTRIBUTION',
+          ACCUMULATION: '吸籌 ACCUMULATION',
+          MARKUP: '拉升 MARKUP',
+          NEUTRAL: '中性 NEUTRAL'
+        };
+        return m[String(st || '').toUpperCase()] || st || '—';
+      }
+
+      function renderArbitrationPanel(arb) {
+        var panel = $('arbitrationPanel');
+        if (!panel) return;
+        if (!arb) { panel.classList.add('d-none'); return; }
+        panel.classList.remove('d-none');
+        panel.classList.remove('high', 'mild', 'aligned');
+        var lv = String(arb.conflict_level || '').toLowerCase();
+        if (lv === 'high') panel.classList.add('high');
+        else if (lv === 'mild') panel.classList.add('mild');
+        else panel.classList.add('aligned');
+        var idx = Number(arb.conflict_index || 0);
+        var trust = arb.trust_hint ? '<p class="small text-warning mb-0 mt-2">' + arb.trust_hint + '</p>' : '';
+        panel.innerHTML =
+          '<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">' +
+          '<h6 class="text-warning mb-0">📛 法人矛盾仲裁</h6>' +
+          '<span class="badge bg-' + (lv === 'high' ? 'danger' : (lv === 'mild' ? 'warning text-dark' : 'success')) + '">' +
+          '矛盾指數 ' + idx + ' · ' + (arb.conflict_level || '') + '</span></div>' +
+          '<p class="mb-2">' + (arb.verdict || '') + '</p>' +
+          '<p class="small text-secondary mb-2">' + (arb.detail || '') + '</p>' +
+          '<div class="conflict-meter" title="越高代表三大法人與分點大戶越不一致"><span style="width:' + Math.min(100, idx) + '%"></span></div>' +
+          trust;
+      }
+
+      function renderMonitorRow(sig) {
+        var st = $('monitorState');
+        var rs = $('monitorReasons');
+        if (st) st.textContent = monitorStateZh(sig.monitor_state);
+        if (rs) {
+          var reasons = sig.monitor_reasons;
+          rs.textContent = Array.isArray(reasons) && reasons.length
+            ? '（' + reasons.join(' · ') + '）'
+            : '';
+        }
+      }
+
+      function tier3HeavyFromWl(wl) {
+        var mem = (wl && wl.tier3_day_trader && wl.tier3_day_trader.members) || [];
+        var heavy = (wl && wl.tier3_day_trader && wl.tier3_day_trader.heavy_alerts) || [];
+        if (heavy.length) return heavy;
+        return mem.filter(function (m) {
+          return Math.abs(Number(m.net_5d_lot || 0)) >= TIER3_HEAVY_LOT;
+        }).map(function (m) {
+          var n = Number(m.net_5d_lot || 0);
+          return { name: m.name, net_5d_lot: n, side: n < 0 ? 'SELL' : 'BUY' };
+        }).sort(function (a, b) {
+          return Math.abs(b.net_5d_lot) - Math.abs(a.net_5d_lot);
+        });
       }
 
       function renderRiskBadges(signals) {
@@ -261,7 +426,8 @@
           var sum = T.layer_summary || {};
           var alertTxt = T.alert || '';
           var isT3 = tierKey === 'tier3_day_trader';
-          var hot = isT3 && mem.length > 0;
+          var heavyT3 = isT3 ? tier3HeavyFromWl(wl) : [];
+          var hot = isT3 && (mem.length > 0 || heavyT3.length > 0);
           var net = '—';
           if (sum.total_net_5d != null) {
             net = Number(sum.total_net_5d).toFixed(1);
@@ -278,6 +444,14 @@
           }
           if (isT3) {
             extra += '<div class="mt-2 small text-danger-emphasis">' + (alertTxt || (mem.length ? '短線／隔日沖特徵' : '')) + '</div>';
+            if (heavyT3.length) {
+              heavyT3.forEach(function (h) {
+                var n = Number(h.net_5d_lot || 0);
+                var side = String(h.side || '').toUpperCase() === 'SELL' ? '賣超' : '買超';
+                extra += '<div class="tier3-heavy-banner">\uD83D\uDEA8 重倉警示：' + (h.name || '分點') +
+                  ' 五日淨' + side + Math.abs(n).toFixed(0) + ' 張（\u2265' + TIER3_HEAVY_LOT + ' 張門檻）</div>';
+              });
+            }
           }
           var body = '<div class="mb-1">五日淨額：<strong>' + net + '</strong> 千張</div>';
           if (!isT3) {
@@ -319,7 +493,70 @@
         });
       }
 
-      var whaleChart = null;
+
+      function drawTrendChart(sig) {
+        var ctx = $('trendChart');
+        if (!ctx) return;
+        if (trendChart) { trendChart.destroy(); trendChart = null; }
+        var labels = (sig.labels_20d || []).slice();
+        var enh = sig.enhanced || {};
+        var coh = (enh.coherence_series_20d || []).map(Number);
+        if (!labels.length || !coh.length) return;
+        var chip = sig.chip_score != null ? Number(sig.chip_score) : null;
+        var cohScaled = coh.map(function (v) { return Math.round(v * 50 * 10) / 10; });
+        var chipLine = chip != null ? labels.map(function (_, i) {
+          return i === labels.length - 1 ? chip : null;
+        }) : [];
+        var datasets = [{
+          label: '群聚指標×50（代理走勢）',
+          data: cohScaled,
+          borderColor: '#a78bfa',
+          backgroundColor: 'rgba(167,139,250,0.12)',
+          fill: true,
+          tension: 0.3,
+          borderWidth: 2,
+          pointRadius: 2
+        }];
+        if (chip != null) {
+          datasets.push({
+            label: '今日 chip_score',
+            data: chipLine,
+            borderColor: '#38bdf8',
+            borderWidth: 2,
+            borderDash: [6, 4],
+            pointRadius: 5,
+            pointBackgroundColor: '#38bdf8',
+            spanGaps: false
+          });
+        }
+        trendChart = new Chart(ctx, {
+          type: 'line',
+          data: { labels: labels, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: '#e5e7eb' } },
+              title: {
+                display: true,
+                text: '近20日群聚走勢（紫）＋今日籌碼分（藍點）',
+                color: '#f1c40f',
+                font: { size: 13 }
+              }
+            },
+            scales: {
+              x: { ticks: { color: TICK_COLOR }, grid: { color: GRID_COLOR } },
+              y: {
+                min: 0,
+                max: 100,
+                ticks: { color: TICK_COLOR },
+                grid: { color: GRID_COLOR },
+                title: { display: true, text: '0–100', color: '#9ca3af' }
+              }
+            }
+          }
+        });
+      }
 
       function drawChart(payload) {
         var ctx = $('whaleChart');
@@ -406,8 +643,15 @@
 
         $('probeMeta').textContent = 'probe: ' + (data.probe_date || '—') + ' ｜ 更新: ' + (data.last_update || '—');
 
-        buildLayerCards(data.whale_layers);
+        var wl = data.whale_layers || {};
+        var arb = computeChipArbitration(sig, wl);
+        renderArbitrationPanel(arb);
+        var hintEl = $('confidenceHint');
+        if (hintEl) hintEl.textContent = confidenceHintText(hl, sig, arb);
+        renderMonitorRow(sig);
+        buildLayerCards(wl);
         fillKeyEvents(hl);
+        drawTrendChart(sig);
         drawChart(data);
         var err = $('loadErr');
         if (err) err.classList.add('d-none');
