@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RB 籌碼戰情室 - 靜態 Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
     .led-pill{ display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; background:#1e1e1e; border:1px solid #3a3a3a; color:#cfcfcf; font-weight:700; font-size:0.95rem; }
     .led-pill.off{ opacity:.55; }
@@ -47,11 +47,21 @@
     .dashboard-subtitle{ color:#9ca3af; font-size:0.95rem; }
     .org-foreign{ color:#c084fc; font-weight:600; }
     .org-local{ color:#84cc16; font-weight:600; }
+    .page-title{ color:#f1c40f; }
+    .stock-search-input{ max-width:220px; font-size:1.4rem; }
+    .stock-select-input{ max-width:260px; font-size:1.4rem; }
+    .report-iframe{ width:100%; height:80vh; border:none; margin-top:16px; }
+    .report-iframe-phase3{ margin-top:12px; }
+    .phase3-hint{ font-size:0.9rem; }
+    .phase3-error{ display:none; margin-top:12px; padding:1rem 1.25rem; border-radius:8px;
+      background:#2a1515; border:1px solid #7f1d1d; color:#fecaca; }
+    .phase3-error.show{ display:block; }
+    .nav-link-ext .tab-ext-icon{ font-size:0.85em; opacity:0.85; margin-left:2px; }
   </style>
 </head>
 <body>
 <div class="container py-5">
-  <h1 class="mb-2 text-center" style="color:#f1c40f;" id="dashboardTitle">📊 RUNBOR 籌碼戰情室</h1>
+  <h1 class="mb-2 text-center page-title" id="dashboardTitle">📊 RUNBOR 籌碼戰情室</h1>
   <div class="text-center mb-2">
     <span class="badge bg-secondary" id="versionBadge">版本：載入中…</span>
   </div>
@@ -62,11 +72,9 @@
       <div class="d-flex flex-wrap align-items-center gap-3">
         <label class="mb-0 fs-3 fw-bold text-white" for="stockSearch">切換股票：</label>
         <input id="stockSearch"
-               class="form-control form-control-lg bg-dark text-white border-secondary"
-               style="max-width:220px; font-size:1.4rem;"
+               class="form-control form-control-lg bg-dark text-white border-secondary stock-search-input"
                placeholder="過濾用：如 6239、力成（清空＝顯示全部）" />
-        <select id="stockSelect" class="form-select form-select-lg bg-dark text-white border-secondary"
-                style="max-width:260px; font-size:1.4rem;">
+        <select id="stockSelect" class="form-select form-select-lg bg-dark text-white border-secondary stock-select-input">
           <option value="">載入中…</option>
         </select>
       </div>
@@ -94,8 +102,10 @@
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link" id="tab-phase2" href="dashboard.html" title="Phase 2：一眼看盤（大戶分層＋軌跡圖）">
-        Phase 2 一眼看盤
+      <a class="nav-link nav-link-ext" id="tab-phase2" href="dashboard.html?stock=6239"
+         target="_blank" rel="noopener noreferrer"
+         title="Phase 2：一眼看盤（新分頁開啟，會帶入目前選擇的股票代號）">
+        Phase 2 一眼看盤 <span class="tab-ext-icon" aria-hidden="true">↗</span>
       </a>
     </li>
   </ul>
@@ -103,12 +113,12 @@
   <div class="tab-content" id="rbTabsContent">
     <div class="tab-pane fade show active" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
       <div id="content"></div>
-      <div id="loading" class="text-center text-muted py-5">選擇股票後將載入數據…</div>
+      <div id="loading" class="text-center text-muted py-5">載入預設股票（6239）…</div>
     </div>
 
     <div class="tab-pane fade" id="panel-phase1" role="tabpanel" aria-labelledby="tab-phase1">
       <iframe src="data/signal_vs_returns_report.html"
-              style="width:100%; height:80vh; border:none; margin-top:16px;"
+              class="report-iframe"
               title="Phase 1 Signal vs Returns Report"></iframe>
     </div>
 
@@ -121,11 +131,11 @@
           <button type="button" class="btn btn-sm btn-outline-warning active" data-phase3-horizon="20">ret_20d（決策燈）</button>
         </div>
       </div>
+      <div id="phase3Error" class="phase3-error" role="alert"></div>
       <iframe id="phase3Frame"
-              src="data/ml_winrate_report_ret20d.html"
-              style="width:100%; height:80vh; border:none; margin-top:12px;"
+              class="report-iframe report-iframe-phase3 d-none"
               title="Phase 3 ML Winrate Report"></iframe>
-      <div class="text-muted mt-2" style="font-size:0.9rem;">
+      <div class="text-muted mt-2 phase3-hint">
         若顯示空白：請先在本機執行 <code>bat/7_phase3_ml_winrate.bat</code> 產生 <code>data/ml_winrate_report_ret*.html</code>，並推送到 GitHub Pages。
       </div>
     </div>
@@ -136,6 +146,7 @@
 <script>
 (function(){
   const DATA_BASE = 'data';
+  const DEFAULT_STOCK = '6239';
   let manifest = { stock_ids: [], stocks: [] };
   let charts = { whale: null, radar: null, breadth: null, coherence: null, tornadoBuy: null, tornadoSell: null };
   function destroyCharts(){
@@ -143,6 +154,20 @@
   }
 
   function el(id){ return document.getElementById(id); }
+
+  function updatePhase2Link(stockId){
+    var a = el('tab-phase2');
+    if (!a) return;
+    var sid = String(stockId || DEFAULT_STOCK).trim() || DEFAULT_STOCK;
+    a.href = 'dashboard.html?stock=' + encodeURIComponent(sid);
+  }
+
+  function resolveDefaultStockId(stocks){
+    if (!stocks || !stocks.length) return '';
+    var ids = stocks.map(function(s){ return String(s.id); });
+    if (ids.indexOf(DEFAULT_STOCK) >= 0) return DEFAULT_STOCK;
+    return stocks[0].id;
+  }
   function escapeHtml(s){
     if (s == null || s === undefined) return '';
     return String(s)
@@ -905,6 +930,7 @@
 
         sel.addEventListener('change', function(){
           if (sel.value) {
+            updatePhase2Link(sel.value);
             loadStock(sel.value);
           }
         });
@@ -925,9 +951,12 @@
           });
         }
 
-        // 預設載入第一檔（若存在）
-        if (sel.value){
-          loadStock(sel.value);
+        // 預設載入 DEFAULT_STOCK（若 manifest 有該檔），否則第一檔
+        var defaultId = resolveDefaultStockId(stocks);
+        if (defaultId){
+          sel.value = defaultId;
+          updatePhase2Link(defaultId);
+          loadStock(defaultId);
         }
       })
       .catch(function(err){
@@ -940,15 +969,47 @@
   applyVersion();
 
   (function initPhase3(){
-    var frame = document.getElementById('phase3Frame');
+    var frame = el('phase3Frame');
+    var errBox = el('phase3Error');
     if (!frame) return;
 
-    function setHorizon(h){
-      var src = 'data/ml_winrate_report_ret' + h + 'd.html';
+    function showPhase3Error(msg){
+      if (errBox){
+        errBox.innerHTML = msg;
+        errBox.classList.add('show');
+      }
+      frame.classList.add('d-none');
+      frame.removeAttribute('src');
+    }
+
+    function showPhase3Frame(src){
+      if (errBox) errBox.classList.remove('show');
+      frame.classList.remove('d-none');
       frame.src = src;
+    }
+
+    function setHorizon(h){
+      var rel = DATA_BASE + '/ml_winrate_report_ret' + h + 'd.html';
       document.querySelectorAll('[data-phase3-horizon]').forEach(function(btn){
         btn.classList.toggle('active', String(btn.getAttribute('data-phase3-horizon')) === String(h));
       });
+      if (errBox){
+        errBox.classList.add('show');
+        errBox.innerHTML = '載入勝率報告中…';
+      }
+      frame.classList.add('d-none');
+      fetch(rel, { method: 'HEAD', cache: 'no-store' })
+        .then(function(r){
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          showPhase3Frame(rel);
+        })
+        .catch(function(){
+          showPhase3Error(
+            '<strong>無法載入 Phase 3 報告</strong>（<code>' + rel + '</code>）<br>' +
+            '請在本機執行 <code>python sub-py/ml_signal_winrate.py --horizons 5,10,20</code> ' +
+            '或 <code>bat/7_phase3_ml_winrate.bat</code>，產生 HTML 後 push 到 GitHub Pages。'
+          );
+        });
     }
 
     document.querySelectorAll('[data-phase3-horizon]').forEach(function(btn){
@@ -956,6 +1017,14 @@
         setHorizon(btn.getAttribute('data-phase3-horizon'));
       });
     });
+
+    frame.addEventListener('error', function(){
+      showPhase3Error(
+        '<strong>iframe 載入失敗</strong>。請確認 <code>data/ml_winrate_report_ret*.html</code> 已存在並已推送。'
+      );
+    });
+
+    setHorizon('20');
   })();
 })();
 </script>
