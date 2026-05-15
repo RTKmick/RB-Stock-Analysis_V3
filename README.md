@@ -97,8 +97,8 @@ For RUMBOR Data Mining
 ### Phase 2：一眼看盤（大戶儀表板）
 
 - 開啟 **`dashboard.html`**（與 `index.html` 同層，GitHub Pages 根路徑即可）。  
-- 預設載入 `data/6239_whale_track.json`；網址參數可切股：`dashboard.html?stock=2338`（需存在對應 `data/{id}_whale_track.json`）。  
-- 內容：頂部 **chip_score／燈號／headline.summary**、**whale_layers** 三張分層卡、**Chart.js** Top6 累積軌跡、`headline.key_events` 清單。  
+- 網址參數切股：`dashboard.html?stock=6239`（載入 `data/{id}_whale_track.json`）；頂部下拉選單會讀 `manifest.json` 並同步更新網址。  
+- 內容：頂部 **chip_score／燈號／headline.summary**、融資／借券 **高壓警報徽章**（`margin_risk_flag` / `sbl_short_pressure_flag`）、**whale_layers** 三張分層卡、**Chart.js** Top6 累積軌跡、`headline.key_events` 清單。  
 - 戰情室分頁列亦有 **「Phase 2 一眼看盤」** 連結。
 
 ### Phase 3：ML 勝率估計（整合）

@@ -38,6 +38,13 @@
     .events-panel li { margin-bottom: 0.5rem; color: #cbd5e1; font-size: 0.9rem; }
     .meta-foot { font-size: 0.8rem; color: #6b7280; }
     a.back-link { color: #93c5fd; }
+    .risk-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .risk-badge { font-size: 0.8rem; font-weight: 700; padding: 0.35rem 0.65rem; border-radius: 8px;
+      background: rgba(220, 38, 38, 0.2); border: 1px solid #dc2626; color: #fecaca;
+      box-shadow: 0 0 12px rgba(220, 38, 38, 0.35); animation: risk-pulse 2s ease-in-out infinite; }
+    @keyframes risk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
+    .stock-switch { max-width: 200px; font-size: 0.95rem; }
+    .url-hint { font-size: 0.75rem; color: #6b7280; }
   </style>
 </head>
 <body>
@@ -45,6 +52,11 @@
     <div class="container">
       <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
         <a class="back-link small" href="index.html">← 返回戰情室</a>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <label class="text-secondary small mb-0" for="stockSelect">切換</label>
+          <select id="stockSelect" class="form-select form-select-sm bg-dark text-white border-secondary stock-switch" title="網址 ?stock=代號"></select>
+          <span class="url-hint" id="urlHint"></span>
+        </div>
         <span class="meta-foot" id="probeMeta"></span>
       </div>
       <div class="row align-items-center g-4">
@@ -52,6 +64,7 @@
           <div class="d-flex flex-wrap align-items-baseline gap-3 mb-2">
             <span class="stock-title" id="stockTitle">載入中…</span>
             <span class="text-secondary" id="stockIdBadge"></span>
+            <div id="riskBadges" class="risk-badges"></div>
           </div>
           <div class="d-flex flex-wrap align-items-end gap-4 mb-3">
             <div>
@@ -106,8 +119,20 @@
 
   <script>
     (function () {
-      const params = new URLSearchParams(window.location.search);
-      const stock = (params.get('stock') || '6239').trim();
+      var DEFAULT_STOCK = '6239';
+      var GRID_COLOR = 'rgba(255, 255, 255, 0.05)';
+      var TICK_COLOR = '#d1d5db';
+      var manifestCache = null;
+
+      function getStockFromUrl() {
+        var p = new URLSearchParams(window.location.search);
+        var s = (p.get('stock') || DEFAULT_STOCK).trim();
+        return /^[0-9A-Za-z]{4,6}$/.test(s) ? s : DEFAULT_STOCK;
+      }
+
+      function jsonUrl(stockId) {
+        return 'data/' + encodeURIComponent(stockId) + '_whale_track.json';
+      }
 
       const $ = function (id) { return document.getElementById(id); };
 
@@ -132,6 +157,65 @@
         var e = signals.enhanced;
         if (e && e.close_last != null && !isNaN(Number(e.close_last))) return Number(e.close_last);
         return null;
+      }
+
+      function flagOn(v) {
+        return v === 1 || v === '1' || v === true;
+      }
+
+      function renderRiskBadges(signals) {
+        var host = $('riskBadges');
+        if (!host) return;
+        host.innerHTML = '';
+        if (!signals) return;
+        if (flagOn(signals.sbl_short_pressure_flag)) {
+          var b1 = document.createElement('span');
+          b1.className = 'risk-badge';
+          b1.textContent = '\uD83D\uDEA8 借券異常激增';
+          host.appendChild(b1);
+        }
+        if (flagOn(signals.margin_risk_flag)) {
+          var b2 = document.createElement('span');
+          b2.className = 'risk-badge';
+          b2.textContent = '\uD83D\uDEA8 融資斷頭風險';
+          host.appendChild(b2);
+        }
+      }
+
+      function populateStockSelect(manifest, currentId) {
+        var sel = $('stockSelect');
+        if (!sel) return;
+        sel.innerHTML = '';
+        var list = [];
+        if (manifest && manifest.stocks && manifest.stocks.length) {
+          list = manifest.stocks.slice();
+        } else if (manifest && manifest.stock_ids && manifest.stock_ids.length) {
+          list = manifest.stock_ids.map(function (id) { return { id: id, name: id }; });
+        } else {
+          list = [{ id: currentId, name: currentId }];
+        }
+        list.forEach(function (s) {
+          var id = String(s.id || s).trim();
+          if (!id) return;
+          var opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = (s.name ? s.name + ' (' + id + ')' : id);
+          if (id === currentId) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        if (!sel.querySelector('option[value="' + currentId + '"]')) {
+          var o = document.createElement('option');
+          o.value = currentId;
+          o.textContent = currentId;
+          o.selected = true;
+          sel.insertBefore(o, sel.firstChild);
+        }
+      }
+
+      function navigateToStock(stockId) {
+        var url = new URL(window.location.href);
+        url.searchParams.set('stock', stockId);
+        window.location.href = url.pathname + '?' + url.searchParams.toString();
       }
 
       function setLights(light) {
@@ -261,12 +345,21 @@
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             plugins: {
-              legend: { labels: { color: '#ccc' } },
-              title: { display: true, text: 'Top6 大戶累積買賣超（千張）', color: '#f1c40f' }
+              legend: { labels: { color: '#e5e7eb', font: { family: "'Segoe UI', 'Microsoft JhengHei', sans-serif" } } },
+              title: { display: true, text: 'Top6 大戶累積買賣超（千張）', color: '#f1c40f', font: { size: 14 } },
+              tooltip: { titleColor: '#f9fafb', bodyColor: '#e5e7eb', backgroundColor: 'rgba(20,20,20,0.95)' }
             },
             scales: {
-              x: { ticks: { color: '#9ca3af' }, grid: { color: '#2a2a2a' } },
-              y: { ticks: { color: '#9ca3af' }, grid: { color: '#2a2a2a' } }
+              x: {
+                ticks: { color: TICK_COLOR },
+                grid: { color: GRID_COLOR },
+                border: { color: 'rgba(255,255,255,0.12)' }
+              },
+              y: {
+                ticks: { color: TICK_COLOR },
+                grid: { color: GRID_COLOR },
+                border: { color: 'rgba(255,255,255,0.12)' }
+              }
             }
           }
         });
@@ -284,27 +377,23 @@
         return '<span class="badge bg-' + m[0] + ' signal-badge">' + m[1] + '</span>';
       }
 
-      Promise.all([
-        fetch('data/manifest.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
-        fetch('data/' + stock + '_whale_track.json').then(function (r) {
-          if (!r.ok) throw new Error('找不到 data/' + stock + '_whale_track.json（HTTP ' + r.status + '）');
-          return r.json();
-        })
-      ]).then(function (parts) {
-        var manifest = parts[0] || {};
-        var data = parts[1] || {};
+      function renderDashboard(data, stock, manifest) {
         var name = data.stock_name || stock;
-        if (manifest.stocks && Array.isArray(manifest.stocks)) {
+        if (manifest && manifest.stocks && Array.isArray(manifest.stocks)) {
           var hit = manifest.stocks.find(function (s) { return String(s.id) === String(stock); });
           if (hit && hit.name) name = hit.name;
         }
+        document.title = name + ' (' + stock + ') | Phase 2 一眼看盤';
         $('stockTitle').textContent = name;
         $('stockIdBadge').textContent = '(' + stock + ')';
+        var hint = $('urlHint');
+        if (hint) hint.textContent = '?stock=' + stock;
 
         var sig = data.signals || {};
         $('chipScore').textContent = sig.chip_score != null ? Number(sig.chip_score).toFixed(1) : '—';
         setLights(sig.chip_light);
         $('chipComment').textContent = sig.chip_comment || '';
+        renderRiskBadges(sig);
 
         var cl = pickClose(sig);
         $('closePrice').textContent = cl != null ? cl.toFixed(2) : '—';
@@ -320,12 +409,46 @@
         buildLayerCards(data.whale_layers);
         fillKeyEvents(hl);
         drawChart(data);
-      }).catch(function (e) {
+        var err = $('loadErr');
+        if (err) err.classList.add('d-none');
+      }
+
+      function loadStock(stockId) {
+        stockId = String(stockId || DEFAULT_STOCK).trim();
+        $('stockTitle').textContent = '載入中…';
+        $('headlineSummary').textContent = '讀取 ' + jsonUrl(stockId) + ' …';
+
+        var manifestPromise = manifestCache
+          ? Promise.resolve(manifestCache)
+          : fetch('data/manifest.json').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; });
+
+        return manifestPromise.then(function (manifest) {
+          manifestCache = manifest;
+          populateStockSelect(manifest, stockId);
+          return fetch(jsonUrl(stockId)).then(function (r) {
+            if (!r.ok) throw new Error('找不到 ' + jsonUrl(stockId) + '（HTTP ' + r.status + '）');
+            return r.json();
+          }).then(function (data) {
+            renderDashboard(data, stockId, manifest);
+          });
+        });
+      }
+
+      var stock = getStockFromUrl();
+      var sel = $('stockSelect');
+      if (sel) {
+        sel.addEventListener('change', function () {
+          if (sel.value && sel.value !== stock) navigateToStock(sel.value);
+        });
+      }
+
+      loadStock(stock).catch(function (e) {
         var el = $('loadErr');
         el.classList.remove('d-none');
         el.textContent = String(e.message || e);
         $('stockTitle').textContent = '載入失敗';
         $('headlineSummary').textContent = '';
+        renderRiskBadges(null);
       });
     })();
   </script>
