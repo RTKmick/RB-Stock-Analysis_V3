@@ -12,6 +12,43 @@ from core.finmind_client import FinMindClient
 SignalsDict = Dict[str, Any]
 
 
+def _apply_foreign_momentum(out: SignalsDict) -> None:
+    """外資動量：5日均速 vs 20日均速，產出 inst_foreign_momentum_label 供前端 LED。"""
+    f5 = float(out.get("inst_foreign_net_5d") or 0.0)
+    f20 = float(out.get("inst_foreign_net_20d") or 0.0)
+
+    speed_5 = f5 / 5.0
+    speed_20 = f20 / 20.0
+
+    if speed_20 != 0.0:
+        ratio: float | None = speed_5 / speed_20
+    else:
+        ratio = None
+
+    if ratio is None:
+        momentum = "NEUTRAL"
+    elif ratio >= 1.3:
+        momentum = "ACCELERATING"
+    elif ratio <= 0.7:
+        momentum = "DECELERATING"
+    else:
+        momentum = "STABLE"
+
+    if f20 > 0:
+        base = "BUY"
+    elif f20 < 0:
+        base = "SELL"
+    else:
+        base = "NEUTRAL"
+
+    out["inst_foreign_speed_5d"] = round(speed_5, 0)
+    out["inst_foreign_speed_20d"] = round(speed_20, 0)
+    out["inst_foreign_momentum_ratio"] = (
+        round(ratio, 3) if ratio is not None else None
+    )
+    out["inst_foreign_momentum_label"] = f"{base}_{momentum}"
+
+
 def _to_date_str(d: str) -> str:
     return datetime.strptime(d, "%Y-%m-%d").strftime("%Y-%m-%d")
 
@@ -321,6 +358,8 @@ def compute_institutional_and_margin_signals(
     out["inst_bear_with_short_pressure_flag"] = 1 if (
         inst_three_20 < 0 and sbl_flag >= 1
     ) else 0
+
+    _apply_foreign_momentum(out)
 
     return out
 

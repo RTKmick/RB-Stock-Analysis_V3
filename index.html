@@ -179,15 +179,56 @@
   function normText(s){
     return String(s || '').trim().toLowerCase();
   }
+  function computeForeignMomentumLabel(signals) {
+    if (signals.inst_foreign_momentum_label) {
+      return String(signals.inst_foreign_momentum_label);
+    }
+    const f5 = parseFloat(signals.inst_foreign_net_5d || 0) || 0;
+    const f20 = parseFloat(signals.inst_foreign_net_20d || 0) || 0;
+    const speed5 = f5 / 5;
+    const speed20 = f20 / 20;
+    let momentum = 'NEUTRAL';
+    if (speed20 !== 0) {
+      const ratio = speed5 / speed20;
+      if (ratio >= 1.3) momentum = 'ACCELERATING';
+      else if (ratio <= 0.7) momentum = 'DECELERATING';
+      else momentum = 'STABLE';
+    }
+    let base = 'NEUTRAL';
+    if (f20 > 0) base = 'BUY';
+    else if (f20 < 0) base = 'SELL';
+    return base + '_' + momentum;
+  }
+  function getForeignMomentumClass(label) {
+    if (label === 'BUY_ACCELERATING') return 'on';
+    if (label === 'SELL_DECELERATING') return 'off';
+    if (label === 'BUY_DECELERATING') return 'danger';
+    if (label === 'SELL_ACCELERATING') return 'danger';
+    return 'off';
+  }
+  function getForeignMomentumText(label) {
+    const map = {
+      'BUY_ACCELERATING': '外資加速買',
+      'BUY_STABLE': '外資穩定買',
+      'BUY_DECELERATING': '外資買力減弱',
+      'SELL_ACCELERATING': '外資加速賣',
+      'SELL_STABLE': '外資穩定賣',
+      'SELL_DECELERATING': '外資賣力減弱',
+      'NEUTRAL_STABLE': '外資觀望中',
+      'NEUTRAL_NEUTRAL': '外資觀望中'
+    };
+    return map[label] || '外資動向不明';
+  }
   function buildFlags(signals){
-    const f5 = parseFloat(signals.foreign_net_5d || 0) || 0;
-    const l5 = parseFloat(signals.local_net_5d || 0) || 0;
     const buy5 = parseFloat(signals.buy_count_5d || 0) || 0;
     const sell5 = parseFloat(signals.sell_count_5d || 0) || 0;
     const score_u = parseFloat(signals.score_unified || signals.score || 0) || 0;
     const trend = String(signals.trend || '');
+    const fMomentum = computeForeignMomentumLabel(signals);
     return {
-      fb_diverge: ((f5>0&&l5<0)||(f5<0&&l5>0)) ? 1 : 0,
+      foreign_momentum_class: getForeignMomentumClass(fMomentum),
+      foreign_momentum_text: getForeignMomentumText(fMomentum),
+      foreign_momentum_label: fMomentum,
       breadth_expand: (buy5-sell5)>0 ? 1 : 0,
       net_sell_dominate: (trend.indexOf('偏空')>=0 || score_u<=30) ? 1 : 0,
       strength_high: score_u>=75 ? 1 : 0
@@ -268,7 +309,7 @@
     (stock.whale_data || []).forEach(function(w){ colorMap[w.name]= w.color || '#888'; });
 
     let ledHtml = '';
-    ledHtml += '<span class="led-pill ' + (flags.fb_diverge===1?'on':'off') + '"><span class="led-dot"></span>外/本分歧</span>';
+    ledHtml += '<span class="led-pill ' + flags.foreign_momentum_class + '"><span class="led-dot"></span>' + flags.foreign_momentum_text + '</span>';
     ledHtml += '<span class="led-pill ' + (flags.breadth_expand===1?'on':'off') + '"><span class="led-dot"></span>實盤擴散</span>';
     ledHtml += '<span class="led-pill ' + (flags.net_sell_dominate===1?'danger':'off') + '"><span class="led-dot"></span>淨賣主導</span>';
     ledHtml += '<span class="led-pill ' + (flags.strength_high===1?'on':'off') + '"><span class="led-dot"></span>強度高</span>';
