@@ -225,13 +225,15 @@
     const score_u = parseFloat(signals.score_unified || signals.score || 0) || 0;
     const trend = String(signals.trend || '');
     const fMomentum = computeForeignMomentumLabel(signals);
+    const alignVal = parseInt(signals.inst_three_align_5d || 0, 10);
     return {
       foreign_momentum_class: getForeignMomentumClass(fMomentum),
       foreign_momentum_text: getForeignMomentumText(fMomentum),
       foreign_momentum_label: fMomentum,
       breadth_expand: (buy5-sell5)>0 ? 1 : 0,
       net_sell_dominate: (trend.indexOf('偏空')>=0 || score_u<=30) ? 1 : 0,
-      strength_high: score_u>=75 ? 1 : 0
+      strength_high: score_u>=75 ? 1 : 0,
+      inst_align: alignVal
     };
   }
   function msZh(ms){
@@ -313,6 +315,9 @@
     ledHtml += '<span class="led-pill ' + (flags.breadth_expand===1?'on':'off') + '"><span class="led-dot"></span>實盤擴散</span>';
     ledHtml += '<span class="led-pill ' + (flags.net_sell_dominate===1?'danger':'off') + '"><span class="led-dot"></span>淨賣主導</span>';
     ledHtml += '<span class="led-pill ' + (flags.strength_high===1?'on':'off') + '"><span class="led-dot"></span>強度高</span>';
+    var alignClass = flags.inst_align === 1 ? 'on' : (flags.inst_align === -1 ? 'danger' : 'off');
+    var alignText = flags.inst_align === 1 ? '法人同向買' : (flags.inst_align === -1 ? '法人同向賣' : '法人方向分歧');
+    ledHtml += '<span class="led-pill ' + alignClass + '"><span class="led-dot"></span>' + alignText + '</span>';
 
     let statusCls = 'status-warn';
     if (stock.status && stock.status.indexOf('✅')>=0) statusCls = 'status-pass';
