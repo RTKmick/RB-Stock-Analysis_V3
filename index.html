@@ -221,17 +221,91 @@
     };
     return map[label] || '外資動向不明';
   }
+  function computeTrustMomentumLabel(signals) {
+    if (signals.inst_trust_momentum_label) {
+      return String(signals.inst_trust_momentum_label);
+    }
+    var t5 = parseFloat(signals.inst_trust_net_5d || 0) || 0;
+    var t20 = parseFloat(signals.inst_trust_net_20d || 0) || 0;
+    var speed5 = t5 / 5;
+    var speed20 = t20 / 20;
+    var momentum = 'NEUTRAL';
+    if (speed20 !== 0) {
+      var ratio = speed5 / speed20;
+      if (ratio >= 1.3) momentum = 'ACCELERATING';
+      else if (ratio <= 0.7) momentum = 'DECELERATING';
+      else momentum = 'STABLE';
+    }
+    var base = t20 > 0 ? 'BUY' : (t20 < 0 ? 'SELL' : 'NEUTRAL');
+    return base + '_' + momentum;
+  }
+  function getTrustMomentumClass(label) {
+    if (label === 'BUY_ACCELERATING') return 'on';
+    if (label === 'BUY_DECELERATING') return 'danger';
+    if (label === 'SELL_ACCELERATING') return 'danger';
+    if (label === 'SELL_DECELERATING') return 'off';
+    return 'off';
+  }
+  function getTrustMomentumText(label) {
+    var map = {
+      'BUY_ACCELERATING': '投信加速買',
+      'BUY_STABLE': '投信穩定買',
+      'BUY_DECELERATING': '投信買力減弱',
+      'SELL_ACCELERATING': '投信加速賣',
+      'SELL_STABLE': '投信穩定賣',
+      'SELL_DECELERATING': '投信賣力減弱',
+      'NEUTRAL_STABLE': '投信觀望',
+      'NEUTRAL_NEUTRAL': '投信觀望'
+    };
+    return map[label] || '投信動向不明';
+  }
+  function foreignMomentumEmoji(label) {
+    var emoji = {
+      'BUY_ACCELERATING': '🟢買↑↑',
+      'BUY_STABLE': '🟢買→',
+      'BUY_DECELERATING': '🔴買↓',
+      'SELL_ACCELERATING': '🔴賣↑↑',
+      'SELL_STABLE': '⚫賣→',
+      'SELL_DECELERATING': '⚫賣↓'
+    };
+    return emoji[label] || '⚫—';
+  }
+  function loadMomentumLabels(stocks) {
+    if (!stocks || !stocks.length) return;
+    stocks.forEach(function(s) {
+      var url = DATA_BASE + '/' + encodeURIComponent(s.id) + '_whale_track.json';
+      fetch(url)
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) {
+          if (!d) return;
+          var sig = d.signals || {};
+          var label = computeForeignMomentumLabel(sig);
+          var tag = foreignMomentumEmoji(label);
+          var sel = document.getElementById('stockSelect');
+          if (!sel) return;
+          Array.from(sel.options).forEach(function(opt) {
+            if (opt.value === s.id) {
+              opt.textContent = (s.name ? s.name + ' (' + s.id + ')' : s.id) + '  ' + tag;
+            }
+          });
+        })
+        .catch(function() {});
+    });
+  }
   function buildFlags(signals){
     const buy5 = parseFloat(signals.buy_count_5d || 0) || 0;
     const sell5 = parseFloat(signals.sell_count_5d || 0) || 0;
     const score_u = parseFloat(signals.score_unified || signals.score || 0) || 0;
     const trend = String(signals.trend || '');
     const fMomentum = computeForeignMomentumLabel(signals);
+    const tMomentum = computeTrustMomentumLabel(signals);
     const alignVal = parseInt(signals.inst_three_align_5d || 0, 10);
     return {
       foreign_momentum_class: getForeignMomentumClass(fMomentum),
       foreign_momentum_text: getForeignMomentumText(fMomentum),
       foreign_momentum_label: fMomentum,
+      trust_momentum_class: getTrustMomentumClass(tMomentum),
+      trust_momentum_text: getTrustMomentumText(tMomentum),
       breadth_expand: (buy5-sell5)>0 ? 1 : 0,
       net_sell_dominate: (trend.indexOf('偏空')>=0 || score_u<=30) ? 1 : 0,
       strength_high: score_u>=75 ? 1 : 0,
@@ -363,6 +437,7 @@
     var alignClass = flags.inst_align === 1 ? 'on' : (flags.inst_align === -1 ? 'danger' : 'off');
     var alignText = flags.inst_align === 1 ? '法人同向買' : (flags.inst_align === -1 ? '法人同向賣' : '法人方向分歧');
     ledHtml += '<span class="led-pill ' + alignClass + '"><span class="led-dot"></span>' + alignText + '</span>';
+    ledHtml += '<span class="led-pill ' + flags.trust_momentum_class + '"><span class="led-dot"></span>' + flags.trust_momentum_text + '</span>';
 
     let statusCls = 'status-warn';
     if (stock.status && stock.status.indexOf('✅')>=0) statusCls = 'status-pass';
@@ -388,6 +463,12 @@
       html += '<div class="mt-2"><span class="tag-pill">訊號：' + escapeHtml(actZh) + '</span>';
       if (hl.confidence != null && hl.confidence !== '') {
         html += '<span class="tag-pill">信心度 ' + escapeHtml(String(hl.confidence)) + '</span>';
+        var conf = parseFloat(hl.confidence || 50);
+        if (conf < 40) {
+          html += '<span style="margin-left:8px;background:#451a03;color:#fb923c;font-size:0.78rem;padding:2px 8px;border-radius:4px;font-weight:600;">';
+          html += '⚠️ 訊號混沌，不宜重押';
+          html += '</span>';
+        }
       }
       html += '</div>';
       if (hl.key_events && hl.key_events.length) {
@@ -401,6 +482,38 @@
     } else {
       html += '<div class="mb-3 px-2 py-2 rounded" style="font-size:0.85rem;color:#6b7280;background:#1a1a1a;border:1px dashed #444;">';
       html += '💡 此 JSON 尚無 <code>headline</code>：請在本機專案根目錄執行 <code>python scraper_chip.py --stock_id ' + escapeHtml(String(stock.id || '6239')) + ' --force</code> 重新產生 <code>data/' + escapeHtml(String(stock.id || '')) + '_whale_track.json</code> 後推送或覆蓋 <code>data/</code>（probe 已是最新時須加 <code>--force</code>）。';
+      html += '</div>';
+    }
+
+    var instThreeNet5 = parseFloat(sig.inst_three_net_5d || 0);
+    var wl = stock.whale_layers || {};
+    var t2summary = (wl.tier2_local_major && wl.tier2_local_major.layer_summary) ? wl.tier2_local_major.layer_summary : {};
+    var t2net5 = parseFloat(t2summary.total_net_5d || 0);
+    if (instThreeNet5 < 0 && t2net5 > 0) {
+      html += '<div class="metric-card mt-3" style="border-left:4px solid #f59e0b;background:#1a1200;text-align:left;">';
+      html += '<div style="color:#f59e0b;font-weight:700;margin-bottom:6px;">⚡ 訊號矛盾警示</div>';
+      html += '<div style="font-size:0.88rem;color:#d1d5db;">';
+      html += '三大法人 5日 <b style="color:#ef4444;">賣超 ' + (instThreeNet5 / 10000).toFixed(1) + ' 萬</b>，';
+      html += '但本土主力分點 5日 <b style="color:#22c55e;">買超 ' + t2net5.toFixed(0) + ' 張</b>。<br>';
+      html += '<span style="color:#9ca3af;">解讀建議：優先相信三大法人（官方申報數據）；本土分點買超可能是護盤、鎖籌碼行為，需觀察是否持續。</span>';
+      html += '</div></div>';
+    }
+
+    var t3members = (wl.tier3_day_trader && wl.tier3_day_trader.members) || [];
+    var t3maxNet = 0;
+    var t3maxName = '';
+    t3members.forEach(function(m) {
+      var absNet = Math.abs(parseFloat(m.net_5d_lot || 0));
+      if (absNet > t3maxNet) {
+        t3maxNet = absNet;
+        t3maxName = m.name || '';
+      }
+    });
+    if (t3maxNet >= 500) {
+      html += '<div class="metric-card mt-3" style="text-align:left;border:1px solid #7f1d1d;background:#2d0a0a;">';
+      html += '<div style="font-size:0.82rem;"><span style="color:#ef4444;font-weight:700;">🚨 隔日沖大單警示</span><br>';
+      html += '<span style="color:#d1d5db;">【' + escapeHtml(t3maxName) + '】5日淨額達 ' + t3maxNet.toFixed(0) + ' 張，';
+      html += '規模超過一般短線門檻，可能對短線價格造成顯著影響。</span></div>';
       html += '</div>';
     }
 
@@ -948,7 +1061,8 @@
       whale_data: raw.whale_data || [],
       total_whale_values: raw.total_whale_values || [],
       top6_details: raw.top6_details || [],
-      headline: raw.headline && typeof raw.headline === 'object' ? raw.headline : null
+      headline: raw.headline && typeof raw.headline === 'object' ? raw.headline : null,
+      whale_layers: raw.whale_layers && typeof raw.whale_layers === 'object' ? raw.whale_layers : null
     };
   }
 
@@ -999,7 +1113,7 @@
           filtered.forEach(function(s){
             const o = document.createElement('option');
             o.value = s.id;
-            o.textContent = s.id + ' ' + (s.name || '');
+            o.textContent = (s.name ? s.name + ' (' + s.id + ')' : s.id);
             sel.appendChild(o);
           });
           // 若目前選項不在過濾結果中，預設選第一筆
@@ -1018,6 +1132,7 @@
           input.value = '';
         }
         renderOptions('');
+        loadMomentumLabels(stocks);
 
         sel.addEventListener('change', function(){
           if (sel.value) {
