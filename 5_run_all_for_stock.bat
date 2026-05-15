@@ -91,7 +91,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [6/7] Smoke check outputs (smoke_check_artifacts.py) ...
+echo [6/8] Smoke check outputs (smoke_check_artifacts.py) ...
 "%ROOT%\venv\Scripts\python.exe" sub-py\smoke_check_artifacts.py
 if errorlevel 1 (
     echo Smoke check failed. Please fix issues above before upload.
@@ -100,7 +100,14 @@ if errorlevel 1 (
 )
 
 echo.
-echo [7/7] Optional: upload changes to GitHub (upl_rb.bat)
+echo [7/8] Generating market_context.json (TWSE) ...
+"%ROOT%\venv\Scripts\python.exe" scripts\generate_market_context.py --keep-on-fail
+if errorlevel 1 (
+    echo generate_market_context.py failed. Check TWSE connectivity or use --keep-on-fail with existing JSON.
+)
+
+echo.
+echo [8/8] Optional: upload changes to GitHub (upl_rb.bat)
 choice /M "Run upl_rb.bat to commit/push now?"
 if errorlevel 2 (
     echo Skipping upload. You can run upl_rb.bat later.

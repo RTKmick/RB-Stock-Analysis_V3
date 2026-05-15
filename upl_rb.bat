@@ -42,7 +42,7 @@ echo %date% %time% - Run [upl_rb] push %REMOTE% %BRANCH% >> "%ROOT%\Bat\Log.txt"
 git status
 echo.
 echo [upl_rb] Staging main sources (no venv / no .env)...
-git add core sub-py templates ^
+git add core sub-py scripts templates ^
     index.html dashboard.html README.md requirements.txt ^
     scraper_chip.py rb_tv_app.py ^
     *.bat .gitignore Version.txt ^

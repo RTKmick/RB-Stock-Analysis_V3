@@ -60,6 +60,40 @@
     .nav-link-ext .tab-ext-icon{ font-size:0.85em; opacity:0.85; margin-left:2px; }
     .coherence-spark { margin-top: 10px; }
     .coherence-spark-label { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
+    .market-bar {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+    .market-kpi { text-align: center; min-width: 120px; }
+    .market-kpi .mk-label { font-size: 0.72rem; color: #9ca3af; margin-bottom: 2px; }
+    .market-kpi .mk-value { font-size: 1.1rem; font-weight: 700; }
+    .market-kpi .mk-sub { font-size: 0.7rem; color: #6b7280; }
+    .market-state-badge {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .ms-risk-on   { background: #052e16; color: #22c55e; border: 1px solid #166534; }
+    .ms-cautious  { background: #422006; color: #eab308; border: 1px solid #854d0e; }
+    .ms-neutral   { background: #1f2937; color: #9ca3af; border: 1px solid #374151; }
+    .ms-risk-off  { background: #2d0a0a; color: #ef4444; border: 1px solid #7f1d1d; }
+    .stock-context-tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    .sct-follow  { background: #1e3a5f; color: #60a5fa; }
+    .sct-diverge { background: #3b1f00; color: #fb923c; }
   </style>
 </head>
 <body>
@@ -68,6 +102,8 @@
   <div class="text-center mb-2">
     <span class="badge bg-secondary" id="versionBadge">版本：載入中…</span>
   </div>
+
+  <div id="marketBar"></div>
 
   <!-- 全域股票選擇器：所有分頁共用 -->
   <div class="row justify-content-center mb-3">
@@ -151,7 +187,80 @@
   const DATA_BASE = 'data';
   const DEFAULT_STOCK = '6239';
   let manifest = { stock_ids: [], stocks: [] };
+  var marketCtx = null;
   let charts = { whale: null, radar: null, breadth: null, coherence: null, tornadoBuy: null, tornadoSell: null };
+
+  function loadMarketContext() {
+    return fetch(DATA_BASE + '/market_context.json')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) {
+        marketCtx = d;
+        renderMarketBar(d);
+        return d;
+      })
+      .catch(function() {
+        marketCtx = null;
+      });
+  }
+
+  function renderMarketBar(ctx) {
+    var host = document.getElementById('marketBar');
+    if (!host || !ctx) return;
+    var t = ctx.taiex || {};
+    var inst = ctx.institutional || {};
+    var ms = ctx.market_state || 'NEUTRAL';
+    var msReason = ctx.market_state_reason || '';
+    var msClass = {
+      'RISK_ON': 'ms-risk-on',
+      'CAUTIOUS': 'ms-cautious',
+      'NEUTRAL': 'ms-neutral',
+      'RISK_OFF': 'ms-risk-off'
+    }[ms] || 'ms-neutral';
+    var msText = {
+      'RISK_ON': '🟢 多頭格局',
+      'CAUTIOUS': '🟡 留意風險',
+      'NEUTRAL': '⚫ 方向不明',
+      'RISK_OFF': '🔴 偏空警戒'
+    }[ms] || '⚫ 觀察中';
+    var fRaw1d = inst.foreign_net_1d != null ? Number(inst.foreign_net_1d) : null;
+    var fRaw5d = inst.foreign_net_5d != null ? Number(inst.foreign_net_5d) : null;
+    var fNet1d = fRaw1d != null ? (fRaw1d / 100000000).toFixed(1) : '-';
+    var fNet5d = fRaw5d != null ? (fRaw5d / 100000000).toFixed(1) : '-';
+    var fStreak = inst.foreign_streak_sell || 0;
+    var streakText = fStreak >= 2 ? '（連賣' + fStreak + '日）' : '';
+    var changePct = t.change_pct != null ? t.change_pct : 0;
+    var changeColor = changePct >= 0 ? '#22c55e' : '#ef4444';
+    var changeSign = changePct >= 0 ? '+' : '';
+    var closeFmt = t.close != null ? Number(t.close).toLocaleString('zh-TW', { maximumFractionDigits: 2 }) : '-';
+    var html = '<div class="market-bar">';
+    html += '<div><span class="market-state-badge ' + msClass + '">' + msText + '</span></div>';
+    html += '<div class="market-kpi"><div class="mk-label">加權指數</div>';
+    html += '<div class="mk-value" style="color:' + changeColor + ';">' + closeFmt + '</div>';
+    html += '<div class="mk-sub">' + changeSign + changePct + '%</div></div>';
+    html += '<div class="market-kpi"><div class="mk-label">外資今日</div>';
+    html += '<div class="mk-value" style="color:' + ((fRaw1d != null && fRaw1d >= 0) ? '#22c55e' : '#ef4444') + ';">' + fNet1d + ' 億</div>';
+    html += '<div class="mk-sub">' + streakText + '</div></div>';
+    html += '<div class="market-kpi"><div class="mk-label">外資5日</div>';
+    html += '<div class="mk-value" style="color:' + ((fRaw5d != null && fRaw5d >= 0) ? '#22c55e' : '#ef4444') + ';">' + fNet5d + ' 億</div></div>';
+    var t20 = t.trend_20d_pct != null ? t.trend_20d_pct : 0;
+    html += '<div class="market-kpi"><div class="mk-label">20日趨勢</div>';
+    html += '<div class="mk-value" style="color:' + (t20 >= 0 ? '#22c55e' : '#ef4444') + ';">' + (t20 >= 0 ? '+' : '') + t20 + '%</div></div>';
+    if (msReason) {
+      html += '<div style="flex-basis:100%; font-size:0.78rem; color:#6b7280; margin-top:4px;">' + escapeHtml(msReason) + '</div>';
+    }
+    html += '</div>';
+    host.innerHTML = html;
+  }
+
+  function getStockContextTag(stockSignals) {
+    if (!marketCtx || !marketCtx.institutional) return '';
+    var mktDir = marketCtx.institutional.foreign_net_5d > 0 ? 'BUY' : 'SELL';
+    var stockDir = parseFloat(stockSignals.inst_foreign_net_5d || 0) > 0 ? 'BUY' : 'SELL';
+    var same = mktDir === stockDir;
+    var cls  = same ? 'sct-follow' : 'sct-diverge';
+    var text = same ? '跟隨大盤' : '獨立走勢';
+    return '<span class="stock-context-tag ' + cls + '">' + text + '</span>';
+  }
   function destroyCharts(){
     ['whale','radar','breadth','coherence','tornadoBuy','tornadoSell'].forEach(function(k){ if (charts[k]) { try { charts[k].destroy(); } catch(e){} charts[k]=null; } });
   }
@@ -447,7 +556,7 @@
 
     let html = '<div class="col-lg-10"><div class="card shadow-lg"><div class="card-body">';
     html += '<div class="d-flex justify-content-between align-items-center mb-4">';
-    html += '<div><h3 class="card-title mb-1 text-white">' + (stock.id || '') + ' ' + (stock.name || '') + '</h3>';
+    html += '<div><h3 class="card-title mb-1 text-white">' + (stock.id || '') + ' ' + (stock.name || '') + getStockContextTag(sig) + '</h3>';
     html += '<span class="update-time">最後更新：' + (stock.last_update || '-') + '</span>';
     if (stock.probe_date) html += '<div class="update-time">分點參考日：' + stock.probe_date + '</div>';
     html += '</div><div class="text-end"><span class="badge bg-warning text-dark mb-1">Top 6 核心大戶監控 (10日)</span>';
@@ -1158,13 +1267,16 @@
           });
         }
 
-        // 預設載入 DEFAULT_STOCK（若 manifest 有該檔），否則第一檔
+        // 預設載入 DEFAULT_STOCK（若 manifest 有該檔），否則第一檔（等大盤情境後再載入個股標籤）
         var defaultId = resolveDefaultStockId(stocks);
-        if (defaultId){
-          sel.value = defaultId;
-          updatePhase2Link(defaultId);
-          loadStock(defaultId);
+        function loadDefaultStock(){
+          if (defaultId){
+            sel.value = defaultId;
+            updatePhase2Link(defaultId);
+            loadStock(defaultId);
+          }
         }
+        loadMarketContext().then(loadDefaultStock).catch(loadDefaultStock);
       })
       .catch(function(err){
         el('stockSelect').innerHTML = '<option value="">無法載入清單</option>';
