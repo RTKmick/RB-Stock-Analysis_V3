@@ -219,7 +219,7 @@ def run_strategy(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--stock_id", default="6239", help="股票代號，如 6239")
+    parser.add_argument("--stock_id", default="2454", help="股票代號，如 2454")
     parser.add_argument("--days", type=int, default=20, help="回溯交易日數（建議 20，對應 dashboard 的 20日）")
     parser.add_argument("--throttle", type=float, default=0.6, help="每次請求間隔秒數")
     parser.add_argument("--no_ssl_verify", action="store_true", help="關閉 SSL verify（公司網路憑證問題才用）")

@@ -364,11 +364,11 @@ def webhook():
 
 @app.route("/dashboard/")
 def dashboard():
-    stock_id = request.args.get("stock_id", "6239").strip()
+    stock_id = request.args.get("stock_id", "2454").strip()
 
     # 防呆：只允許數字
     if not stock_id.isdigit():
-        stock_id = "6239"
+        stock_id = "2454"
 
     available_ids = list_available_stock_ids(DATA_PATH)
     available_stocks = [{"id": sid, "name": get_stock_name(sid)} for sid in available_ids]

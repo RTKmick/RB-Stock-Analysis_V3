@@ -27,15 +27,6 @@
       "close_last": 198.5,
       "confidence": 49,
       "logged_at": "2026-05-16 18:31"
-    },
-    {
-      "trade_date": "2026-05-13",
-      "stock_id": "6239",
-      "stock_name": "力成",
-      "action_signal": "EXIT_ALERT",
-      "close_last": 232.0,
-      "confidence": 38,
-      "logged_at": "2026-05-16 18:31"
     }
   ]
 }

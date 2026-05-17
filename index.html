@@ -113,7 +113,7 @@
         <label class="mb-0 fs-5 fw-bold text-white" for="stockSearch">切換股票：</label>
         <input id="stockSearch"
                class="form-control form-control-lg bg-dark text-white border-secondary stock-search-input"
-               placeholder="過濾用：如 6239、力成（清空＝顯示全部）" />
+               placeholder="過濾用：如 2454、聯發科（清空＝顯示全部）" />
         <select id="stockSelect" class="form-select form-select-lg bg-dark text-white border-secondary stock-select-input">
           <option value="">載入中…</option>
         </select>
@@ -142,7 +142,7 @@
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link nav-link-ext" id="tab-phase2" href="dashboard.html?stock=6239"
+      <a class="nav-link nav-link-ext" id="tab-phase2" href="dashboard.html?stock=2454"
          target="_blank" rel="noopener noreferrer"
          title="Phase 2：一眼看盤（新分頁開啟，會帶入目前選擇的股票代號）">
         Phase 2 一眼看盤 <span class="tab-ext-icon" aria-hidden="true">↗</span>
@@ -153,7 +153,7 @@
   <div class="tab-content" id="rbTabsContent">
     <div class="tab-pane fade show active" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
       <div id="content"></div>
-      <div id="loading" class="text-center text-muted py-5">載入預設股票（6239）…</div>
+      <div id="loading" class="text-center text-muted py-5">載入預設股票（2454）…</div>
     </div>
 
     <div class="tab-pane fade" id="panel-phase1" role="tabpanel" aria-labelledby="tab-phase1">
@@ -186,7 +186,7 @@
 <script>
 (function(){
   const DATA_BASE = 'data';
-  const DEFAULT_STOCK = '6239';
+  const DEFAULT_STOCK = '2454';
   let manifest = { stock_ids: [], stocks: [] };
   var marketCtx = null;
   let charts = { whale: null, radar: null, breadth: null, coherence: null, tornadoBuy: null, tornadoSell: null };
@@ -636,7 +636,7 @@
       html += '</div>';
     } else {
       html += '<div class="mb-3 px-2 py-2 rounded" style="font-size:0.85rem;color:#6b7280;background:#1a1a1a;border:1px dashed #444;">';
-      html += '💡 此 JSON 尚無 <code>headline</code>：請在本機專案根目錄執行 <code>python scraper_chip.py --stock_id ' + escapeHtml(String(stock.id || '6239')) + ' --force</code> 重新產生 <code>data/' + escapeHtml(String(stock.id || '')) + '_whale_track.json</code> 後推送或覆蓋 <code>data/</code>（probe 已是最新時須加 <code>--force</code>）。';
+      html += '💡 此 JSON 尚無 <code>headline</code>：請在本機專案根目錄執行 <code>python scraper_chip.py --stock_id ' + escapeHtml(String(stock.id || '2454')) + ' --force</code> 重新產生 <code>data/' + escapeHtml(String(stock.id || '')) + '_whale_track.json</code> 後推送或覆蓋 <code>data/</code>（probe 已是最新時須加 <code>--force</code>）。';
       html += '</div>';
     }
 
@@ -1280,7 +1280,7 @@
 
         if (stocks.length === 0){
           renderOptions('');
-          el('loading').innerHTML = '<div class="text-muted">請在本機執行 <code>python scraper_chip.py --stock_id 6239</code> 並將 data/ 推送到 GitHub 後重新整理。</div>';
+          el('loading').innerHTML = '<div class="text-muted">請在本機執行 <code>python scraper_chip.py --stock_id 2454</code> 並將 data/ 推送到 GitHub 後重新整理。</div>';
           return;
         }
 
