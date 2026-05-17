@@ -27,7 +27,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 OUT_PATH = ROOT / "data" / "market_context.json"
-HISTORY_PATH = ROOT / "data" / "signal_history.json"
 
 
 def _fetch_twse(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
@@ -374,88 +373,6 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
     }
 
 
-def _trade_date_from_whale(data: dict[str, Any]) -> str:
-    probe = str(data.get("probe_date") or "").strip()
-    if probe and len(probe) >= 10:
-        return probe[:10]
-    lu = str(data.get("last_update") or "").strip()
-    if lu and len(lu) >= 10:
-        return lu[:10].replace("/", "-")
-    return datetime.now().strftime("%Y-%m-%d")
-
-
-def append_signal_history() -> int:
-    """從 data/*_whale_track.json 追加當日 action_signal / close_last（歷史回測前置）。"""
-    pattern = list((ROOT / "data").glob("*_whale_track.json"))
-    if not pattern:
-        print("[WARN] no whale_track json; skip signal_history")
-        return 0
-
-    if HISTORY_PATH.is_file():
-        try:
-            with open(HISTORY_PATH, encoding="utf-8") as f:
-                store = json.load(f)
-        except Exception:
-            store = {}
-    else:
-        store = {}
-    records: list[dict[str, Any]] = list(store.get("records") or [])
-    index = {
-        (str(r.get("trade_date")), str(r.get("stock_id"))): i
-        for i, r in enumerate(records)
-        if r.get("trade_date") and r.get("stock_id")
-    }
-    now_s = datetime.now().strftime("%Y-%m-%d %H:%M")
-    added = updated = 0
-
-    for path in sorted(pattern):
-        sid = path.name.replace("_whale_track.json", "")
-        if not sid.isdigit():
-            continue
-        try:
-            with open(path, encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception as exc:
-            print(f"[WARN] skip {path.name}: {exc}")
-            continue
-        hl = data.get("headline") or {}
-        enh = data.get("enhanced") or data.get("signals", {}).get("enhanced") or {}
-        if not isinstance(enh, dict):
-            enh = {}
-        close_last = enh.get("close_last")
-        if close_last is None:
-            sig = data.get("signals") or {}
-            if isinstance(sig, dict):
-                e2 = sig.get("enhanced") or {}
-                if isinstance(e2, dict):
-                    close_last = e2.get("close_last")
-        entry = {
-            "trade_date": _trade_date_from_whale(data),
-            "stock_id": sid,
-            "stock_name": data.get("stock_name") or sid,
-            "action_signal": hl.get("action_signal") or "NEUTRAL",
-            "close_last": float(close_last) if close_last is not None else None,
-            "confidence": hl.get("confidence"),
-            "logged_at": now_s,
-        }
-        key = (entry["trade_date"], sid)
-        if key in index:
-            records[index[key]] = entry
-            updated += 1
-        else:
-            index[key] = len(records)
-            records.append(entry)
-            added += 1
-
-    store["updated"] = now_s
-    store["records"] = records
-    HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(HISTORY_PATH, "w", encoding="utf-8") as f:
-        json.dump(store, f, ensure_ascii=False, indent=2)
-    print(f"[OK] wrote {HISTORY_PATH} (+{added} new, {updated} updated, total {len(records)})")
-    return 0
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate data/market_context.json")
     parser.add_argument(
@@ -501,7 +418,9 @@ def main() -> int:
         f"融資餘額={margin.get('margin_balance', 0)/1e8:.0f}億"
     )
     if not args.no_history:
-        append_signal_history()
+        from core.signal_history import run_signal_history_pipeline
+
+        run_signal_history_pipeline()
     return 0
 
 

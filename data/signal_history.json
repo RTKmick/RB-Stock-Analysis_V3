@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-16 18:31",
+  "updated": "2026-05-17 11:51",
   "records": [
     {
       "trade_date": "2026-05-14",
@@ -8,7 +8,17 @@
       "action_signal": "HOLD_WATCH",
       "close_last": 3405.0,
       "confidence": 40,
-      "logged_at": "2026-05-16 18:31"
+      "logged_at": "2026-05-16 18:31",
+      "close_5d_later": null,
+      "close_10d_later": null,
+      "close_20d_later": null,
+      "return_5d_pct": null,
+      "return_10d_pct": null,
+      "return_20d_pct": null,
+      "score_unified": null,
+      "chip_light": null,
+      "monitor_state": null,
+      "final_grade": null
     },
     {
       "trade_date": "2026-05-14",
@@ -17,7 +27,17 @@
       "action_signal": "EXIT_ALERT",
       "close_last": 259.0,
       "confidence": 26,
-      "logged_at": "2026-05-16 18:31"
+      "logged_at": "2026-05-16 18:31",
+      "close_5d_later": null,
+      "close_10d_later": null,
+      "close_20d_later": null,
+      "return_5d_pct": null,
+      "return_10d_pct": null,
+      "return_20d_pct": null,
+      "score_unified": null,
+      "chip_light": null,
+      "monitor_state": null,
+      "final_grade": null
     },
     {
       "trade_date": "2026-05-14",
@@ -26,7 +46,74 @@
       "action_signal": "HOLD_WATCH",
       "close_last": 198.5,
       "confidence": 49,
-      "logged_at": "2026-05-16 18:31"
+      "logged_at": "2026-05-16 18:31",
+      "close_5d_later": null,
+      "close_10d_later": null,
+      "close_20d_later": null,
+      "return_5d_pct": null,
+      "return_10d_pct": null,
+      "return_20d_pct": null,
+      "score_unified": null,
+      "chip_light": null,
+      "monitor_state": null,
+      "final_grade": null
+    },
+    {
+      "trade_date": "2026-05-15",
+      "stock_id": "2454",
+      "stock_name": "聯發科",
+      "action_signal": "HOLD_WATCH",
+      "close_last": 3260.0,
+      "confidence": 52,
+      "logged_at": "2026-05-17 11:51",
+      "score_unified": 70.0,
+      "chip_light": "yellow",
+      "monitor_state": "NEUTRAL",
+      "final_grade": "C",
+      "close_5d_later": null,
+      "close_10d_later": null,
+      "close_20d_later": null,
+      "return_5d_pct": null,
+      "return_10d_pct": null,
+      "return_20d_pct": null
+    },
+    {
+      "trade_date": "2026-05-15",
+      "stock_id": "2486",
+      "stock_name": "一詮",
+      "action_signal": "EXIT_ALERT",
+      "close_last": 249.0,
+      "confidence": 27,
+      "logged_at": "2026-05-17 11:51",
+      "score_unified": 66.0,
+      "chip_light": "red",
+      "monitor_state": "NEUTRAL",
+      "final_grade": "C",
+      "close_5d_later": null,
+      "close_10d_later": null,
+      "close_20d_later": null,
+      "return_5d_pct": null,
+      "return_10d_pct": null,
+      "return_20d_pct": null
+    },
+    {
+      "trade_date": "2026-05-15",
+      "stock_id": "3035",
+      "stock_name": "智原",
+      "action_signal": "HOLD_WATCH",
+      "close_last": 190.0,
+      "confidence": 45,
+      "logged_at": "2026-05-17 11:51",
+      "score_unified": 68.0,
+      "chip_light": "red",
+      "monitor_state": "FADING",
+      "final_grade": "C",
+      "close_5d_later": null,
+      "close_10d_later": null,
+      "close_20d_later": null,
+      "return_5d_pct": null,
+      "return_10d_pct": null,
+      "return_20d_pct": null
     }
   ]
 }

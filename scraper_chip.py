@@ -216,6 +216,13 @@ def run_strategy(
         f"series_len={len(sig.get('labels_20d',[]))}"
     )
 
+    try:
+        from core.signal_history import run_signal_history_pipeline
+
+        run_signal_history_pipeline()
+    except Exception as e:
+        print(f"[WARN] signal_history 略過: {e}")
+
 
 def main():
     parser = argparse.ArgumentParser()

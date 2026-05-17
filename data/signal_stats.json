@@ -1,0 +1,33 @@
+{
+  "updated": "2026-05-17 11:51",
+  "total_records": 6,
+  "total_with_5d_return": 0,
+  "total_with_20d_return": 0,
+  "by_signal": {
+    "HOLD_WATCH": {
+      "count": 4,
+      "sample_size_5d": 0,
+      "avg_return_5d_pct": null,
+      "win_rate_5d": null,
+      "sample_size_10d": 0,
+      "avg_return_10d_pct": null,
+      "win_rate_10d": null,
+      "sample_size_20d": 0,
+      "avg_return_20d_pct": null,
+      "win_rate_20d": null
+    },
+    "EXIT_ALERT": {
+      "count": 2,
+      "sample_size_5d": 0,
+      "avg_return_5d_pct": null,
+      "win_rate_5d": null,
+      "sample_size_10d": 0,
+      "avg_return_10d_pct": null,
+      "win_rate_10d": null,
+      "sample_size_20d": 0,
+      "avg_return_20d_pct": null,
+      "win_rate_20d": null
+    }
+  },
+  "min_sample_size": 10
+}

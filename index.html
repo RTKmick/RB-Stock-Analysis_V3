@@ -95,6 +95,18 @@
     .sct-follow  { background: #1e3a5f; color: #60a5fa; }
     .sct-diverge { background: #3b1f00; color: #fb923c; }
     .broker-spark-bar { display: inline-block; vertical-align: middle; margin-left: 8px; }
+    .backtest-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      font-weight: 600;
+    }
+    .bt-good  { background: #052e16; color: #22c55e; border: 1px solid #166534; }
+    .bt-neutral { background: #1f2937; color: #9ca3af; border: 1px solid #374151; }
+    .bt-bad   { background: #2d0a0a; color: #ef4444; border: 1px solid #7f1d1d; }
+    .bt-nodata { background: #1a1a1a; color: #6b7280; font-style: italic; }
   </style>
 </head>
 <body>
@@ -186,11 +198,35 @@
 <script>
 (function(){
   const DATA_BASE = 'data';
+  var signalStats = null;
   const DEFAULT_STOCK = '2454';
   let manifest = { stock_ids: [], stocks: [] };
   var marketCtx = null;
   let charts = { whale: null, radar: null, breadth: null, coherence: null, tornadoBuy: null, tornadoSell: null };
 
+  function loadSignalStats() {
+    return fetch(DATA_BASE + '/signal_stats.json')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) { signalStats = d; return d; })
+      .catch(function() { signalStats = null; return null; });
+  }
+  function getBacktestBadge(actionSignal) {
+    if (!actionSignal || !signalStats || !signalStats.by_signal) return '';
+    var s = signalStats.by_signal[actionSignal];
+    if (!s) return '';
+    var winRate = s.win_rate_10d != null ? s.win_rate_10d : s.win_rate_5d;
+    var avgRet  = s.avg_return_10d_pct != null ? s.avg_return_10d_pct : s.avg_return_5d_pct;
+    var period  = s.win_rate_10d != null ? '10日' : '5日';
+    var sample  = s.win_rate_10d != null ? (s.sample_size_10d || 0) : (s.sample_size_5d || 0);
+    var minN = signalStats.min_sample_size || 10;
+    if (winRate == null || sample < minN) {
+      return '<span class="backtest-badge bt-nodata">累積數據中（' + sample + '/' + minN + '筆）</span>';
+    }
+    var cls = winRate >= 0.6 ? 'bt-good' : (winRate <= 0.4 ? 'bt-bad' : 'bt-neutral');
+    var pct = (winRate * 100).toFixed(0);
+    var ret = (avgRet >= 0 ? '+' : '') + Number(avgRet).toFixed(1) + '%';
+    return '<span class="backtest-badge ' + cls + '">歷史' + period + '勝率 ' + pct + '%｜平均 ' + ret + '（' + sample + '筆）</span>';
+  }
   function loadMarketContext() {
     return fetch(DATA_BASE + '/market_context.json')
       .then(function(r) { return r.ok ? r.json() : null; })
@@ -377,7 +413,7 @@
       'BUY_DECELERATING': '🟡買↓',
       'SELL_ACCELERATING': '🔴賣↑↑',
       'SELL_STABLE': '⚫賣→',
-      'SELL_DECELERATING': '🟡賣↓'
+      'SELL_DECELERATING': '🔵賣↓'
     };
     return emoji[label] || '⚫—';
   }
@@ -615,7 +651,7 @@
       html += '<div class="metric-card mb-3" style="text-align:left;border-left:4px solid #f1c40f;background:#141414;">';
       html += '<div class="metric-label mb-1">📰 一句話結論（Phase 0 headline）</div>';
       html += '<div style="font-size:1.05rem;line-height:1.55;color:#e5e7eb;">' + escapeHtml(hl.summary) + '</div>';
-      html += '<div class="mt-2"><span class="tag-pill">訊號：' + escapeHtml(actZh) + '</span>';
+      html += '<div class="mt-2"><span class="tag-pill">訊號：' + escapeHtml(actZh) + '</span>' + getBacktestBadge(hl.action_signal);
       if (hl.confidence != null && hl.confidence !== '') {
         html += '<span class="tag-pill">信心度 ' + escapeHtml(String(hl.confidence)) + '</span>';
         var conf = parseFloat(hl.confidence || 50);
@@ -1245,6 +1281,7 @@
       })
       .then(function(m){
         manifest = m;
+        loadSignalStats();
         const sel = el('stockSelect');
         const input = el('stockSearch');
         const stocks = manifest.stocks && manifest.stocks.length
