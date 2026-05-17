@@ -36,6 +36,54 @@ TIER3_HEAVY_LOT_THRESHOLD = 500.0
 INST_FLOW_LOT_EPS = 50.0
 
 
+def _daily_net_from_cumulative(cumulative: list) -> list[float]:
+    if not cumulative:
+        return []
+    out = [round(float(cumulative[0]), 1)]
+    for i in range(1, len(cumulative)):
+        out.append(round(float(cumulative[i]) - float(cumulative[i - 1]), 1))
+    return out
+
+
+def _enrich_top6_daily_net_series(
+    top6_details: list[dict], whale_data: list[dict]
+) -> None:
+    """從 whale_data 累積軌跡差分，寫入 top6_details.daily_net_series。"""
+    by_name: dict[str, list] = {}
+    by_id: dict[str, list] = {}
+    for w in whale_data:
+        vals = w.get("values")
+        if not vals:
+            continue
+        name = str(w.get("name", "")).strip()
+        bid = str(w.get("broker_id", "")).strip()
+        if name:
+            by_name[name] = vals
+        if bid:
+            by_id[bid] = vals
+
+    name_to_id = {
+        str(d.get("broker_name", "")).strip(): str(d.get("broker_id", "")).strip()
+        for d in top6_details
+        if d.get("broker_name") and d.get("broker_id")
+    }
+    for w in whale_data:
+        if w.get("broker_id"):
+            continue
+        name = str(w.get("name", "")).strip()
+        bid = name_to_id.get(name)
+        if bid:
+            w["broker_id"] = bid
+
+    for broker in top6_details:
+        bid = str(broker.get("broker_id", "")).strip()
+        bname = str(broker.get("broker_name", "")).strip()
+        cumulative = by_id.get(bid) or by_name.get(bname)
+        broker["daily_net_series"] = (
+            _daily_net_from_cumulative(cumulative) if cumulative else []
+        )
+
+
 def _sign_flow_lot(v: float, eps: float = INST_FLOW_LOT_EPS) -> int:
     if v > eps:
         return 1
@@ -613,16 +661,24 @@ def analyze_whale_trajectory(
     pivot_cumsum = pivot_net.reindex(date_10d).fillna(0).cumsum()
 
     colors = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40"]
+    name_to_id = {
+        str(d.get("broker_name", "")).strip(): str(d.get("broker_id", "")).strip()
+        for d in top6_details
+        if d.get("broker_name") and d.get("broker_id")
+    }
     whale_data = []
     for i, name in enumerate(pivot_cumsum.columns):
-        whale_data.append(
-            {
-                "name": name,
-                "values": (pivot_cumsum[name] / 1000.0).round(1).tolist(),
-                "color": colors[i % len(colors)],
-            }
-        )
+        col_name = str(name).strip()
+        entry: dict = {
+            "name": col_name,
+            "values": (pivot_cumsum[name] / 1000.0).round(1).tolist(),
+            "color": colors[i % len(colors)],
+        }
+        if col_name in name_to_id:
+            entry["broker_id"] = name_to_id[col_name]
+        whale_data.append(entry)
     total_whale_values = (pivot_cumsum.sum(axis=1) / 1000.0).round(1).tolist()
+    _enrich_top6_daily_net_series(top6_details, whale_data)
 
     # signals（短期）
     c20 = compute_concentration(df_20d, top_n=15)

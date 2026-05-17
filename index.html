@@ -49,8 +49,8 @@
     .org-foreign{ color:#c084fc; font-weight:600; }
     .org-local{ color:#84cc16; font-weight:600; }
     .page-title{ color:#f1c40f; }
-    .stock-search-input{ max-width:220px; font-size:1.4rem; }
-    .stock-select-input{ max-width:260px; font-size:1.4rem; }
+    .stock-search-input{ max-width:180px; font-size:1rem; }
+    .stock-select-input{ max-width:240px; font-size:1rem; }
     .report-iframe{ width:100%; height:80vh; border:none; margin-top:16px; }
     .report-iframe-phase3{ margin-top:12px; }
     .phase3-hint{ font-size:0.9rem; }
@@ -94,6 +94,7 @@
     }
     .sct-follow  { background: #1e3a5f; color: #60a5fa; }
     .sct-diverge { background: #3b1f00; color: #fb923c; }
+    .broker-spark-bar { display: inline-block; vertical-align: middle; margin-left: 8px; }
   </style>
 </head>
 <body>
@@ -108,8 +109,8 @@
   <!-- 全域股票選擇器：所有分頁共用 -->
   <div class="row justify-content-center mb-3">
     <div class="col-lg-10">
-      <div class="d-flex flex-wrap align-items-center gap-3">
-        <label class="mb-0 fs-3 fw-bold text-white" for="stockSearch">切換股票：</label>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <label class="mb-0 fs-5 fw-bold text-white" for="stockSearch">切換股票：</label>
         <input id="stockSearch"
                class="form-control form-control-lg bg-dark text-white border-secondary stock-search-input"
                placeholder="過濾用：如 6239、力成（清空＝顯示全部）" />
@@ -463,6 +464,50 @@
            '<div class="coherence-spark-label" style="color:' + slopeColor + ';">' +
            '籌碼凝聚度走勢：' + slopeText +
            '</div></div>';
+  }
+  function buildBrokerBarSpark(dailySeries, whaleData, brokerName) {
+    var series = dailySeries;
+    if ((!series || series.length < 2) && whaleData) {
+      var found = null;
+      for (var i = 0; i < whaleData.length; i++) {
+        if (whaleData[i].name === brokerName) {
+          found = whaleData[i].values;
+          break;
+        }
+      }
+      if (found && found.length >= 2) {
+        series = [found[0]];
+        for (var j = 1; j < found.length; j++) {
+          series.push(Math.round((found[j] - found[j - 1]) * 10) / 10);
+        }
+      }
+    }
+    if (!series || series.length < 2) return '';
+    var W = 100, H = 28, PAD = 2;
+    var n = series.length;
+    var barW = Math.max(2, Math.floor((W - PAD * 2) / n) - 1);
+    var gap = 1;
+    var maxAbs = Math.max.apply(null, series.map(function(v) { return Math.abs(v); }));
+    if (maxAbs === 0) maxAbs = 1;
+    var midY = H / 2;
+    var maxBarH = midY - PAD;
+    var bars = '';
+    for (var k = 0; k < n; k++) {
+      var v = series[k];
+      var barH = Math.max(1, Math.abs(v) / maxAbs * maxBarH);
+      var x = PAD + k * (barW + gap);
+      var y, color;
+      if (v >= 0) {
+        y = midY - barH;
+        color = '#22c55e';
+      } else {
+        y = midY;
+        color = '#ef4444';
+      }
+      bars += '<rect x="' + x + '" y="' + y.toFixed(1) + '" width="' + barW + '" height="' + barH.toFixed(1) + '" fill="' + color + '" rx="1"/>';
+    }
+    var zeroLine = '<line x1="' + PAD + '" y1="' + midY + '" x2="' + (W - PAD) + '" y2="' + midY + '" stroke="#555" stroke-width="0.5"/>';
+    return '<span class="broker-spark-bar"><svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' + zeroLine + bars + '</svg></span>';
   }
   function msZh(ms){
     const m = { ACCUMULATION:'吸籌/佈局期', MARKUP:'推升/趨勢延續', FADING:'退潮警戒', DISTRIBUTION:'派發警戒' };
@@ -823,7 +868,8 @@
       var wl = b.archetype_label || '';
       var lbl = wl === 'swing_leader' ? '波段主力' : (wl === 'distributor' ? '派發/出貨' : (wl === 'flipper' ? '短線/隔日沖' : '混合'));
       html += '<tr title=\"近10日/5日/1日淨買超(千張)：' + (b.net_10d!=null?b.net_10d:'-') + ' / ' + (b.net_5d!=null?b.net_5d:'-') + ' / ' + (b.net_1d!=null?b.net_1d:'-') + '\\n連買=' + (b.streak_buy!=null?b.streak_buy:'-') + '、連賣=' + (b.streak_sell!=null?b.streak_sell:'-') + '\">';
-      html += '<td><span class="broker-chip" style="background:' + c + ';"></span><code>' + (b.broker_id||'') + '</code> <span style="color:' + c + '; font-weight:700;">' + (b.broker_name||'') + '</span></td>';
+      var barChart = buildBrokerBarSpark(b.daily_net_series || null, stock.whale_data || [], b.broker_name);
+      html += '<td><span class="broker-chip" style="background:' + c + ';"></span><code>' + (b.broker_id||'') + '</code> <span style="color:' + c + '; font-weight:700;">' + (b.broker_name||'') + '</span>' + barChart + '</td>';
       html += '<td>' + typeBadge + '</td>';
       html += '<td class="text-end ' + (b.net_10d>0?'buy-row':'sell-row') + '">' + (b.net_10d!= null ? b.net_10d : '-') + '</td>';
       html += '<td class="text-end ' + (b.net_5d>0?'buy-row':'sell-row') + '">' + (b.net_5d!= null ? b.net_5d : '-') + '</td>';
