@@ -27,6 +27,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 OUT_PATH = ROOT / "data" / "market_context.json"
+HISTORY_PATH = ROOT / "data" / "signal_history.json"
 
 
 def _fetch_twse(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
@@ -49,13 +50,34 @@ def _fetch_twse(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
         return None
 
 
+def _fetch_twse_on_date(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
+    """僅在 API 回傳 date 與請求日一致時採用（避免假日重複最近交易日）。"""
+    payload = _fetch_twse(url, date_yyyymmdd)
+    if not payload:
+        return None
+    api_date = str(payload.get("date") or "").strip()
+    if api_date and api_date != date_yyyymmdd:
+        return None
+    return payload
+
+
 def _table_rows(payload: dict[str, Any] | None) -> list[list[Any]]:
     if not payload:
         return []
     rows = payload.get("data")
-    if not isinstance(rows, list):
+    if isinstance(rows, list) and rows:
+        return [r for r in rows if isinstance(r, list) and r]
+    tables = payload.get("tables")
+    if not isinstance(tables, list):
         return []
-    return [r for r in rows if isinstance(r, list) and r]
+    out: list[list[Any]] = []
+    for table in tables:
+        if not isinstance(table, dict):
+            continue
+        data = table.get("data")
+        if isinstance(data, list):
+            out.extend(r for r in data if isinstance(r, list) and r)
+    return out
 
 
 def _parse_num(v: Any) -> float:
@@ -109,30 +131,36 @@ def _fetch_taiex_series(end: datetime, n: int = 25) -> list[tuple[str, float]]:
     return out[-n:]
 
 
-def _sum_institutional_net(rows: list[list[Any]], name_filter: str | None) -> float:
-    total = 0.0
-    for row in rows:
-        if len(row) < 5:
-            continue
-        name = str(row[0]).strip()
-        if name_filter and name_filter not in name:
-            continue
-        buy = _parse_num(row[2])
-        sell = _parse_num(row[3])
-        total += buy - sell
-    return total
+def _row_net_amount(row: list[Any]) -> float:
+    """BFI82U 欄位：名稱, 買進, 賣出, 買賣差額（元）。"""
+    if len(row) >= 4:
+        net = _parse_num(row[3])
+        if net != 0.0:
+            return net
+    if len(row) >= 3:
+        return _parse_num(row[1]) - _parse_num(row[2])
+    return 0.0
 
 
-def _fetch_institutional_day(date_yyyymmdd: str) -> dict[str, float]:
-    payload = _fetch_twse(
+def _fetch_institutional_day(date_yyyymmdd: str) -> dict[str, float] | None:
+    payload = _fetch_twse_on_date(
         "https://www.twse.com.tw/fund/BFI82U", date_yyyymmdd
     )
+    if not payload:
+        return None
     rows = _table_rows(payload)
-    foreign = _sum_institutional_net(rows, "外陸資")
-    if foreign == 0:
-        foreign = _sum_institutional_net(rows, "外資")
-    trust = _sum_institutional_net(rows, "投信")
-    dealer = _sum_institutional_net(rows, "自營")
+    foreign = trust = dealer = 0.0
+    for row in rows:
+        name = str(row[0]).strip()
+        if not name or "合計" in name:
+            continue
+        net = _row_net_amount(row)
+        if "外資及陸資" in name or "外陸資" in name:
+            foreign += net
+        elif name == "投信":
+            trust = net
+        elif "自營商" in name:
+            dealer += net
     three = foreign + trust + dealer
     return {
         "foreign": foreign,
@@ -142,26 +170,24 @@ def _fetch_institutional_day(date_yyyymmdd: str) -> dict[str, float]:
     }
 
 
-def _fetch_margin_day(date_yyyymmdd: str) -> dict[str, float]:
-    payload = _fetch_twse(
+def _fetch_margin_day(date_yyyymmdd: str) -> dict[str, float] | None:
+    payload = _fetch_twse_on_date(
         "https://www.twse.com.tw/exchangeReport/MI_MARGN", date_yyyymmdd
     )
+    if not payload:
+        return None
     rows = _table_rows(payload)
     margin_bal = 0.0
     short_bal = 0.0
     for row in rows:
-        if len(row) < 5:
+        if len(row) < 6:
             continue
         name = str(row[0]).strip()
-        if "融資" in name and "融券" not in name:
-            margin_bal = _parse_num(row[4]) if len(row) > 4 else _parse_num(row[-1])
-        if "融券" in name and "餘額" in name:
-            short_bal = _parse_num(row[4]) if len(row) > 4 else _parse_num(row[-1])
-    if margin_bal == 0 and rows:
-        for row in rows:
-            if len(row) >= 5 and "融資" in str(row[0]):
-                margin_bal = _parse_num(row[4])
-                break
+        today = _parse_num(row[5])
+        if "融資金額" in name:
+            margin_bal = today * 1000.0
+        elif name.startswith("融券") and "交易單位" in name:
+            short_bal = today
     return {"margin_balance": margin_bal, "short_balance": short_bal}
 
 
@@ -255,10 +281,14 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
 
     inst_days: list[dict[str, float]] = []
     d = end
-    for _ in range(25):
+    tries = 0
+    while len(inst_days) < 20 and tries < 50:
         ymd = d.strftime("%Y%m%d")
-        inst_days.append(_fetch_institutional_day(ymd))
+        day = _fetch_institutional_day(ymd)
+        if day is not None:
+            inst_days.append(day)
         d -= timedelta(days=1)
+        tries += 1
     inst_days = list(reversed(inst_days))
 
     foreign_daily = [x["foreign"] for x in inst_days]
@@ -283,9 +313,14 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
 
     margin_series: list[dict[str, float]] = []
     d = end
-    for _ in range(10):
-        margin_series.append(_fetch_margin_day(d.strftime("%Y%m%d")))
+    tries = 0
+    while len(margin_series) < 6 and tries < 30:
+        ymd = d.strftime("%Y%m%d")
+        mday = _fetch_margin_day(ymd)
+        if mday is not None and mday["margin_balance"] > 0:
+            margin_series.append(mday)
         d -= timedelta(days=1)
+        tries += 1
     margin_series = list(reversed(margin_series))
     margin_bal = margin_series[-1]["margin_balance"] if margin_series else 0.0
     margin_5d_ago = margin_series[-6]["margin_balance"] if len(margin_series) >= 6 else margin_bal
@@ -339,6 +374,88 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
     }
 
 
+def _trade_date_from_whale(data: dict[str, Any]) -> str:
+    probe = str(data.get("probe_date") or "").strip()
+    if probe and len(probe) >= 10:
+        return probe[:10]
+    lu = str(data.get("last_update") or "").strip()
+    if lu and len(lu) >= 10:
+        return lu[:10].replace("/", "-")
+    return datetime.now().strftime("%Y-%m-%d")
+
+
+def append_signal_history() -> int:
+    """從 data/*_whale_track.json 追加當日 action_signal / close_last（歷史回測前置）。"""
+    pattern = list((ROOT / "data").glob("*_whale_track.json"))
+    if not pattern:
+        print("[WARN] no whale_track json; skip signal_history")
+        return 0
+
+    if HISTORY_PATH.is_file():
+        try:
+            with open(HISTORY_PATH, encoding="utf-8") as f:
+                store = json.load(f)
+        except Exception:
+            store = {}
+    else:
+        store = {}
+    records: list[dict[str, Any]] = list(store.get("records") or [])
+    index = {
+        (str(r.get("trade_date")), str(r.get("stock_id"))): i
+        for i, r in enumerate(records)
+        if r.get("trade_date") and r.get("stock_id")
+    }
+    now_s = datetime.now().strftime("%Y-%m-%d %H:%M")
+    added = updated = 0
+
+    for path in sorted(pattern):
+        sid = path.name.replace("_whale_track.json", "")
+        if not sid.isdigit():
+            continue
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception as exc:
+            print(f"[WARN] skip {path.name}: {exc}")
+            continue
+        hl = data.get("headline") or {}
+        enh = data.get("enhanced") or data.get("signals", {}).get("enhanced") or {}
+        if not isinstance(enh, dict):
+            enh = {}
+        close_last = enh.get("close_last")
+        if close_last is None:
+            sig = data.get("signals") or {}
+            if isinstance(sig, dict):
+                e2 = sig.get("enhanced") or {}
+                if isinstance(e2, dict):
+                    close_last = e2.get("close_last")
+        entry = {
+            "trade_date": _trade_date_from_whale(data),
+            "stock_id": sid,
+            "stock_name": data.get("stock_name") or sid,
+            "action_signal": hl.get("action_signal") or "NEUTRAL",
+            "close_last": float(close_last) if close_last is not None else None,
+            "confidence": hl.get("confidence"),
+            "logged_at": now_s,
+        }
+        key = (entry["trade_date"], sid)
+        if key in index:
+            records[index[key]] = entry
+            updated += 1
+        else:
+            index[key] = len(records)
+            records.append(entry)
+            added += 1
+
+    store["updated"] = now_s
+    store["records"] = records
+    HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+        json.dump(store, f, ensure_ascii=False, indent=2)
+    print(f"[OK] wrote {HISTORY_PATH} (+{added} new, {updated} updated, total {len(records)})")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate data/market_context.json")
     parser.add_argument(
@@ -349,6 +466,11 @@ def main() -> int:
         "--keep-on-fail",
         action="store_true",
         help="TWSE 失敗時保留既有 market_context.json（若存在）",
+    )
+    parser.add_argument(
+        "--no-history",
+        action="store_true",
+        help="不更新 data/signal_history.json",
     )
     args = parser.parse_args()
     as_of = None
@@ -368,7 +490,18 @@ def main() -> int:
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(ctx, f, ensure_ascii=False, indent=2)
     print(f"[OK] wrote {OUT_PATH}")
-    print(f"     market_state={ctx['market_state']} | {ctx['market_state_reason']}")
+    inst = ctx.get("institutional") or {}
+    margin = ctx.get("margin") or {}
+    print(
+        f"     market_state={ctx['market_state']} | {ctx['market_state_reason']}"
+    )
+    print(
+        f"     外資1d={inst.get('foreign_net_1d', 0)/1e8:.1f}億 "
+        f"外資5d={inst.get('foreign_net_5d', 0)/1e8:.1f}億 "
+        f"融資餘額={margin.get('margin_balance', 0)/1e8:.0f}億"
+    )
+    if not args.no_history:
+        append_signal_history()
     return 0
 
 

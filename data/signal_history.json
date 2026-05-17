@@ -1,0 +1,41 @@
+{
+  "updated": "2026-05-16 18:31",
+  "records": [
+    {
+      "trade_date": "2026-05-14",
+      "stock_id": "2454",
+      "stock_name": "聯發科",
+      "action_signal": "HOLD_WATCH",
+      "close_last": 3405.0,
+      "confidence": 40,
+      "logged_at": "2026-05-16 18:31"
+    },
+    {
+      "trade_date": "2026-05-14",
+      "stock_id": "2486",
+      "stock_name": "一詮",
+      "action_signal": "EXIT_ALERT",
+      "close_last": 259.0,
+      "confidence": 26,
+      "logged_at": "2026-05-16 18:31"
+    },
+    {
+      "trade_date": "2026-05-14",
+      "stock_id": "3035",
+      "stock_name": "智原",
+      "action_signal": "HOLD_WATCH",
+      "close_last": 198.5,
+      "confidence": 49,
+      "logged_at": "2026-05-16 18:31"
+    },
+    {
+      "trade_date": "2026-05-13",
+      "stock_id": "6239",
+      "stock_name": "力成",
+      "action_signal": "EXIT_ALERT",
+      "close_last": 232.0,
+      "confidence": 38,
+      "logged_at": "2026-05-16 18:31"
+    }
+  ]
+}

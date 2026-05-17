@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-15 22:11",
+  "updated": "2026-05-16 18:31",
   "taiex": {
     "close": 41172.36,
     "change": -579.39,
@@ -33,23 +33,23 @@
     "as_of_date": "115/05/15"
   },
   "institutional": {
-    "foreign_net_1d": 0.0,
-    "foreign_net_5d": 0.0,
-    "foreign_net_20d": 0.0,
-    "foreign_streak_sell": 0,
-    "trust_net_1d": 0.0,
-    "trust_net_5d": 0.0,
-    "trust_net_20d": 0.0,
-    "dealer_net_1d": 0.0,
-    "three_net_1d": 0.0,
-    "three_net_5d": 0.0,
-    "foreign_momentum": "NEUTRAL_NEUTRAL"
+    "foreign_net_1d": -10426586381.0,
+    "foreign_net_5d": -10426586381.0,
+    "foreign_net_20d": -10426586381.0,
+    "foreign_streak_sell": 1,
+    "trust_net_1d": -1367237707.0,
+    "trust_net_5d": -1367237707.0,
+    "trust_net_20d": -1367237707.0,
+    "dealer_net_1d": -24943483026.0,
+    "three_net_1d": -36737307114.0,
+    "three_net_5d": -36737307114.0,
+    "foreign_momentum": "SELL_ACCELERATING"
   },
   "margin": {
-    "margin_balance": 0.0,
-    "margin_balance_change_5d_pct": 0.0,
-    "short_balance": 0.0,
-    "short_balance_change_5d_pct": 0.0
+    "margin_balance": 492797137000.0,
+    "margin_balance_change_5d_pct": 3.27,
+    "short_balance": 231677.0,
+    "short_balance_change_5d_pct": 12.99
   },
   "market_state": "CAUTIOUS",
   "market_state_reason": "市場偏多但有分歧訊號，留意風險"
