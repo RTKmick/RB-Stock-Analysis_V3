@@ -27,6 +27,68 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 OUT_PATH = ROOT / "data" / "market_context.json"
+INST_HISTORY_PATH = ROOT / "data" / "inst_daily_history.json"
+MAX_INST_HISTORY_ROWS = 120
+
+
+def _load_inst_daily_history() -> list[dict[str, Any]]:
+    if not INST_HISTORY_PATH.is_file():
+        return []
+    try:
+        raw = json.loads(INST_HISTORY_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    if isinstance(raw, list):
+        return [x for x in raw if isinstance(x, dict)]
+    return []
+
+
+def _save_inst_daily_history(rows: list[dict[str, Any]]) -> None:
+    by_date: dict[str, dict[str, Any]] = {}
+    for r in rows:
+        d = str(r.get("date", "")).strip()
+        if len(d) != 8 or not d.isdigit():
+            continue
+        by_date[d] = {
+            "date": d,
+            "foreign": float(r.get("foreign", 0) or 0),
+            "trust": float(r.get("trust", 0) or 0),
+            "dealer": float(r.get("dealer", 0) or 0),
+            "three": float(r.get("three", 0) or 0),
+        }
+    merged = sorted(by_date.values(), key=lambda x: x["date"])[-MAX_INST_HISTORY_ROWS:]
+    INST_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    INST_HISTORY_PATH.write_text(
+        json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
+def _merge_inst_daily_history(
+    fetched_days: list[tuple[str, dict[str, float]]],
+) -> list[dict[str, Any]]:
+    """合併本次抓到的多日法人資料至 inst_daily_history，回傳排序後完整序列。"""
+    by_date: dict[str, dict[str, Any]] = {}
+    for r in _load_inst_daily_history():
+        d = str(r.get("date", "")).strip()
+        if len(d) == 8 and d.isdigit():
+            by_date[d] = {
+                "date": d,
+                "foreign": float(r.get("foreign", 0) or 0),
+                "trust": float(r.get("trust", 0) or 0),
+                "dealer": float(r.get("dealer", 0) or 0),
+                "three": float(r.get("three", 0) or 0),
+            }
+    for ymd, day in fetched_days:
+        by_date[ymd] = {
+            "date": ymd,
+            "foreign": float(day["foreign"]),
+            "trust": float(day["trust"]),
+            "dealer": float(day["dealer"]),
+            "three": float(day["three"]),
+        }
+    merged = sorted(by_date.values(), key=lambda x: x["date"])
+    _save_inst_daily_history(merged)
+    return merged
 
 
 def _fetch_twse(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
@@ -278,27 +340,30 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
     trend_20d = ((close - close_20d) / close_20d * 100.0) if close_20d else 0.0
     series_20d = closes[-20:]
 
-    inst_days: list[dict[str, float]] = []
+    fetched_rows: list[tuple[str, dict[str, float]]] = []
     d = end
     tries = 0
-    while len(inst_days) < 20 and tries < 50:
+    while len(fetched_rows) < 20 and tries < 50:
         ymd = d.strftime("%Y%m%d")
         day = _fetch_institutional_day(ymd)
         if day is not None:
-            inst_days.append(day)
+            fetched_rows.append((ymd, day))
         d -= timedelta(days=1)
         tries += 1
-    inst_days = list(reversed(inst_days))
+    fetched_rows = list(reversed(fetched_rows))
 
-    foreign_daily = [x["foreign"] for x in inst_days]
-    trust_daily = [x["trust"] for x in inst_days]
-    dealer_daily = [x["dealer"] for x in inst_days]
-    three_daily = [x["three"] for x in inst_days]
+    merged_hist = _merge_inst_daily_history(fetched_rows)
+
+    foreign_daily = [float(x["foreign"]) for x in merged_hist]
+    trust_daily = [float(x["trust"]) for x in merged_hist]
+    dealer_daily = [float(x["dealer"]) for x in merged_hist]
+    three_daily = [float(x["three"]) for x in merged_hist]
 
     def _sum_last(arr: list[float], n: int) -> float:
         if not arr:
             return 0.0
-        return float(sum(arr[-n:]))
+        take = min(n, len(arr))
+        return float(sum(arr[-take:]))
 
     foreign_1d = foreign_daily[-1] if foreign_daily else 0.0
     foreign_5d = _sum_last(foreign_daily, 5)
@@ -309,6 +374,7 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
     dealer_1d = dealer_daily[-1] if dealer_daily else 0.0
     three_1d = three_daily[-1] if three_daily else 0.0
     three_5d = _sum_last(three_daily, 5)
+    three_20d = _sum_last(three_daily, 20)
 
     margin_series: list[dict[str, float]] = []
     d = end
@@ -343,6 +409,7 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
         "dealer_net_1d": dealer_1d,
         "three_net_1d": three_1d,
         "three_net_5d": three_5d,
+        "three_net_20d": three_20d,
         "foreign_momentum": _foreign_momentum_label(foreign_5d, foreign_20d),
     }
     margin = {

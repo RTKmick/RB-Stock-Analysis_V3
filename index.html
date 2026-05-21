@@ -107,6 +107,10 @@
     .bt-neutral { background: #1f2937; color: #9ca3af; border: 1px solid #374151; }
     .bt-bad   { background: #2d0a0a; color: #ef4444; border: 1px solid #7f1d1d; }
     .bt-nodata { background: #1a1a1a; color: #6b7280; font-style: italic; }
+    .metric-tip {
+      cursor: help;
+      border-bottom: 1px dotted #6b7280;
+    }
   </style>
 </head>
 <body>
@@ -319,8 +323,14 @@
   function resolveDefaultStockId(stocks){
     if (!stocks || !stocks.length) return '';
     var ids = stocks.map(function(s){ return String(s.id); });
+    var qStock = '';
+    try {
+      qStock = new URLSearchParams(window.location.search).get('stock') || '';
+    } catch (e) { qStock = ''; }
+    qStock = String(qStock).trim();
+    if (qStock && ids.indexOf(qStock) >= 0) return qStock;
     if (ids.indexOf(DEFAULT_STOCK) >= 0) return DEFAULT_STOCK;
-    return stocks[0].id;
+    return String(stocks[0].id);
   }
   function escapeHtml(s){
     if (s == null || s === undefined) return '';
@@ -329,6 +339,29 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+  function tipAttr(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+  function tip(label, explanation) {
+    return '<span class="metric-tip" data-bs-toggle="tooltip" data-bs-placement="top" title="' +
+      tipAttr(explanation) + '">' + escapeHtml(label) + '</span>';
+  }
+  function initBootstrapTooltips() {
+    if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+    setTimeout(function() {
+      [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]')).forEach(function(el) {
+        var existing = bootstrap.Tooltip.getInstance(el);
+        if (existing) existing.dispose();
+        try {
+          new bootstrap.Tooltip(el, { trigger: 'hover' });
+        } catch (e) {}
+      });
+    }, 100);
   }
   function normText(s){
     return String(s || '').trim().toLowerCase();
@@ -741,12 +774,12 @@
     html += '<div class="mt-2" style="font-size:0.8rem; color:#9ca3af;">小提示：外/本分歧只是警示燈，真正判斷「吃貨或倒貨」請同時看主力成本帶（收盤在成本區上/中/下）、Top 6 波段分數站在哪一邊，以及 5日/10日/20日 NetBuy 的變化。</div>';
     html += '</div>';
 
-    html += '<div class="row mb-4"><div class="col-md-4"><div class="metric-card"><div class="metric-label">20日集中度 (%)</div><div class="metric-value">' + c20 + '%</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">5日集中度 (%)</div><div class="metric-value">' + c5 + '%</div></div></div>';
+    html += '<div class="row mb-4"><div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('20日集中度 (%)', '前 15 大分點佔總成交量的比例。越高=少數大戶主導，越低=散戶為主。') + '</div><div class="metric-value">' + c20 + '%</div></div></div>';
+    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('5日集中度 (%)', '前 15 大分點佔總成交量的比例。越高=少數大戶主導，越低=散戶為主。') + '</div><div class="metric-value">' + c5 + '%</div></div></div>';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">主力走向</div><div class="metric-value" style="font-size:1.15rem;">' + trend + '</div></div></div></div>';
 
-    html += '<div class="row mb-4"><div class="col-md-4"><div class="metric-card"><div class="metric-label">地緣評分</div><div class="metric-value">' + geo + '</div><div class="metric-label mt-1">' + geoTagZh(sig.geo_tag || '') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">前五分點距離加權均值(KM)</div><div class="metric-value">' + (sig.geo_top5_wavg_km != null ? sig.geo_top5_wavg_km : '-') + '</div><div class="metric-label mt-1">Z 分數：' + (sig.geo_zscore != null ? sig.geo_zscore : '-') + ' ｜ 親近度：' + (sig.geo_affinity_score != null ? sig.geo_affinity_score : '-') + '</div></div></div>';
+    html += '<div class="row mb-4"><div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('地緣評分', '買方分點地理集中度。分數越高代表買方分點越集中在同一區域，可能有協同操作。') + '</div><div class="metric-value">' + geo + '</div><div class="metric-label mt-1">' + geoTagZh(sig.geo_tag || '') + '</div></div></div>';
+    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('前五分點距離加權均值(KM)', '買超前五大分點到總部的平均距離(公里)。距離越近可能代表內部人交易。') + '</div><div class="metric-value">' + (sig.geo_top5_wavg_km != null ? sig.geo_top5_wavg_km : '-') + '</div><div class="metric-label mt-1">' + tip('Z 分數', '買方分點距離的標準化偏差。正值=比基準更分散，負值=比基準更集中。') + '：' + (sig.geo_zscore != null ? sig.geo_zscore : '-') + ' ｜ ' + tip('親近度', '買方分點與公司總部的地理位置親近程度（地緣維度）。') + '：' + (sig.geo_affinity_score != null ? sig.geo_affinity_score : '-') + '</div></div></div>';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">基準／權重／調整</div><div class="metric-value" style="font-size:1rem;">' + baselineTagZh(sig.geo_baseline_tag) + '</div><div class="metric-label mt-1">權重＝' + (sig.geo_baseline_weight != null ? sig.geo_baseline_weight : '-') + ' ｜ 調整值＝' + (sig.geo_adjust != null ? sig.geo_adjust : '-') + '</div></div></div></div>';
 
     var g5 = sig.geo_top5_detail || [];
@@ -755,7 +788,7 @@
     var czStatus = ez.cost_zone_status || '';
     if (czStatus) {
       var czZh = czStatus === 'above_zone' ? '強勢突破' : (czStatus === 'inside_zone' ? '成本區洗盤' : '破位警戒');
-      html += '<h6 class="text-info-dash mt-3 mb-2">🏷 主力成本帶</h6><div class="cost-zone-container">';
+      html += '<h6 class="text-info-dash mt-3 mb-2">🏷 ' + tip('主力成本帶', '估算大戶近期的平均持倉成本區間。現價在帶內=大戶持平，在帶上方=大戶獲利。') + '</h6><div class="cost-zone-container">';
       html += '<span class="tag-pill">' + czZh + '</span>';
       html += '<span class="tag-pill">20日觸及次數: ' + (ez.cz_touch_20d != null ? ez.cz_touch_20d : '-') + '</span>';
       html += '<span class="tag-pill">突破次數: ' + (ez.cz_break_up_20d != null ? ez.cz_break_up_20d : '-') + '</span>';
@@ -787,13 +820,20 @@
     var tvColorMap = { weak:'#9ca3af', watch:'#eab308', strong:'#22c55e' };
     var tvZh = tvGradeMap[tvGrade] || tvGrade;
     var tvColor = tvColorMap[tvGrade] || '#9ca3af';
-    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">TV 綜合得分</div><div class="metric-value" style="color:' + tvColor + ';">' + tvScore + '</div><div class="metric-label" style="color:' + tvColor + ';">' + tvZh + '</div></div></div>';
+    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">' + tip('TV 綜合得分', 'TradingView 五大結構訊號的綜合分數。0=無結構訊號，越高=技術面越強。') + '</div><div class="metric-value" style="color:' + tvColor + ';">' + tvScore + '</div><div class="metric-label" style="color:' + tvColor + ';">' + tvZh + '</div></div></div>';
     html += '<div class="col-md-9"><div class="metric-card" style="text-align:left;"><div class="metric-label mb-2">五大價格訊號</div><div class="d-flex flex-wrap gap-2">';
-    var tvNames = {sig_vwap:'均價偏離',sig_accumulation:'吸籌訊號',sig_rotation:'換手/輪動',sig_profile_zone:'價量重心',sig_structure_break:'結構突破'};
+    var tvNames = {sig_vwap:'均價偏離（VWAP）',sig_accumulation:'吸籌訊號',sig_rotation:'換手/輪動',sig_profile_zone:'價量重心',sig_structure_break:'結構突破'};
+    var tvTips = {
+      sig_vwap: '成交量加權平均價。主力常以 VWAP 作為當日操作的基準價格。',
+      sig_accumulation: '吸籌／累積相關結構訊號，搭配量價與籌碼觀察。',
+      sig_rotation: '換手或輪動結構訊號，反映資金在族群間移動。',
+      sig_profile_zone: '價量重心區間訊號，用於判斷多空平衡位置。',
+      sig_structure_break: '結構突破訊號，代表價格型態出現方向性變化。'
+    };
     ['sig_vwap','sig_accumulation','sig_rotation','sig_profile_zone','sig_structure_break'].forEach(function(k){
       var v = sig[k] != null ? sig[k] : 0;
       var on = v ? '啟動' : '未觸發';
-      html += '<span class="tag-pill">' + tvNames[k] + '：<b style="color:' + (v?'#2ecc71':'#666') + '">' + on + '</b></span>';
+      html += '<span class="tag-pill">' + tip(tvNames[k], tvTips[k]) + '：<b style="color:' + (v?'#2ecc71':'#666') + '">' + on + '</b></span>';
     });
     html += '</div></div></div></div>';
 
@@ -831,7 +871,7 @@
     html += '<div class="metric-label mt-1">融資壓力: ' + (marginFlag>0 ? '偏高' : '正常') + ' | 借券壓力: ' + (sblFlag>0 ? '放大' : '正常') + '</div>';
     html += '</div></div>';
     html += '<div class="col-md-6"><div class="metric-card" style="text-align:left;">';
-    html += '<div class="metric-label">三大法人 × 融資 × 借券 狀態</div>';
+    html += '<div class="metric-label">' + tip('三大法人 × 融資 × 借券 狀態（Regime）', '市場型態判斷：趨勢(trend)、盤整(range)、轉換中(transition)。此卡片為法人＋融資＋借券合成的偏多／偏空情境。') + '</div>';
     html += '<div class="metric-value" style="font-size:1.25rem;color:' + regimeColor + ';">' + regimeTag + '</div>';
     html += '<div class="metric-label mt-1">條件1: inst_three_net_20d>0 且 融資/借券壓力正常 → 偏多 regime</div>';
     html += '<div class="metric-label">條件2: inst_three_net_20d<0 且 借券壓力放大 → 偏空+空軍壓力 regime</div>';
@@ -849,8 +889,8 @@
     var pr20 = sig.pressure_ratio_20d != null ? sig.pressure_ratio_20d.toFixed(3) : '-';
     html += '<div class="row mb-4 g-3"><div class="col-md-3"><div class="metric-card"><div class="metric-label">Top15 買方穩定度(10D)</div><div class="metric-value">' + st10 + '</div></div></div>';
     html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">Top15 買方穩定度(20D)</div><div class="metric-value">' + st20 + '</div></div></div>';
-    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">壓力比(5D)</div><div class="metric-value">' + pr5 + '</div><div class="metric-label">' + (sig.pressure_ratio_5d != null ? (sig.pressure_ratio_5d >= 0.55 ? '買方主導' : (sig.pressure_ratio_5d <= 0.45 ? '賣方主導' : '拉扯')) : '') + '</div></div></div>';
-    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">壓力比(20D)</div><div class="metric-value">' + pr20 + '</div><div class="metric-label">' + (sig.pressure_ratio_20d != null ? (sig.pressure_ratio_20d >= 0.55 ? '買方主導' : (sig.pressure_ratio_20d <= 0.45 ? '賣方主導' : '拉扯')) : '') + '</div></div></div></div>';
+    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">' + tip('壓力比(5D)', '買方前 15 大佔買賣合計的比例。>0.5=買壓較大，<0.5=賣壓較大。') + '</div><div class="metric-value">' + pr5 + '</div><div class="metric-label">' + (sig.pressure_ratio_5d != null ? (sig.pressure_ratio_5d >= 0.55 ? '買方主導' : (sig.pressure_ratio_5d <= 0.45 ? '賣方主導' : '拉扯')) : '') + '</div></div></div>';
+    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">' + tip('壓力比(20D)', '買方前 15 大佔買賣合計的比例。>0.5=買壓較大，<0.5=賣壓較大。') + '</div><div class="metric-value">' + pr20 + '</div><div class="metric-label">' + (sig.pressure_ratio_20d != null ? (sig.pressure_ratio_20d >= 0.55 ? '買方主導' : (sig.pressure_ratio_20d <= 0.45 ? '賣方主導' : '拉扯')) : '') + '</div></div></div></div>';
 
     html += '<div class="row mb-4 g-3"><div class="col-md-4"><div class="metric-card"><div class="metric-label">20日 Top15 主力差(張)</div><div class="metric-value">' + (sig.delta_major_flow_20 != null ? sig.delta_major_flow_20 : '-') + '</div><div class="metric-label">買: ' + (sig.top15_buy_sum_20 != null ? sig.top15_buy_sum_20 : '-') + ' | 賣: ' + (sig.top15_sell_sum_20 != null ? sig.top15_sell_sum_20 : '-') + '</div></div></div></div>';
 
@@ -861,23 +901,33 @@
     html += '<h6 class="text-info-dash mt-4 mb-2">✅ 交易有效性 / 🛡 風控</h6><div class="row mb-4 g-3">';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">突破成立</div><div class="metric-value" style="color:' + (val.breakout_flag===1?'#2ecc71':'#999') + '">' + (val.breakout_flag===1?'通過':'未通過') + '</div></div></div>';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">背離警示</div><div class="metric-value" style="color:' + (val.divergence_flag===1?'#f1c40f':'#2ecc71') + '">' + (val.divergence_flag===1?'有背離':'正常') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">確認分數</div><div class="metric-value">' + (val.confirmation_score != null ? val.confirmation_score : '-') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">20日波動率 (ATR%)</div><div class="metric-value">' + (risk.atr_pct_20d != null ? (risk.atr_pct_20d*100).toFixed(2) + '%' : '-') + '</div></div></div>';
+    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('確認分數', '量價配合度。越高代表技術面與籌碼面方向一致，訊號越可信。') + '</div><div class="metric-value">' + (val.confirmation_score != null ? val.confirmation_score : '-') + '</div></div></div>';
+    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('20日波動率 (ATR%)', '近 20 日平均真實波幅佔價格的比例。越高=波動越大，風險越高。') + '</div><div class="metric-value">' + (risk.atr_pct_20d != null ? (risk.atr_pct_20d*100).toFixed(2) + '%' : '-') + '</div></div></div>';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">成交動能(20D億)</div><div class="metric-value">' + (risk.avg_turnover_20d != null ? (risk.avg_turnover_20d/1e8).toFixed(2) : '-') + '</div></div></div>';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">失效條件</div><div class="metric-value" style="color:' + (risk.invalid_flag===1?'#e74c3c':'#2ecc71') + '">' + (risk.invalid_flag===1?'已觸發':'安全') + '</div></div></div></div>';
 
     var dr = (sig.dist_risk_flag || 0) ? 1 : 0;
-    html += '<div class="row mb-4"><div class="col-md-6"><div class="metric-card" style="text-align:left;"><div class="metric-label">🧨 分佈風險 (Distribution Risk)</div><div class="metric-value" style="font-size:1.2rem; color:' + (dr?'#e74c3c':'#2ecc71') + '">' + (dr?'風險偏高':'風險正常') + '</div><div class="metric-label">' + (sig.dist_risk_tag || '') + '</div></div></div></div>';
+    var hhiBuy = sig.buy_hhi_20d;
+    var entBuy = sig.buy_entropy_20d;
+    var hhiSell = sig.sell_hhi_20d;
+    var entSell = sig.sell_entropy_20d;
+    var hhiTxt = (hhiBuy != null || entBuy != null)
+      ? ('買方 HHI ' + (hhiBuy != null ? hhiBuy : '-') + ' ／ 熵 ' + (entBuy != null ? entBuy : '-') +
+         ' ｜ 賣方 HHI ' + (hhiSell != null ? hhiSell : '-') + ' ／ 熵 ' + (entSell != null ? entSell : '-'))
+      : '';
+    html += '<div class="row mb-4"><div class="col-md-6"><div class="metric-card" style="text-align:left;"><div class="metric-label">' + tip('🧨 分佈風險 (Distribution Risk)', '赫芬達爾指數(HHI)衡量集中度，熵值衡量分散度。HHI 高+熵低=少數大戶壟斷。') + '</div><div class="metric-value" style="font-size:1.2rem; color:' + (dr?'#e74c3c':'#2ecc71') + '">' + (dr?'風險偏高':'風險正常') + '</div><div class="metric-label">' + (sig.dist_risk_tag || '') + '</div>';
+    if (hhiTxt) html += '<div class="metric-label mt-2" style="font-size:0.78rem;color:#9ca3af;">' + tip('HHI／熵值（20日）', '赫芬達爾指數(HHI)衡量集中度，熵值衡量分散度。HHI 高+熵低=少數大戶壟斷。') + '：' + escapeHtml(hhiTxt) + '</div>';
+    html += '</div></div></div>';
 
     html += '<div class="row mb-4 g-3"><div class="col-md-3"><div class="metric-card"><div class="metric-label">20日買超家數</div><div class="metric-value">' + (sig.buy_count_20d != null ? sig.buy_count_20d : '-') + '</div></div></div>';
     html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">20日賣超家數</div><div class="metric-value">' + (sig.sell_count_20d != null ? sig.sell_count_20d : '-') + '</div></div></div>';
     html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">5日買超家數</div><div class="metric-value">' + (sig.buy_count_5d != null ? sig.buy_count_5d : '-') + '</div></div></div>';
     html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">5日賣超家數</div><div class="metric-value">' + (sig.sell_count_5d != null ? sig.sell_count_5d : '-') + '</div></div></div></div>';
 
-    html += '<h6 class="text-info-dash mt-3 mb-2">📉 廣度趨勢</h6><div class="chart-container-mini"><canvas id="breadthCanvas"></canvas></div>';
+    html += '<h6 class="text-info-dash mt-3 mb-2">' + tip('📉 廣度趨勢', '買方分點數 vs 賣方分點數的變化。正值=買盤擴散，負值=賣壓擴散。') + '</h6><div class="chart-container-mini"><canvas id="breadthCanvas"></canvas></div>';
 
     html += '<h6 class="text-info-dash mt-3 mb-2">👥 主力群聚連貫性 (Coherence)</h6><div class="row g-3 mb-4"><div class="col-md-8"><div class="chart-container-mini" style="height:220px;"><canvas id="coherenceCanvas"></canvas></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">本日連貫性</div><div class="metric-value">' + (ez.coherence_today != null ? ez.coherence_today : '-') + '</div></div>';
+    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('本日連貫性', '主力買賣行為的一致程度。>1.0 代表主力集中且有方向性，<1.0 代表分散或觀望。') + '</div><div class="metric-value">' + (ez.coherence_today != null ? ez.coherence_today : '-') + '</div></div>';
     html += '<div class="metric-card mt-2"><div class="metric-label">斜率 (5日)</div><div class="metric-value">' + (ez.coherence_slope_5d != null ? ez.coherence_slope_5d : '-') + '</div></div>';
     html += '<div class="metric-card mt-2"><div class="metric-label">持久性 (20日)</div><div class="metric-value">' + (ez.coherence_persistence_20d != null ? (ez.coherence_persistence_20d*100).toFixed(1) + '%' : '-') + '</div></div></div></div>';
 
@@ -900,7 +950,7 @@
     html += '<h6 class="text-info-dash mt-4 mb-2">📈 Top 6 核心大戶：近十日買賣超累計軌跡(張)</h6><div class="chart-container"><canvas id="whaleChartCanvas"></canvas></div>';
 
     html += '<h6 class="text-warning mt-4">Top 6 大戶（綜合總覽）</h6><div class="card shadow-lg"><div class="card-body"><div class="table-responsive"><table class="table table-dark table-hover border-secondary"><thead><tr>';
-    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">波段分數</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th></tr></thead><tbody>';
+    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">' + tip('波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th></tr></thead><tbody>';
     if (top6.length === 0) html += '<tr><td colspan="8" class="text-center text-muted">暫無大戶數據</td></tr>';
     else top6.forEach(function(b){
       const c = b.color || colorMap[b.broker_name] || '#888';
@@ -929,8 +979,8 @@
     html += '<h6 class="card-title text-white mb-2">券商原型 — Top 6 波段主力概況</h6>';
     html += '<p class="dashboard-subtitle">根據 Top 6 近 10 日淨買超與連買 / 連賣，估計每家券商的「波段主力」傾向，並彙總成整體分數。</p>';
     html += '<div class="row mb-2 g-3">';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">Top6 平均波段分數</div><div class="metric-value">' + (waveAvg!=null ? waveAvg.toFixed(3) : '-') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">Top6 最高波段分數</div><div class="metric-value">' + (waveMax!=null ? waveMax.toFixed(3) : '-') + '</div></div></div>';
+    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('Top6 平均波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</div><div class="metric-value">' + (waveAvg!=null ? waveAvg.toFixed(3) : '-') + '</div></div></div>';
+    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('Top6 最高波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</div><div class="metric-value">' + (waveMax!=null ? waveMax.toFixed(3) : '-') + '</div></div></div>';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">代表券商</div><div class="metric-value" style="font-size:1.15rem;">' + waveLeader + '</div></div></div>';
     html += '</div>';
     html += '<p class="mt-1 dashboard-subtitle">說明：分數愈高代表愈像「慢慢吃貨、連買不太賣」的波段主力；愈低則可能偏短線或出貨型態。詳細分點資訊請參考上方 Top 6 大戶表格。</p>';
@@ -946,8 +996,8 @@
       aHtml += '<h5 class=\"card-title text-white mb-3\">券商原型 — Top 6 波段主力概況</h5>';
       aHtml += '<p class=\"dashboard-subtitle\">這裡僅保留整體指標：平均波段分數、最高分數與代表券商；各券商細節已整合到分數儀表板中的「Top 6 大戶（綜合總覽）」區塊。</p>';
       aHtml += '<div class=\"row mb-3 g-3 align-items-stretch\">';
-      aHtml += '<div class=\"col-md-4\"><div class=\"metric-card\"><div class=\"metric-label\">Top6 平均波段分數</div><div class=\"metric-value\">' + (waveAvg!=null ? waveAvg.toFixed(3) : '-') + '</div></div></div>';
-      aHtml += '<div class=\"col-md-4\"><div class=\"metric-card\"><div class=\"metric-label\">Top6 最高波段分數</div><div class=\"metric-value\">' + (waveMax!=null ? waveMax.toFixed(3) : '-') + '</div></div></div>';
+      aHtml += '<div class=\"col-md-4\"><div class=\"metric-card\"><div class=\"metric-label\">' + tip('Top6 平均波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</div><div class=\"metric-value\">' + (waveAvg!=null ? waveAvg.toFixed(3) : '-') + '</div></div></div>';
+      aHtml += '<div class=\"col-md-4\"><div class=\"metric-card\"><div class=\"metric-label\">' + tip('Top6 最高波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</div><div class=\"metric-value\">' + (waveMax!=null ? waveMax.toFixed(3) : '-') + '</div></div></div>';
       aHtml += '<div class=\"col-md-4\"><div class=\"metric-card\"><div class=\"metric-label\">代表券商</div><div class=\"metric-value\" style=\"font-size:1.15rem;\">' + waveLeader + '</div></div></div>';
       aHtml += '</div>';
       aHtml += '<p class=\"mt-3 mb-0 dashboard-subtitle\">說明：分數愈高代表愈像「慢慢吃貨、連買不太賣」的波段主力；愈低則可能是短線或偏出貨型態。詳細分點資訊請回到分數儀表板的 Top 6 表格查看。</p>';
@@ -1235,6 +1285,7 @@
         options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { min: 0, max: maxAbs, grid: { color: '#2b2b2b' }, ticks: { color: '#9a9a9a' } }, y: { position: 'right', grid: { display: false }, ticks: { color: '#d0d0d0' } } }, plugins: { legend: { display: false } } }
       });
     }
+    initBootstrapTooltips();
   }
 
   function buildStockInfo(raw){
@@ -1361,7 +1412,7 @@
           if (defaultId){
             sel.value = defaultId;
             updatePhase2Link(defaultId);
-            loadStock(defaultId);
+            sel.dispatchEvent(new Event('change'));
           }
         }
         Promise.all([loadSignalStats(), loadMarketContext()])
@@ -1375,6 +1426,11 @@
   }
 
   loadManifest();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBootstrapTooltips);
+  } else {
+    initBootstrapTooltips();
+  }
   applyVersion();
 
   (function initPhase3(){
