@@ -211,16 +211,21 @@
       .catch(function() { signalStats = null; return null; });
   }
   function getBacktestBadge(actionSignal) {
-    if (!actionSignal || !signalStats || !signalStats.by_signal) return '';
+    if (!actionSignal) return '';
+    var minN = (signalStats && signalStats.min_sample_size) || 10;
+    if (!signalStats || !signalStats.by_signal) {
+      return '<span class="backtest-badge bt-nodata">累積數據中（0/' + minN + '筆）</span>';
+    }
     var s = signalStats.by_signal[actionSignal];
-    if (!s) return '';
+    if (!s) {
+      return '<span class="backtest-badge bt-nodata">累積數據中（0/' + minN + '筆）</span>';
+    }
     var winRate = s.win_rate_10d != null ? s.win_rate_10d : s.win_rate_5d;
     var avgRet  = s.avg_return_10d_pct != null ? s.avg_return_10d_pct : s.avg_return_5d_pct;
     var period  = s.win_rate_10d != null ? '10日' : '5日';
     var sample  = s.win_rate_10d != null ? (s.sample_size_10d || 0) : (s.sample_size_5d || 0);
-    var minN = signalStats.min_sample_size || 10;
     if (winRate == null || sample < minN) {
-      return '<span class="backtest-badge bt-nodata">累積數據中（' + sample + '/' + minN + '筆）</span>';
+      return '<span class="backtest-badge bt-nodata">累積數據中（' + (sample || 0) + '/' + minN + '筆）</span>';
     }
     var cls = winRate >= 0.6 ? 'bt-good' : (winRate <= 0.4 ? 'bt-bad' : 'bt-neutral');
     var pct = (winRate * 100).toFixed(0);
@@ -1359,7 +1364,9 @@
             loadStock(defaultId);
           }
         }
-        loadMarketContext().then(loadDefaultStock).catch(loadDefaultStock);
+        Promise.all([loadSignalStats(), loadMarketContext()])
+          .then(loadDefaultStock)
+          .catch(loadDefaultStock);
       })
       .catch(function(err){
         el('stockSelect').innerHTML = '<option value="">無法載入清單</option>';

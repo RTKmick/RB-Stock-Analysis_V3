@@ -1,7 +1,8 @@
 {
-  "updated": "2026-05-17 11:51",
+  "updated": "2026-05-21 19:30",
   "total_records": 6,
   "total_with_5d_return": 0,
+  "total_with_10d_return": 0,
   "total_with_20d_return": 0,
   "by_signal": {
     "HOLD_WATCH": {

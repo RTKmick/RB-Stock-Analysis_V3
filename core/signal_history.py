@@ -1,4 +1,4 @@
-"""每日訊號記錄、報酬回填、勝率統計（V1.8.0 歷史回測）。"""
+"""每日訊號記錄、報酬回填、勝率統計（對應 StockOC v180_backtest_spec / V1.8.0）。"""
 from __future__ import annotations
 
 import json
@@ -256,7 +256,9 @@ def compute_signal_stats(
             by_signal[str(sig)].append(r)
 
     stats: dict[str, Any] = {}
-    total_with_5d = total_with_20d = 0
+    total_with_5d = sum(1 for r in records if r.get("return_5d_pct") is not None)
+    total_with_10d = sum(1 for r in records if r.get("return_10d_pct") is not None)
+    total_with_20d = sum(1 for r in records if r.get("return_20d_pct") is not None)
     for signal, recs in by_signal.items():
         s: dict[str, Any] = {"count": len(recs)}
         for period in ("5d", "10d", "20d"):
@@ -264,10 +266,6 @@ def compute_signal_stats(
             returns = [float(r[key]) for r in recs if r.get(key) is not None]
             n = len(returns)
             s[f"sample_size_{period}"] = n
-            if period == "5d":
-                total_with_5d += n
-            if period == "20d":
-                total_with_20d += n
             if n >= min_sample:
                 s[f"avg_return_{period}_pct"] = round(sum(returns) / n, 2)
                 wins = sum(1 for x in returns if x > 0)
@@ -281,6 +279,7 @@ def compute_signal_stats(
         "updated": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "total_records": len(records),
         "total_with_5d_return": total_with_5d,
+        "total_with_10d_return": total_with_10d,
         "total_with_20d_return": total_with_20d,
         "by_signal": stats,
         "min_sample_size": min_sample,
