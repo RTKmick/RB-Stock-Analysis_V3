@@ -40,9 +40,9 @@ echo ================================
 echo One-key pipeline for stock(s)
 echo ================================
 set "STOCK_IDS="
-set /p STOCK_IDS=Enter stock id(s) (e.g. 3105 or 2330 2603) ^> 
+set /p STOCK_IDS=Enter stock id(s) or press Enter for all tracked ^> 
 if "%STOCK_IDS%"=="" (
-    set "STOCK_IDS=3105"
+    set "STOCK_IDS=2454 2486 3035 2330 2603 3661 2345 6547"
 )
 
 set "DAYS="
@@ -105,6 +105,10 @@ echo [7/8] Generating market_context.json (TWSE) ...
 if errorlevel 1 (
     echo generate_market_context.py failed. Check TWSE connectivity or use --keep-on-fail with existing JSON.
 )
+
+echo.
+echo [Extra] Telegram daily report ^(optional: set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env^) ...
+"%ROOT%\venv\Scripts\python.exe" send_daily_report.py
 
 echo.
 echo [8/8] Optional: upload changes to GitHub (upl_rb.bat)
