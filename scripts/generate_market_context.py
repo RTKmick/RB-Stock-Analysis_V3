@@ -91,6 +91,55 @@ def _merge_inst_daily_history(
     return merged
 
 
+def compute_institutional_from_history(
+    history_path: Path | None = None,
+) -> dict[str, Any] | None:
+    """從 inst_daily_history.json 讀取並累加 1d／5d／20d（日期最新者為陣列首筆）。"""
+    p = history_path or INST_HISTORY_PATH
+    if p == INST_HISTORY_PATH:
+        rows = _load_inst_daily_history()
+    else:
+        try:
+            raw = json.loads(Path(p).read_text(encoding="utf-8"))
+            rows = [x for x in raw if isinstance(x, dict)] if isinstance(raw, list) else []
+        except Exception:
+            return None
+    if not rows:
+        return None
+
+    hist = sorted(rows, key=lambda x: str(x.get("date", "")), reverse=True)
+
+    def sum_field(field: str, n: int) -> float:
+        n = max(0, min(n, len(hist)))
+        return float(sum(float(r.get(field, 0) or 0) for r in hist[:n]))
+
+    latest = hist[0]
+    streak = 0
+    for r in hist:
+        if float(r.get("foreign", 0) or 0) < 0:
+            streak += 1
+        else:
+            break
+
+    f1 = float(latest.get("foreign", 0) or 0)
+    t1 = float(latest.get("trust", 0) or 0)
+    d1 = float(latest.get("dealer", 0) or 0)
+
+    return {
+        "foreign_net_1d": f1,
+        "foreign_net_5d": sum_field("foreign", 5),
+        "foreign_net_20d": sum_field("foreign", 20),
+        "foreign_streak_sell": streak,
+        "trust_net_1d": t1,
+        "trust_net_5d": sum_field("trust", 5),
+        "trust_net_20d": sum_field("trust", 20),
+        "dealer_net_1d": d1,
+        "three_net_1d": f1 + t1 + d1,
+        "three_net_5d": sum_field("foreign", 5) + sum_field("trust", 5) + sum_field("dealer", 5),
+        "three_net_20d": sum_field("foreign", 20) + sum_field("trust", 20) + sum_field("dealer", 20),
+    }
+
+
 def _fetch_twse(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
     try:
         r = SESSION.get(
@@ -354,27 +403,66 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
 
     merged_hist = _merge_inst_daily_history(fetched_rows)
 
-    foreign_daily = [float(x["foreign"]) for x in merged_hist]
-    trust_daily = [float(x["trust"]) for x in merged_hist]
-    dealer_daily = [float(x["dealer"]) for x in merged_hist]
-    three_daily = [float(x["three"]) for x in merged_hist]
+    inst_from_file = compute_institutional_from_history()
+    if inst_from_file:
+        institutional = {
+            **inst_from_file,
+            "foreign_momentum": _foreign_momentum_label(
+                float(inst_from_file.get("foreign_net_5d") or 0),
+                float(inst_from_file.get("foreign_net_20d") or 0),
+            ),
+        }
+    elif merged_hist:
+        foreign_daily = [float(x["foreign"]) for x in merged_hist]
+        trust_daily = [float(x["trust"]) for x in merged_hist]
+        dealer_daily = [float(x["dealer"]) for x in merged_hist]
+        three_daily = [float(x["three"]) for x in merged_hist]
 
-    def _sum_last(arr: list[float], n: int) -> float:
-        if not arr:
-            return 0.0
-        take = min(n, len(arr))
-        return float(sum(arr[-take:]))
+        def _sum_last(arr: list[float], n: int) -> float:
+            if not arr:
+                return 0.0
+            take = min(n, len(arr))
+            return float(sum(arr[-take:]))
 
-    foreign_1d = foreign_daily[-1] if foreign_daily else 0.0
-    foreign_5d = _sum_last(foreign_daily, 5)
-    foreign_20d = _sum_last(foreign_daily, 20)
-    trust_1d = trust_daily[-1] if trust_daily else 0.0
-    trust_5d = _sum_last(trust_daily, 5)
-    trust_20d = _sum_last(trust_daily, 20)
-    dealer_1d = dealer_daily[-1] if dealer_daily else 0.0
-    three_1d = three_daily[-1] if three_daily else 0.0
-    three_5d = _sum_last(three_daily, 5)
-    three_20d = _sum_last(three_daily, 20)
+        foreign_1d = foreign_daily[-1] if foreign_daily else 0.0
+        foreign_5d = _sum_last(foreign_daily, 5)
+        foreign_20d = _sum_last(foreign_daily, 20)
+        trust_1d = trust_daily[-1] if trust_daily else 0.0
+        trust_5d = _sum_last(trust_daily, 5)
+        trust_20d = _sum_last(trust_daily, 20)
+        dealer_1d = dealer_daily[-1] if dealer_daily else 0.0
+        three_1d = three_daily[-1] if three_daily else 0.0
+        three_5d = _sum_last(three_daily, 5)
+        three_20d = _sum_last(three_daily, 20)
+        institutional = {
+            "foreign_net_1d": foreign_1d,
+            "foreign_net_5d": foreign_5d,
+            "foreign_net_20d": foreign_20d,
+            "foreign_streak_sell": _foreign_streak_sell(foreign_daily),
+            "trust_net_1d": trust_1d,
+            "trust_net_5d": trust_5d,
+            "trust_net_20d": trust_20d,
+            "dealer_net_1d": dealer_1d,
+            "three_net_1d": three_1d,
+            "three_net_5d": three_5d,
+            "three_net_20d": three_20d,
+            "foreign_momentum": _foreign_momentum_label(foreign_5d, foreign_20d),
+        }
+    else:
+        institutional = {
+            "foreign_net_1d": 0.0,
+            "foreign_net_5d": 0.0,
+            "foreign_net_20d": 0.0,
+            "foreign_streak_sell": 0,
+            "trust_net_1d": 0.0,
+            "trust_net_5d": 0.0,
+            "trust_net_20d": 0.0,
+            "dealer_net_1d": 0.0,
+            "three_net_1d": 0.0,
+            "three_net_5d": 0.0,
+            "three_net_20d": 0.0,
+            "foreign_momentum": _foreign_momentum_label(0.0, 0.0),
+        }
 
     margin_series: list[dict[str, float]] = []
     d = end
@@ -398,20 +486,6 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
         ((short_bal - short_5d_ago) / short_5d_ago * 100.0) if short_5d_ago else 0.0
     )
 
-    institutional = {
-        "foreign_net_1d": foreign_1d,
-        "foreign_net_5d": foreign_5d,
-        "foreign_net_20d": foreign_20d,
-        "foreign_streak_sell": _foreign_streak_sell(foreign_daily),
-        "trust_net_1d": trust_1d,
-        "trust_net_5d": trust_5d,
-        "trust_net_20d": trust_20d,
-        "dealer_net_1d": dealer_1d,
-        "three_net_1d": three_1d,
-        "three_net_5d": three_5d,
-        "three_net_20d": three_20d,
-        "foreign_momentum": _foreign_momentum_label(foreign_5d, foreign_20d),
-    }
     margin = {
         "margin_balance": margin_bal,
         "margin_balance_change_5d_pct": round(margin_chg_5d, 2),

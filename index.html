@@ -788,7 +788,7 @@
     var czStatus = ez.cost_zone_status || '';
     if (czStatus) {
       var czZh = czStatus === 'above_zone' ? '強勢突破' : (czStatus === 'inside_zone' ? '成本區洗盤' : '破位警戒');
-      html += '<h6 class="text-info-dash mt-3 mb-2">🏷 ' + tip('主力成本帶', '估算大戶近期的平均持倉成本區間。現價在帶內=大戶持平，在帶上方=大戶獲利。') + '</h6><div class="cost-zone-container">';
+      html += '<h6 class="text-info-dash mt-3 mb-2">🏷 ' + tip('主力成本帶', '估算大戶近期的平均持倉成本區間。現價在帶上方=大戶獲利中，在帶內=成本區，在帶下方=大戶被套。') + '</h6><div class="cost-zone-container">';
       html += '<span class="tag-pill">' + czZh + '</span>';
       html += '<span class="tag-pill">20日觸及次數: ' + (ez.cz_touch_20d != null ? ez.cz_touch_20d : '-') + '</span>';
       html += '<span class="tag-pill">突破次數: ' + (ez.cz_break_up_20d != null ? ez.cz_break_up_20d : '-') + '</span>';
@@ -833,7 +833,10 @@
     ['sig_vwap','sig_accumulation','sig_rotation','sig_profile_zone','sig_structure_break'].forEach(function(k){
       var v = sig[k] != null ? sig[k] : 0;
       var on = v ? '啟動' : '未觸發';
-      html += '<span class="tag-pill">' + tip(tvNames[k], tvTips[k]) + '：<b style="color:' + (v?'#2ecc71':'#666') + '">' + on + '</b></span>';
+      var labelTip = k === 'sig_vwap'
+        ? tip('VWAP', '成交量加權平均價。主力常以 VWAP 作為當日操作的基準價格。收盤 > VWAP 代表買方佔優。')
+        : tip(tvNames[k], tvTips[k]);
+      html += '<span class="tag-pill">' + labelTip + '：<b style="color:' + (v?'#2ecc71':'#666') + '">' + on + '</b></span>';
     });
     html += '</div></div></div></div>';
 
@@ -926,7 +929,7 @@
 
     html += '<h6 class="text-info-dash mt-3 mb-2">' + tip('📉 廣度趨勢', '買方分點數 vs 賣方分點數的變化。正值=買盤擴散，負值=賣壓擴散。') + '</h6><div class="chart-container-mini"><canvas id="breadthCanvas"></canvas></div>';
 
-    html += '<h6 class="text-info-dash mt-3 mb-2">👥 主力群聚連貫性 (Coherence)</h6><div class="row g-3 mb-4"><div class="col-md-8"><div class="chart-container-mini" style="height:220px;"><canvas id="coherenceCanvas"></canvas></div></div>';
+    html += '<h6 class="text-info-dash mt-3 mb-2">' + tip('👥 主力群聚連貫性 (Coherence)', '衡量主力買賣行為的一致程度。>1.0 代表主力集中且有方向性，<1.0 代表分散或觀望。走勢圖越往上代表主力共識越強。') + '</h6><div class="row g-3 mb-4"><div class="col-md-8"><div class="chart-container-mini" style="height:220px;"><canvas id="coherenceCanvas"></canvas></div></div>';
     html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('本日連貫性', '主力買賣行為的一致程度。>1.0 代表主力集中且有方向性，<1.0 代表分散或觀望。') + '</div><div class="metric-value">' + (ez.coherence_today != null ? ez.coherence_today : '-') + '</div></div>';
     html += '<div class="metric-card mt-2"><div class="metric-label">斜率 (5日)</div><div class="metric-value">' + (ez.coherence_slope_5d != null ? ez.coherence_slope_5d : '-') + '</div></div>';
     html += '<div class="metric-card mt-2"><div class="metric-label">持久性 (20日)</div><div class="metric-value">' + (ez.coherence_persistence_20d != null ? (ez.coherence_persistence_20d*100).toFixed(1) + '%' : '-') + '</div></div></div></div>';
