@@ -1,19 +1,14 @@
 {
-  "updated": "2026-05-16 18:31",
+  "updated": "2026-05-23 18:32",
   "taiex": {
-    "close": 41172.36,
-    "change": -579.39,
-    "change_pct": -1.39,
-    "close_5d_ago": 41603.94,
-    "close_20d_ago": 37132.02,
-    "trend_5d_pct": -1.04,
-    "trend_20d_pct": 10.88,
+    "close": 42267.97,
+    "change": 899.76,
+    "change_pct": 2.18,
+    "close_5d_ago": 41172.36,
+    "close_20d_ago": 37714.15,
+    "trend_5d_pct": 2.66,
+    "trend_20d_pct": 12.07,
     "series_20d": [
-      36804.34,
-      36958.8,
-      37605.11,
-      37878.47,
-      37714.15,
       38932.4,
       39616.63,
       39521.73,
@@ -28,29 +23,35 @@
       41898.32,
       41374.5,
       41751.75,
-      41172.36
+      41172.36,
+      40891.82,
+      40175.56,
+      40020.82,
+      41368.21,
+      42267.97
     ],
-    "as_of_date": "115/05/15"
+    "as_of_date": "115/05/22"
   },
   "institutional": {
-    "foreign_net_1d": -10426586381.0,
-    "foreign_net_5d": -10426586381.0,
-    "foreign_net_20d": -10426586381.0,
-    "foreign_streak_sell": 1,
-    "trust_net_1d": -1367237707.0,
-    "trust_net_5d": -1367237707.0,
-    "trust_net_20d": -1367237707.0,
-    "dealer_net_1d": -24943483026.0,
-    "three_net_1d": -36737307114.0,
-    "three_net_5d": -36737307114.0,
-    "foreign_momentum": "SELL_ACCELERATING"
+    "foreign_net_1d": 76136532653.0,
+    "foreign_net_5d": 76136532653.0,
+    "foreign_net_20d": 76136532653.0,
+    "foreign_streak_sell": 0,
+    "trust_net_1d": 11225786560.0,
+    "trust_net_5d": 11225786560.0,
+    "trust_net_20d": 11225786560.0,
+    "dealer_net_1d": 19476325868.0,
+    "three_net_1d": 106838645081.0,
+    "three_net_5d": 106838645081.0,
+    "three_net_20d": 106838645081.0,
+    "foreign_momentum": "BUY_ACCELERATING"
   },
   "margin": {
-    "margin_balance": 492797137000.0,
-    "margin_balance_change_5d_pct": 3.27,
-    "short_balance": 231677.0,
-    "short_balance_change_5d_pct": 12.99
+    "margin_balance": 522289307000.0,
+    "margin_balance_change_5d_pct": 5.98,
+    "short_balance": 257442.0,
+    "short_balance_change_5d_pct": 11.12
   },
-  "market_state": "CAUTIOUS",
-  "market_state_reason": "市場偏多但有分歧訊號，留意風險"
+  "market_state": "RISK_ON",
+  "market_state_reason": "市場多頭格局，法人資金積極流入"
 }

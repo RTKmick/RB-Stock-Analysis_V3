@@ -74,12 +74,15 @@ def run_strategy(
         print("[ERROR] 找不到 FINMIND_API_TOKEN，請在 .env 設定 FINMIND_API_TOKEN=你的 token")
         return
 
+    print(f"[INFO] {stock_id}: 初始化 FinMind 連線…", flush=True)
     client = FinMindClient(token=token, verify_ssl=verify_ssl)
     adapter = TaiwanStockAdapter(client)
     # 優先使用 rawdata 內含經緯度的券商主檔，讓 GEO 功能可用
+    print(f"[INFO] {stock_id}: 載入券商主檔（rawdata，雲端硬碟可能較慢）…", flush=True)
     broker_map = load_broker_master_enriched(RAW_PATH)
 
     # 事先計算交易日，供快取判斷與 pipeline 使用
+    print(f"[INFO] {stock_id}: 向 FinMind 取得交易日曆 lookback=180（網路慢時可能停 30–120 秒）…", flush=True)
     all_dates = adapter.get_trading_dates(lookback=180)
     today_str = datetime.now().strftime("%Y-%m-%d")
     available_dates = [d for d in all_dates if d < today_str]
@@ -89,6 +92,7 @@ def run_strategy(
         return
 
     last_trading_date = available_dates[-1]
+    print(f"[INFO] {stock_id}: 最近交易日 {last_trading_date}", flush=True)
 
     # 簡單快取：若已有同一檔股票、且 probe_date 已是最近交易日，就不用重抓 FinMind
     json_path = os.path.join(DATA_PATH, f"{stock_id}_whale_track.json")

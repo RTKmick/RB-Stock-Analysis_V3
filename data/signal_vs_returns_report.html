@@ -2,7 +2,7 @@
 <title>報酬分析：訊號 vs 未來報酬</title>
 <style>body{font-family:Segoe UI,Microsoft JhengHei,sans-serif;background:#1a1a1a;color:#e0e0e0;padding:24px;} h1,h2{color:#f1c40f;} h3{color:#ddd;} table{border-collapse:collapse;margin:12px 0;} th,td{border:1px solid #444;padding:8px 12px;text-align:right;} th{background:#333;color:#f1c40f;} .n{text-align:center;} .meta{color:#888;font-size:0.9em;} .fig{max-width:90%;margin:16px 0;border:1px solid #444;}</style></head><body>
 <h1>報酬分析：訊號 vs 未來報酬</h1>
-<p class="meta">報告產生時間：2026-05-15 19:48 ｜ 有效樣本數：507</p>
+<p class="meta">報告產生時間：2026-05-23 18:31 ｜ 有效樣本數：507</p>
 <h2>策略檢視說明（Quant Review）</h2>
 <ul class="meta"><li><b>分數區間</b>：特別比較 <code>60-80</code> 與 <code>80+</code>。若極高分區間的短天期報酬反而較弱，可能反映過熱或主力佈局末期（需搭配量能／大盤驗證）。</li><li><b>盈虧比</b>：勝率僅為一維；<code>pl_ratio</code>＝「正報酬樣本平均 / |負報酬樣本平均|」。勝率不高但 pl_ratio 顯著大於 1 時，仍可能具正期望值。</li><li><b>Confluence</b>：交叉表為「分數區間 | monitor_state」；可挑選例如「ACCUMULATION 且分數跨入 60-80」等組合（以樣本數與回測為準）。</li><li><b>流動性</b>：建議以 CLI <code>--min-avg-volume-20d-lot 500</code>（張）或<code>--liquidity-drop-bottom-pct 0.05</code> 降低冷門股極端值扭曲；張數來自 backtest 之 <code>avg_volume_20d_lot</code>。</li><li><b>大盤 Regime（未來擴充）</b>：籌碼在系統性空頭常失效；後續可於母體加入大盤相對季線等旗標再分層統計。</li><li><b>下一步</b>：於交叉表尋找「ret_10d 中位數高且勝率&gt;55%」組合，作為儀表板 BUY_ZONE 等規則的實證依據。</li></ul>
 <h2>一、依分數區間看未來報酬</h2>
@@ -229,6 +229,9 @@
 </table>
 <br/>
 <p class="meta">解讀：平均值 / 中位數代表該分數區間的平均 / 典型報酬；勝率% 為報酬&gt;0 的比例；盈虧比為正報酬子樣本均值除以負報酬子樣本均值的絕對值（兩側皆須有樣本）。請一併檢視 <code>80+</code> 是否出現「過熱反轉」（短天期不如 <code>60-80</code>）。</p>
+<p><img class="fig" src="signal_vs_returns_figures/ret_by_score_ret_5d.png" alt="ret_by_score_ret_5d.png"/></p>
+<p><img class="fig" src="signal_vs_returns_figures/ret_by_score_ret_10d.png" alt="ret_by_score_ret_10d.png"/></p>
+<p><img class="fig" src="signal_vs_returns_figures/ret_by_score_ret_20d.png" alt="ret_by_score_ret_20d.png"/></p>
 <h2>二、依主力監測狀態看報酬（Whale Trend Monitor）</h2>
 <h3>5日報酬（ret_5d）（不同狀態）</h3>
 <table border="1" class="dataframe n">
@@ -442,6 +445,9 @@
 </table>
 <br/>
 <p class="meta">解讀：比較 ACCUMULATION / MARKUP 與 NEUTRAL / DISTRIBUTION 的報酬差異；可與「三、分數×狀態」交叉表併讀，尋找 Confluence。</p>
+<p><img class="fig" src="signal_vs_returns_figures/ret_by_state_ret_5d.png" alt="ret_by_state_ret_5d.png"/></p>
+<p><img class="fig" src="signal_vs_returns_figures/ret_by_state_ret_10d.png" alt="ret_by_state_ret_10d.png"/></p>
+<p><img class="fig" src="signal_vs_returns_figures/ret_by_state_ret_20d.png" alt="ret_by_state_ret_20d.png"/></p>
 <h2>三、分數區間 × 主力狀態（Confluence）</h2>
 <p class="meta">僅列出樣本數達門檻之組合；列名格式「分數區間 | monitor_state」。</p>
 <h3>5日報酬（ret_5d）（交叉表）</h3>
