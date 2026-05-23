@@ -111,6 +111,125 @@
       cursor: help;
       border-bottom: 1px dotted #6b7280;
     }
+    /* Phase 5：多股比較表 */
+    .compare-panel {
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .compare-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .compare-header h5 {
+      margin: 0;
+      color: #f1c40f;
+      font-size: 1rem;
+    }
+    .compare-toggle {
+      background: none;
+      border: 1px solid #4b5563;
+      color: #9ca3af;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .compare-toggle:hover { border-color: #9ca3af; color: #fff; }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .compare-table th {
+      background: #1f2937;
+      color: #9ca3af;
+      padding: 8px 10px;
+      text-align: center;
+      border-bottom: 2px solid #374151;
+      font-weight: 600;
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+    .compare-table td {
+      padding: 8px 10px;
+      text-align: center;
+      border-bottom: 1px solid #1f2937;
+      color: #e5e7eb;
+    }
+    .compare-table tr:hover { background: #1a2332; }
+    .compare-table tr.active-row { background: #172554; border-left: 3px solid #3b82f6; }
+    .cmp-green { color: #22c55e; }
+    .cmp-red { color: #ef4444; }
+    .cmp-yellow { color: #eab308; }
+    .cmp-gray { color: #6b7280; }
+    .cmp-cell-good { background: rgba(34,197,94,0.1); }
+    .cmp-cell-bad { background: rgba(239,68,68,0.1); }
+    .cmp-clickable { cursor: pointer; }
+    .cmp-clickable:hover { text-decoration: underline; color: #60a5fa; }
+    /* Phase 5：策略建議面板 */
+    .strategy-panel {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      border: 1px solid #4338ca;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+    .strategy-title {
+      color: #818cf8;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .strategy-text {
+      font-size: 0.88rem;
+      color: #d1d5db;
+      line-height: 1.6;
+    }
+    .strategy-text b.pos { color: #22c55e; }
+    .strategy-text b.neg { color: #ef4444; }
+    .strategy-text b.neu { color: #eab308; }
+    /* Phase 5：條件警報 */
+    .alert-banner {
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .alert-danger {
+      background: linear-gradient(90deg, #450a0a, #7f1d1d);
+      color: #fca5a5;
+      border: 1px solid #dc2626;
+      animation: alertPulse 2s ease-in-out infinite;
+    }
+    .alert-warning {
+      background: linear-gradient(90deg, #451a03, #78350f);
+      color: #fde68a;
+      border: 1px solid #d97706;
+    }
+    @keyframes alertPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .alert-dismiss {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      font-size: 1.2rem;
+      opacity: 0.6;
+    }
+    .alert-dismiss:hover { opacity: 1; }
   </style>
 </head>
 <body>
@@ -120,7 +239,9 @@
     <span class="badge bg-secondary" id="versionBadge">版本：載入中…</span>
   </div>
 
+  <div id="alertArea"></div>
   <div id="marketBar"></div>
+  <div id="comparePanel"></div>
 
   <!-- 全域股票選擇器：所有分頁共用 -->
   <div class="row justify-content-center mb-3">
@@ -206,6 +327,8 @@
   const DEFAULT_STOCK = '2454';
   let manifest = { stock_ids: [], stocks: [] };
   var marketCtx = null;
+  var allStockData = {};
+  var compareStockOrder = [];
   let charts = { whale: null, radar: null, breadth: null, coherence: null, tornadoBuy: null, tornadoSell: null };
 
   function loadSignalStats() {
@@ -307,6 +430,282 @@
     var text = same ? '跟隨大盤' : '獨立走勢';
     return '<span class="stock-context-tag ' + cls + '">' + text + '</span>';
   }
+
+  function cmpScoreUnified(sig) {
+    var v = sig.score_unified != null ? sig.score_unified : (sig.final_score != null ? sig.final_score : sig.score);
+    return parseFloat(v || 0);
+  }
+
+  function buildCompareTable() {
+    var host = document.getElementById('comparePanel');
+    if (!host) return;
+
+    var ids = (compareStockOrder && compareStockOrder.length)
+      ? compareStockOrder.filter(function(id) { return allStockData[id]; })
+      : Object.keys(allStockData);
+    var extra = Object.keys(allStockData).filter(function(id) { return ids.indexOf(id) < 0; });
+    ids = ids.concat(extra);
+
+    if (ids.length === 0) { host.innerHTML = ''; return; }
+
+    var html = '<div class="compare-panel">';
+    html += '<div class="compare-header">';
+    html += '<h5>📊 多股比較</h5>';
+    html += '<button type="button" class="compare-toggle" onclick="window.toggleCompare()">收合</button>';
+    html += '</div>';
+    html += '<div id="compareBody">';
+    html += '<table class="compare-table">';
+
+    html += '<thead><tr>';
+    html += '<th>股票</th><th>訊號</th><th>評分</th><th>評級</th>';
+    html += '<th>信心度</th><th>外資5D</th><th>投信5D</th>';
+    html += '<th>凝聚度</th><th>壓力比</th><th>籌碼燈</th>';
+    html += '</tr></thead>';
+
+    html += '<tbody>';
+    ids.forEach(function(sid) {
+      var d = allStockData[sid];
+      if (!d) return;
+      var sig = d.signals || {};
+      var hl = d.headline || {};
+      var ez = (sig.enhanced || {});
+
+      var sigMap = {
+        'BUY_ZONE': { cls: 'cmp-green', icon: '🟢', text: '買入' },
+        'HOLD_WATCH': { cls: 'cmp-yellow', icon: '🟡', text: '觀望' },
+        'EXIT_ALERT': { cls: 'cmp-red', icon: '🔴', text: '退出' },
+        'NEUTRAL': { cls: 'cmp-gray', icon: '⚫', text: '中性' }
+      };
+      var sm = sigMap[hl.action_signal] || sigMap['NEUTRAL'];
+
+      var score = cmpScoreUnified(sig);
+      var scoreCls = score >= 75 ? 'cmp-green' : (score < 65 ? 'cmp-red' : 'cmp-yellow');
+
+      var conf = parseFloat(hl.confidence || 50);
+      var confWarn = conf < 40 ? ' ⚠️' : '';
+
+      var f5 = parseFloat(sig.inst_foreign_net_5d || 0);
+      var f5Display = (f5 / 10000).toFixed(0) + '萬';
+      var f5Cls = f5 > 0 ? 'cmp-green' : (f5 < 0 ? 'cmp-red' : 'cmp-gray');
+      var f5Sign = f5 > 0 ? '+' : '';
+
+      var t5 = parseFloat(sig.inst_trust_net_5d || 0);
+      var t5Display = (t5 / 10000).toFixed(0) + '萬';
+      var t5Cls = t5 > 0 ? 'cmp-green' : (t5 < 0 ? 'cmp-red' : 'cmp-gray');
+      var t5Sign = t5 > 0 ? '+' : '';
+
+      var coh = parseFloat(ez.coherence_today || 0);
+      var cohSlope = parseFloat(ez.coherence_slope_5d || 0);
+      var cohArrow = cohSlope > 0.1 ? ' ↑↑' : (cohSlope > 0.03 ? ' ↑' : (cohSlope < -0.05 ? ' ↓' : ' →'));
+
+      var pr = parseFloat(sig.pressure_ratio_5d || 0.5);
+      var prCls = pr > 0.5 ? 'cmp-green' : (pr < 0.45 ? 'cmp-red' : 'cmp-gray');
+
+      var chipMap = { green: '🟢', yellow: '🟡', red: '🔴' };
+      var chipIcon = chipMap[sig.chip_light] || '⚫';
+
+      var sel = document.getElementById('stockSelect');
+      var isActive = sel && sel.value === sid ? ' active-row' : '';
+
+      html += '<tr class="cmp-clickable' + isActive + '" onclick="window.selectStock(\'' + escapeHtml(String(sid)) + '\')">';
+      html += '<td style="text-align:left;font-weight:600;">' + escapeHtml(d.stock_name || sid) + '</td>';
+      html += '<td class="' + sm.cls + '">' + sm.icon + sm.text + '</td>';
+      html += '<td class="' + scoreCls + '">' + score.toFixed(0) + '</td>';
+      html += '<td>' + escapeHtml(sig.final_grade != null ? String(sig.final_grade) : '-') + '</td>';
+      html += '<td>' + conf.toFixed(0) + confWarn + '</td>';
+      html += '<td class="' + f5Cls + '">' + f5Sign + f5Display + '</td>';
+      html += '<td class="' + t5Cls + '">' + t5Sign + t5Display + '</td>';
+      html += '<td>' + coh.toFixed(2) + cohArrow + '</td>';
+      html += '<td class="' + prCls + '">' + pr.toFixed(2) + '</td>';
+      html += '<td>' + chipIcon + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '</div></div>';
+
+    host.innerHTML = html;
+  }
+
+  function toggleCompare() {
+    var body = document.getElementById('compareBody');
+    var btn = document.querySelector('#comparePanel .compare-toggle');
+    if (!body || !btn) return;
+    if (body.style.display === 'none') {
+      body.style.display = '';
+      btn.textContent = '收合';
+    } else {
+      body.style.display = 'none';
+      btn.textContent = '展開';
+    }
+  }
+
+  function selectStock(sid) {
+    var sel = document.getElementById('stockSelect');
+    if (sel) {
+      sel.value = String(sid);
+      sel.dispatchEvent(new Event('change'));
+    }
+  }
+
+  function preloadAllStocks(stockIds) {
+    var ids = (stockIds || []).map(function(s) { return String(s); });
+    var promises = ids.map(function(sid) {
+      return fetch(DATA_BASE + '/' + encodeURIComponent(sid) + '_whale_track.json')
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(d) { if (d) allStockData[sid] = d; })
+        .catch(function() {});
+    });
+    return Promise.all(promises).then(function() {
+      buildCompareTable();
+      var alerts = checkAlerts(allStockData, marketCtx);
+      renderAlerts(alerts);
+    });
+  }
+
+  function buildStrategyPanel(signals, headline, enhanced) {
+    var lines = [];
+    var sig = signals || {};
+    var hl = headline || {};
+    var ez = enhanced || {};
+
+    var action = hl.action_signal || 'NEUTRAL';
+    var conf = parseFloat(hl.confidence || 50);
+    var f5d = parseFloat(sig.inst_foreign_net_5d || 0);
+    var t5d = parseFloat(sig.inst_trust_net_5d || 0);
+    var three5d = parseFloat(sig.inst_three_net_5d || 0);
+    var cohSlope = parseFloat(ez.coherence_slope_5d || 0);
+    var pr5 = parseFloat(sig.pressure_ratio_5d || 0.5);
+
+    if (action === 'BUY_ZONE') {
+      lines.push('🟢 <b class="pos">系統判定為買入區域</b>。');
+    } else if (action === 'EXIT_ALERT') {
+      lines.push('🔴 <b class="neg">系統發出退出警示</b>，建議減倉或停損。');
+    } else {
+      lines.push('🟡 <b class="neu">持股觀望</b>，等待更明確訊號。');
+    }
+
+    if (conf < 35) {
+      lines.push('⚠️ 信心度僅 ' + conf.toFixed(0) + '，<b class="neg">訊號混沌，不宜重押</b>。');
+    } else if (conf >= 65) {
+      lines.push('✅ 信心度 ' + conf.toFixed(0) + '，訊號可信度較高。');
+    }
+
+    var fDir = f5d > 0 ? '買超' : '賣超';
+    var tDir = t5d > 0 ? '買超' : '賣超';
+    var fAmt = Math.abs(f5d / 10000).toFixed(0);
+    var tAmt = Math.abs(t5d / 10000).toFixed(0);
+
+    if (f5d > 0 && t5d > 0) {
+      lines.push('📈 外資 + 投信 5日均<b class="pos">買超</b>（外資 ' + fAmt + '萬、投信 ' + tAmt + '萬），法人方向一致偏多。');
+    } else if (f5d < 0 && t5d < 0) {
+      lines.push('📉 外資 + 投信 5日均<b class="neg">賣超</b>（外資 ' + fAmt + '萬、投信 ' + tAmt + '萬），法人方向一致偏空。');
+    } else {
+      lines.push('⚡ 外資 5日' + fDir + ' ' + fAmt + '萬，投信 ' + tDir + ' ' + tAmt + '萬，<b class="neu">法人方向分歧</b>，觀望為宜。');
+    }
+
+    if (cohSlope > 0.1) {
+      lines.push('🔬 籌碼凝聚度<b class="pos">快速上升</b>（斜率 +' + cohSlope.toFixed(2) + '），主力有集中佈局跡象。');
+    } else if (cohSlope < -0.05) {
+      lines.push('🔬 籌碼凝聚度<b class="neg">下降</b>（斜率 ' + cohSlope.toFixed(2) + '），主力有分散或退場跡象。');
+    }
+
+    if (pr5 > 0.55) {
+      lines.push('💪 壓力比 ' + pr5.toFixed(2) + '，<b class="pos">買方佔優</b>。');
+    } else if (pr5 < 0.42) {
+      lines.push('⛔ 壓力比 ' + pr5.toFixed(2) + '，<b class="neg">賣方佔優</b>。');
+    }
+
+    if (action === 'EXIT_ALERT' && conf < 40) {
+      lines.push('📋 <b>建議操作</b>：訊號偏空且信心度低，建議<b class="neg">降低持倉或觀望</b>，等待信心度回升再考慮進場。');
+    } else if (action === 'BUY_ZONE' && f5d > 0 && t5d > 0) {
+      lines.push('📋 <b>建議操作</b>：法人同步買超 + 系統判定買入區，可<b class="pos">分批布局</b>。');
+    } else if (f5d < 0 && t5d < 0 && three5d < 0) {
+      lines.push('📋 <b>建議操作</b>：三大法人均賣超，即使評分中等，建議<b class="neg">暫時觀望</b>不急進場。');
+    } else {
+      lines.push('📋 <b>建議操作</b>：訊號混合，建議<b class="neu">維持現有部位</b>，等待法人方向明確化。');
+    }
+
+    var html = '<div class="strategy-panel">';
+    html += '<div class="strategy-title">🧠 策略顧問建議</div>';
+    html += '<div class="strategy-text">';
+    html += lines.join('<br>');
+    html += '</div></div>';
+
+    return html;
+  }
+
+  function checkAlerts(allData, ctx) {
+    var alerts = [];
+    var ids = Object.keys(allData);
+
+    var exitCount = 0;
+    ids.forEach(function(sid) {
+      var hl = (allData[sid].headline || {});
+      if (hl.action_signal === 'EXIT_ALERT') exitCount++;
+    });
+    if (exitCount >= 2) {
+      alerts.push({
+        level: 'danger',
+        text: '🚨 系統對 ' + exitCount + '/' + ids.length + ' 檔股票發出 EXIT_ALERT，請檢視整體持倉風險。'
+      });
+    }
+
+    if (ctx && ctx.market_state === 'RISK_OFF') {
+      alerts.push({
+        level: 'danger',
+        text: '🚨 大盤環境判定為【偏空警戒】，所有個股操作建議更保守。'
+      });
+    }
+
+    if (ctx && ctx.institutional) {
+      var streak = ctx.institutional.foreign_streak_sell || 0;
+      if (streak >= 3) {
+        alerts.push({
+          level: 'warning',
+          text: '⚠️ 外資已連續賣超 ' + streak + ' 個交易日，注意系統性賣壓。'
+        });
+      }
+    }
+
+    var lowConf = 0;
+    ids.forEach(function(sid) {
+      var c = parseFloat((allData[sid].headline || {}).confidence || 50);
+      if (c < 40) lowConf++;
+    });
+    if (lowConf === ids.length && ids.length > 0) {
+      alerts.push({
+        level: 'warning',
+        text: '⚠️ 所有追蹤股票的信心度均低於 40，訊號可信度偏低，建議降低操作頻率。'
+      });
+    }
+
+    return alerts;
+  }
+
+  function renderAlerts(alerts) {
+    var host = document.getElementById('alertArea');
+    if (!host) return;
+    if (!alerts || alerts.length === 0) {
+      host.innerHTML = '';
+      return;
+    }
+
+    var html = '';
+    alerts.forEach(function(a, i) {
+      var cls = a.level === 'danger' ? 'alert-danger' : 'alert-warning';
+      html += '<div class="alert-banner ' + cls + '" id="alert-' + i + '">';
+      html += '<span>' + a.text + '</span>';
+      html += '<button type="button" class="alert-dismiss" onclick="window.dismissAlert(' + i + ')">✕</button>';
+      html += '</div>';
+    });
+    host.innerHTML = html;
+  }
+
+  function dismissAlert(idx) {
+    var el = document.getElementById('alert-' + idx);
+    if (el) el.style.display = 'none';
+  }
+
   function destroyCharts(){
     ['whale','radar','breadth','coherence','tornadoBuy','tornadoSell'].forEach(function(k){ if (charts[k]) { try { charts[k].destroy(); } catch(e){} charts[k]=null; } });
   }
@@ -713,6 +1112,8 @@
       html += '💡 此 JSON 尚無 <code>headline</code>：請在本機專案根目錄執行 <code>python scraper_chip.py --stock_id ' + escapeHtml(String(stock.id || '2454')) + ' --force</code> 重新產生 <code>data/' + escapeHtml(String(stock.id || '')) + '_whale_track.json</code> 後推送或覆蓋 <code>data/</code>（probe 已是最新時須加 <code>--force</code>）。';
       html += '</div>';
     }
+
+    html += buildStrategyPanel(sig, hl, ez);
 
     var instThreeNet5 = parseFloat(sig.inst_three_net_5d || 0);
     var wl = stock.whale_layers || {};
@@ -1323,8 +1724,10 @@
     fetch(DATA_BASE + '/' + id + '_whale_track.json')
       .then(function(r){ if (!r.ok) throw new Error('無法載入 ' + id); return r.json(); })
       .then(function(raw){
+        allStockData[String(id)] = raw;
         const stock = buildStockInfo(raw);
         render(stock);
+        buildCompareTable();
       })
       .catch(function(err){
         el('loading').innerHTML = '<div class="text-warning">⚠️ ' + err.message + '。請確認已執行 scraper 並將 data/ 推送到 GitHub。</div>';
@@ -1346,6 +1749,7 @@
         const stocks = manifest.stocks && manifest.stocks.length
           ? manifest.stocks
           : (manifest.stock_ids || []).map(function(sid){ return { id: sid, name: sid }; });
+        compareStockOrder = stocks.map(function(s) { return String(s.id); });
 
         function renderOptions(filterText){
           sel.innerHTML = '';
@@ -1418,9 +1822,14 @@
             sel.dispatchEvent(new Event('change'));
           }
         }
+        var preloadIds = compareStockOrder.slice();
         Promise.all([loadSignalStats(), loadMarketContext()])
+          .then(function() { return preloadAllStocks(preloadIds); })
           .then(loadDefaultStock)
-          .catch(loadDefaultStock);
+          .catch(function() {
+            return preloadAllStocks(preloadIds);
+          })
+          .then(loadDefaultStock);
       })
       .catch(function(err){
         el('stockSelect').innerHTML = '<option value="">無法載入清單</option>';
@@ -1494,6 +1903,10 @@
 
     setHorizon('20');
   })();
+
+  window.toggleCompare = toggleCompare;
+  window.selectStock = selectStock;
+  window.dismissAlert = dismissAlert;
 })();
 </script>
 </body>
