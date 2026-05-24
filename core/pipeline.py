@@ -31,6 +31,7 @@ from core.broker_archetype import apply_broker_archetype
 from core.signals.institutional import compute_institutional_and_margin_signals
 from core.top6_history import enrich_top6_phase7, update_top6_history
 from core.phase8_anomaly import enrich_phase8
+from core.phase9_deep import enrich_phase9
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -1040,6 +1041,16 @@ def analyze_whale_trajectory(
         df_1d=df_1d,
         date_20d=date_20d,
         ohlcv_20d=ohlcv_20d,
+        top6_ids=top6_ids,
+        data_dir=_data_root,
+    )
+
+    # Phase 9：快取累積淨額、籌碼沉澱率
+    enrich_phase9(
+        stock_id=stock_id,
+        top6_details=top6_details,
+        signals=signals,
+        df_20d=df_20d,
         top6_ids=top6_ids,
         data_dir=_data_root,
     )

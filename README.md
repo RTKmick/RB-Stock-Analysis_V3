@@ -76,7 +76,7 @@ For RUMBOR Data Mining
   - `sub-py/`：更新券商主檔、geocode、`build_manifest.py`、**`analyze_signal_vs_returns.py`（Phase 1）**、**`ml_signal_winrate.py`（Phase 3 ML 勝率）** 等。
   - `bat/`：scraper、下載專案、Phase 1 / Phase 3 分析；可選：ngrok、Flask。
   - **`send_daily_report.py`（Phase 6）**：讀 `data/*_whale_track.json` + `market_context.json`，組成純文字日報；若已設定 **`TELEGRAM_BOT_TOKEN`**、**`TELEGRAM_CHAT_ID`**（與 `rb_tv_app.py` 相同，建議寫在 `.env`）則推送到 Telegram。未設定時僅列印摘要。`5_run_all_for_stock.bat` 在產生 `market_context.json` 後會自動呼叫一次。
-  - **`5_run_all_for_stock.bat`**：預設追蹤 8 檔（2454、2486、3035、2330、2603、3661、2345、6547）；直接按 Enter 即跑清單內全部股票。
+  - **`5_run_all_for_stock.bat`**：預設追蹤 8 檔（2454、2486、3035、2330、2603、3661、2345、6547）；直接按 Enter 即跑清單內全部股票；個股 FinMind 跑完後會執行 **`[1b] generate_cross_stock.py`** 更新 `data/cross_stock_flow.json`。
 
 
 ### 建議流程（摘要）
@@ -117,6 +117,26 @@ For RUMBOR Data Mining
    - `data/ml_winrate_report_ret{N}d.html`：簡易 HTML 報表（accuracy / AUC / Top 30 特徵）
 
 依賴：`pip install scikit-learn joblib`（已列入 `requirements.txt`）。
+
+### Phase 9：大戶深層追蹤（V2.0.5 併入同一小版號）
+
+版本策略：**以小版號逐步累積**（例如 V2.0.4 → V2.0.5），同一小版內可合併多項改動與文件更新，避免跳號（如直接跳到 V2.2.0）。
+
+- **FinMind 資料流**：仍以 `scraper_chip.py` 為主（分點、價格、法人／融資等經 FinMind v4 API），寫入 `data/{stock_id}_whale_track.json` 與 `data/cache/tdr/{stock_id}/`。
+- **R1 跨股資金流**：`generate_cross_stock.py` 掃描 `data/*_whale_track.json`，產出 **`data/cross_stock_flow.json`**（儀表板讀取「輪動」券商）。`5_run_all_for_stock.bat` 在個股 scraper 跑完後會自動執行 **`[1b]`** 此步驟。
+- **R2 累積部位**：`core/phase9_deep.py` 依快取 CSV 彙總 Top6 分點之 **`accumulated_net` / `active_days`**。快取欄位為 **`securities_trader_id`** 時會對應為內部使用的 `broker_id`。
+- **R3 籌碼沉澱率**：`signals["chip_settlement_rate"]`（Top6 淨額絕對值合計 ÷ 全市場買賣量合計，上限 1）。
+- **靜態儀表板**：`index.html` 新增跨股區塊（讀 `cross_stock_flow.json`）；Top6 表可顯示累積淨額與沉澱率提示。
+
+**本機只跑 FinMind 與跨股彙整（不跑 Phase 1/3 時）**：
+
+```bash
+python scraper_chip.py --stock_id 2330 --days 60
+python generate_cross_stock.py
+python sub-py/build_manifest.py
+```
+
+追蹤清單內 8 檔可於 PowerShell 迴圈執行，或雙擊 `5_run_all_for_stock.bat` 並對提示直接按 Enter（預設 8 檔、`days=60`）。
 
 ---
 

@@ -262,6 +262,34 @@
       flex: 1;
       min-width: 280px;
     }
+    /* Phase 9：跨股資金流向 */
+    .crossflow-panel {
+      background: #0c0a1a;
+      border: 1px solid #4338ca;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .crossflow-title {
+      color: #a78bfa;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .crossflow-broker {
+      padding: 8px 0;
+      border-bottom: 1px solid #1e1b4b;
+    }
+    .crossflow-broker:last-child { border-bottom: none; }
+    .rotation-tag {
+      display: inline-block;
+      background: #7c3aed;
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+    }
   </style>
 </head>
 <body>
@@ -274,6 +302,7 @@
   <div id="alertArea"></div>
   <div id="marketBar"></div>
   <div id="comparePanel"></div>
+  <div id="crossFlowPanel"></div>
 
   <!-- 全域股票選擇器：所有分頁共用 -->
   <div class="row justify-content-center mb-3">
@@ -589,6 +618,7 @@
     });
     return Promise.all(promises).then(function() {
       buildCompareTable();
+      loadCrossStockFlow();
       var alerts = checkAlerts(allStockData, marketCtx);
       renderAlerts(alerts);
     });
@@ -904,6 +934,53 @@
       html += '</div>';
     }
     return html;
+  }
+  function loadCrossStockFlow() {
+    fetch(DATA_BASE + '/cross_stock_flow.json')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data) return;
+        renderCrossFlow(data);
+      })
+      .catch(function() {});
+  }
+  function renderCrossFlow(data) {
+    var host = document.getElementById('crossFlowPanel');
+    if (!host) return;
+    var flows = data.flows || [];
+    if (flows.length === 0) {
+      host.innerHTML = '';
+      return;
+    }
+    var rotations = flows.filter(function(f) { return f.is_rotation; });
+    if (rotations.length === 0) {
+      host.innerHTML = '';
+      return;
+    }
+    var html = '<div class="crossflow-panel">';
+    html += '<div class="crossflow-title">🔀 跨股資金流向（' + (data.rotation_count || 0) + ' 個輪動大戶）</div>';
+    rotations.forEach(function(f) {
+      var bname = escapeHtml(String(f.broker_name || f.broker_id || ''));
+      html += '<div class="crossflow-broker">';
+      html += '<b style="color:#e5e7eb;">' + bname + '</b>';
+      html += '<span class="rotation-tag">🔄 輪動</span>';
+      html += '<span style="color:#6b7280;font-size:0.78rem;margin-left:8px;">涉及 ' + f.stock_count + ' 檔</span>';
+      html += '<div style="margin-top:4px;">';
+      (f.positions || []).forEach(function(p) {
+        var nv = Number(p.net_lot);
+        var color = nv > 0 ? '#22c55e' : '#ef4444';
+        var sign = nv > 0 ? '+' : '';
+        var icon = nv > 0 ? '🟢' : '🔴';
+        var sn = escapeHtml(String(p.stock_name || p.stock_id || ''));
+        html += '<span style="display:inline-block;margin-right:12px;font-size:0.82rem;">';
+        html += icon + ' <span style="color:#9ca3af;">' + sn + '</span> ';
+        html += '<span style="color:' + color + ';">' + sign + (isNaN(nv) ? '-' : nv.toFixed(0)) + '</span>';
+        html += '</span>';
+      });
+      html += '</div></div>';
+    });
+    html += '</div>';
+    host.innerHTML = html;
   }
   function initBootstrapTooltips() {
     if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
@@ -1517,9 +1594,14 @@
         wtsHtml += '<span style="font-size:0.72rem;color:#6b7280;margin-left:6px;">5日均 ' + (Number(sig.whale_turnover_share_5d_avg) * 100).toFixed(1) + '%</span>';
       }
     }
+    if (sig.chip_settlement_rate != null && !isNaN(Number(sig.chip_settlement_rate))) {
+      var csr = (Number(sig.chip_settlement_rate) * 100).toFixed(2);
+      var csrCls = Number(sig.chip_settlement_rate) > 0.05 ? 'cmp-green' : 'cmp-gray';
+      wtsHtml += '<span style="font-size:0.78rem;margin-left:12px;" class="' + csrCls + '">' + tip('沉澱率', 'Top6 二十日淨額絕對值合計／全市場二十日買賣量。偏高代表大戶成交相對沉澱在籌碼面。') + ' ' + csr + '%</span>';
+    }
     html += '<h6 class="text-warning mt-4">Top 6 大戶（綜合總覽）' + wtsHtml + '</h6><div class="card shadow-lg"><div class="card-body"><div class="table-responsive"><table class="table table-dark table-hover border-secondary"><thead><tr>';
-    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">' + tip('波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th><th class="text-end">' + tip('爆量', '今日分點買賣量合計相對過去20日均量倍數；≥3x 為爆量警報。') + '</th><th class="text-center">' + tip('駐留', '依 data/{代號}_top6_history.json 連續出現在 Top6 的交易日數；每日 pipeline 會追加紀錄。') + '</th></tr></thead><tbody>';
-    if (top6.length === 0) html += '<tr><td colspan="10" class="text-center text-muted">暫無大戶數據</td></tr>';
+    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">' + tip('波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th><th class="text-end">' + tip('爆量', '今日分點買賣量合計相對過去20日均量倍數；≥3x 為爆量警報。') + '</th><th class="text-end">' + tip('累積', '依 data/cache/tdr 各日 CSV 加總該分點淨額（張）；天數為有出現在快取檔的交易日數。') + '</th><th class="text-center">' + tip('駐留', '依 data/{代號}_top6_history.json 連續出現在 Top6 的交易日數；每日 pipeline 會追加紀錄。') + '</th></tr></thead><tbody>';
+    if (top6.length === 0) html += '<tr><td colspan="11" class="text-center text-muted">暫無大戶數據</td></tr>';
     else top6.forEach(function(b){
       const c = b.color || colorMap[b.broker_name] || '#888';
       const typeBadge = (b.broker_org_type==='foreign') ? '<span class="badge bg-secondary">外資</span>' : '<span class="badge bg-dark">本土</span>';
@@ -1552,6 +1634,11 @@
       var spikeCls = spikeAlert ? 'cmp-red' : (spike >= 2 ? 'cmp-yellow' : 'cmp-gray');
       var spikeIcon = spikeAlert ? '🔥' : '';
       html += '<td class="' + spikeCls + ' text-end">' + spikeIcon + spike.toFixed(1) + 'x</td>';
+      var accum = b.accumulated_net != null ? Number(b.accumulated_net) : 0;
+      var accumColor = accum > 0 ? 'cmp-green' : (accum < 0 ? 'cmp-red' : 'cmp-gray');
+      var accumSign = accum > 0 ? '+' : '';
+      var ad = b.active_days != null ? b.active_days : 0;
+      html += '<td class="text-end ' + accumColor + '" title="快取內有資料天數：' + ad + ' 日">' + accumSign + (isNaN(accum) ? '0' : accum.toFixed(0)) + '</td>';
       html += '<td class="text-center ' + stabClass + '">' + stabIcon + days + '日</td></tr>';
     });
     html += '</tbody></table></div>';

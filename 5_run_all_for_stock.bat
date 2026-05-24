@@ -86,6 +86,15 @@ for %%S in (%STOCK_IDS%) do (
 )
 
 echo.
+echo [1b] Phase 9: cross_stock_flow.json ^(跨股資金流向^) ...
+"%PYEXE%" generate_cross_stock.py
+if errorlevel 1 (
+    echo generate_cross_stock.py failed. Please check the error above.
+    pause
+    exit /b 1
+)
+
+echo.
 echo [2/6] Rebuilding data\manifest.json ...
 "%PYEXE%" sub-py\build_manifest.py
 
