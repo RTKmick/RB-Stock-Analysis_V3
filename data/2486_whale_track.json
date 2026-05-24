@@ -1061,11 +1061,18 @@
     "spike_alert_count": 0,
     "group_sync_alerts": [
       {
-        "group": "統一",
+        "group": "富邦",
         "direction": "BUY",
-        "branch_count": 21,
-        "total_branches": 28,
-        "total_net": -108988.0
+        "branch_count": 43,
+        "total_branches": 53,
+        "total_net": 642249.0
+      },
+      {
+        "group": "台新",
+        "direction": "BUY",
+        "branch_count": 41,
+        "total_branches": 51,
+        "total_net": 229333.0
       },
       {
         "group": "兆豐",
@@ -1075,13 +1082,6 @@
         "total_net": 196691.0
       },
       {
-        "group": "玉山",
-        "direction": "BUY",
-        "branch_count": 14,
-        "total_branches": 17,
-        "total_net": 123807.0
-      },
-      {
         "group": "國泰",
         "direction": "BUY",
         "branch_count": 9,
@@ -1089,58 +1089,16 @@
         "total_net": 178254.0
       },
       {
-        "group": "群益",
+        "group": "玉山",
         "direction": "BUY",
-        "branch_count": 34,
-        "total_branches": 50,
-        "total_net": 126080.0
-      },
-      {
-        "group": "凱基",
-        "direction": "BUY",
-        "branch_count": 51,
-        "total_branches": 67,
-        "total_net": -221891.0
-      },
-      {
-        "group": "華南",
-        "direction": "BUY",
-        "branch_count": 31,
-        "total_branches": 40,
-        "total_net": 133741.0
-      },
-      {
-        "group": "富邦",
-        "direction": "BUY",
-        "branch_count": 43,
-        "total_branches": 53,
-        "total_net": 642249.0
-      },
-      {
-        "group": "元大",
-        "direction": "BUY",
-        "branch_count": 112,
-        "total_branches": 145,
-        "total_net": 622226.0
-      },
-      {
-        "group": "永豐",
-        "direction": "BUY",
-        "branch_count": 31,
-        "total_branches": 43,
-        "total_net": 232649.0
-      },
-      {
-        "group": "台新",
-        "direction": "BUY",
-        "branch_count": 41,
-        "total_branches": 51,
-        "total_net": 229333.0
+        "branch_count": 14,
+        "total_branches": 17,
+        "total_net": 123807.0
       }
     ],
     "divergence_detail": null,
-    "whale_turnover_share": 109.9886,
-    "whale_turnover_share_5d_avg": 99.1886,
+    "whale_turnover_share": 0.055,
+    "whale_turnover_share_5d_avg": 0.0497,
     "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -6245.2,
@@ -1285,5 +1243,5 @@
   "stock_id": "2486",
   "stock_name": "一詮",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:43"
+  "last_update": "2026-05-24 10:53"
 }

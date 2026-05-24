@@ -1092,32 +1092,10 @@
     ],
     "max_broker_spike": 1.74,
     "spike_alert_count": 0,
-    "group_sync_alerts": [
-      {
-        "group": "中信",
-        "direction": "BUY",
-        "branch_count": 26,
-        "total_branches": 35,
-        "total_net": 219071.0
-      },
-      {
-        "group": "兆豐",
-        "direction": "BUY",
-        "branch_count": 28,
-        "total_branches": 41,
-        "total_net": 28599.0
-      },
-      {
-        "group": "玉山",
-        "direction": "BUY",
-        "branch_count": 12,
-        "total_branches": 17,
-        "total_net": -33581.0
-      }
-    ],
+    "group_sync_alerts": [],
     "divergence_detail": null,
-    "whale_turnover_share": 193.2951,
-    "whale_turnover_share_5d_avg": 172.4748,
+    "whale_turnover_share": 0.0987,
+    "whale_turnover_share_5d_avg": 0.0957,
     "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -22969.2,
@@ -1270,5 +1248,5 @@
   "stock_id": "2330",
   "stock_name": "台積電",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:43"
+  "last_update": "2026-05-24 10:53"
 }

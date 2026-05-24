@@ -1091,60 +1091,11 @@
     "spike_alert_count": 2,
     "group_sync_alerts": [
       {
-        "group": "統一",
+        "group": "元大",
         "direction": "SELL",
-        "branch_count": 28,
-        "total_branches": 33,
-        "total_net": -290232.0
-      },
-      {
-        "group": "中信",
-        "direction": "SELL",
-        "branch_count": 31,
-        "total_branches": 35,
-        "total_net": -143184.0
-      },
-      {
-        "group": "兆豐",
-        "direction": "SELL",
-        "branch_count": 35,
-        "total_branches": 41,
-        "total_net": -460150.0
-      },
-      {
-        "group": "玉山",
-        "direction": "SELL",
-        "branch_count": 16,
-        "total_branches": 17,
-        "total_net": 6948602.0
-      },
-      {
-        "group": "國泰",
-        "direction": "SELL",
-        "branch_count": 12,
-        "total_branches": 12,
-        "total_net": -1158107.0
-      },
-      {
-        "group": "群益",
-        "direction": "SELL",
-        "branch_count": 48,
-        "total_branches": 52,
-        "total_net": -185319.0
-      },
-      {
-        "group": "凱基",
-        "direction": "SELL",
-        "branch_count": 67,
-        "total_branches": 69,
-        "total_net": -1272617.0
-      },
-      {
-        "group": "華南",
-        "direction": "SELL",
-        "branch_count": 39,
-        "total_branches": 40,
-        "total_net": -703233.0
+        "branch_count": 143,
+        "total_branches": 147,
+        "total_net": -4658689.0
       },
       {
         "group": "富邦",
@@ -1154,11 +1105,18 @@
         "total_net": -3193715.0
       },
       {
-        "group": "元大",
+        "group": "凱基",
         "direction": "SELL",
-        "branch_count": 143,
-        "total_branches": 147,
-        "total_net": -4658689.0
+        "branch_count": 67,
+        "total_branches": 69,
+        "total_net": -1272617.0
+      },
+      {
+        "group": "國泰",
+        "direction": "SELL",
+        "branch_count": 12,
+        "total_branches": 12,
+        "total_net": -1158107.0
       },
       {
         "group": "永豐",
@@ -1166,18 +1124,11 @@
         "branch_count": 40,
         "total_branches": 45,
         "total_net": -871284.0
-      },
-      {
-        "group": "台新",
-        "direction": "SELL",
-        "branch_count": 49,
-        "total_branches": 55,
-        "total_net": -378653.0
       }
     ],
     "divergence_detail": null,
-    "whale_turnover_share": 807.3874,
-    "whale_turnover_share_5d_avg": 616.9954,
+    "whale_turnover_share": 0.4037,
+    "whale_turnover_share_5d_avg": 0.3085,
     "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": 25712.2,
@@ -1328,5 +1279,5 @@
   "stock_id": "2603",
   "stock_name": "長榮",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:44"
+  "last_update": "2026-05-24 10:53"
 }

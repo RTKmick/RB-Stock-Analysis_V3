@@ -1052,6 +1052,27 @@
     "spike_alert_count": 1,
     "group_sync_alerts": [
       {
+        "group": "富邦",
+        "direction": "BUY",
+        "branch_count": 37,
+        "total_branches": 44,
+        "total_net": 195360.0
+      },
+      {
+        "group": "國泰",
+        "direction": "BUY",
+        "branch_count": 11,
+        "total_branches": 11,
+        "total_net": 127991.0
+      },
+      {
+        "group": "兆豐",
+        "direction": "BUY",
+        "branch_count": 18,
+        "total_branches": 22,
+        "total_net": 90868.0
+      },
+      {
         "group": "第一金",
         "direction": "BUY",
         "branch_count": 14,
@@ -1064,62 +1085,6 @@
         "branch_count": 10,
         "total_branches": 13,
         "total_net": 5589.0
-      },
-      {
-        "group": "兆豐",
-        "direction": "BUY",
-        "branch_count": 18,
-        "total_branches": 22,
-        "total_net": 90868.0
-      },
-      {
-        "group": "玉山",
-        "direction": "BUY",
-        "branch_count": 14,
-        "total_branches": 16,
-        "total_net": -98399.0
-      },
-      {
-        "group": "國泰",
-        "direction": "BUY",
-        "branch_count": 11,
-        "total_branches": 11,
-        "total_net": 127991.0
-      },
-      {
-        "group": "群益",
-        "direction": "BUY",
-        "branch_count": 19,
-        "total_branches": 24,
-        "total_net": 76400.0
-      },
-      {
-        "group": "華南",
-        "direction": "BUY",
-        "branch_count": 2,
-        "total_branches": 2,
-        "total_net": 3015.0
-      },
-      {
-        "group": "富邦",
-        "direction": "BUY",
-        "branch_count": 37,
-        "total_branches": 44,
-        "total_net": 195360.0
-      },
-      {
-        "group": "元大",
-        "direction": "BUY",
-        "branch_count": 65,
-        "total_branches": 97,
-        "total_net": 208515.0
-      },
-      {
-        "group": "台新",
-        "direction": "BUY",
-        "branch_count": 26,
-        "total_branches": 35,
-        "total_net": -6506.0
       }
     ],
     "divergence_detail": {
@@ -1128,8 +1093,8 @@
       "price_chg_pct": -1.74,
       "whale_net_5d": 781901.0
     },
-    "whale_turnover_share": 101.0242,
-    "whale_turnover_share_5d_avg": 189.4491,
+    "whale_turnover_share": 0.0505,
+    "whale_turnover_share_5d_avg": 0.0947,
     "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -19.8,
@@ -1279,5 +1244,5 @@
   "stock_id": "6547",
   "stock_name": "高端疫苗",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:44"
+  "last_update": "2026-05-24 10:53"
 }

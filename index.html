@@ -647,6 +647,16 @@
       lines.push('⛔ 壓力比 ' + pr5.toFixed(2) + '，<b class="neg">賣方佔優</b>。');
     }
 
+    var divPx = sig.divergence_detail;
+    if (divPx && divPx.label) {
+      var px = divPx.price_chg_pct;
+      var w5 = divPx.whale_net_5d;
+      var divLine = escapeHtml(String(divPx.label));
+      if (px != null) divLine += '｜5日價格 ' + (px > 0 ? '+' : '') + px + '%';
+      if (w5 != null) divLine += '｜大戶5日淨額 ' + (w5 > 0 ? '+' : '') + w5 + ' 張';
+      lines.push('🧭 <b>價量背離</b>：' + divLine);
+    }
+
     if (action === 'EXIT_ALERT' && conf < 40) {
       lines.push('📋 <b>建議操作</b>：訊號偏空且信心度低，建議<b class="neg">降低持倉或觀望</b>，等待信心度回升再考慮進場。');
     } else if (action === 'BUY_ZONE' && f5d > 0 && t5d > 0) {

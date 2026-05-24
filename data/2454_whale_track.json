@@ -1091,25 +1091,10 @@
     ],
     "max_broker_spike": 4.51,
     "spike_alert_count": 1,
-    "group_sync_alerts": [
-      {
-        "group": "富邦",
-        "direction": "SELL",
-        "branch_count": 37,
-        "total_branches": 55,
-        "total_net": -243574.0
-      },
-      {
-        "group": "永豐",
-        "direction": "SELL",
-        "branch_count": 32,
-        "total_branches": 45,
-        "total_net": -444519.0
-      }
-    ],
+    "group_sync_alerts": [],
     "divergence_detail": null,
-    "whale_turnover_share": 598.6624,
-    "whale_turnover_share_5d_avg": 483.6323,
+    "whale_turnover_share": 0.3003,
+    "whale_turnover_share_5d_avg": 0.2488,
     "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -4144.1,
@@ -1261,5 +1246,5 @@
   "stock_id": "2454",
   "stock_name": "聯發科",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:43"
+  "last_update": "2026-05-24 10:53"
 }

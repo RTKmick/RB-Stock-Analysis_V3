@@ -1090,46 +1090,11 @@
     "spike_alert_count": 0,
     "group_sync_alerts": [
       {
-        "group": "兆豐",
-        "direction": "BUY",
-        "branch_count": 29,
-        "total_branches": 38,
-        "total_net": 15952.0
-      },
-      {
         "group": "玉山",
         "direction": "BUY",
         "branch_count": 13,
         "total_branches": 17,
         "total_net": 5228.0
-      },
-      {
-        "group": "群益",
-        "direction": "BUY",
-        "branch_count": 35,
-        "total_branches": 44,
-        "total_net": 39831.0
-      },
-      {
-        "group": "富邦",
-        "direction": "BUY",
-        "branch_count": 40,
-        "total_branches": 54,
-        "total_net": -3088.0
-      },
-      {
-        "group": "元大",
-        "direction": "BUY",
-        "branch_count": 103,
-        "total_branches": 146,
-        "total_net": -33083.0
-      },
-      {
-        "group": "永豐",
-        "direction": "BUY",
-        "branch_count": 31,
-        "total_branches": 44,
-        "total_net": 33348.0
       }
     ],
     "divergence_detail": {
@@ -1138,8 +1103,8 @@
       "price_chg_pct": -1.0,
       "whale_net_5d": 1918463.0
     },
-    "whale_turnover_share": 392.8638,
-    "whale_turnover_share_5d_avg": 544.083,
+    "whale_turnover_share": 0.2002,
+    "whale_turnover_share_5d_avg": 0.274,
     "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -539.5,
@@ -1291,5 +1256,5 @@
   "stock_id": "2345",
   "stock_name": "智邦",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:43"
+  "last_update": "2026-05-24 10:53"
 }

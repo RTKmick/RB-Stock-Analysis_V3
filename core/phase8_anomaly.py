@@ -46,20 +46,19 @@ def detect_direction_reversal(daily_net_series: list[float]) -> tuple[str | None
 
 
 def detect_group_sync_from_df(df_1d: pd.DataFrame) -> list[dict[str, Any]]:
-    """依當日各分點淨額，檢查同一集團是否 ≥2 分點且 ≥2/3 同向。"""
+    """
+    集團同步：方向以合計淨額為準；同向分點 ≥67%；|合計|≥100 張；活躍分點>20 時提高至 80%。
+    最多回傳 5 筆（依 |total_net|）。Hotfix：避免 BUY 與 total_net 正負矛盾、過多雜訊警報。
+    """
     if df_1d is None or df_1d.empty:
         return []
-    sync_alerts: list[dict[str, Any]] = []
-    gdf = (
-        df_1d.groupby(["broker_id", "broker_name"], as_index=False)["net"]
-        .sum()
-        .assign(
-            broker_id=lambda x: x["broker_id"].astype(str).str.strip(),
-            broker_name=lambda x: x["broker_name"].astype(str),
-        )
+    agg = (
+        df_1d.assign(broker_id=lambda x: x["broker_id"].astype(str).str.strip())
+        .groupby("broker_id", as_index=False)
+        .agg(net=("net", "sum"), broker_name=("broker_name", "first"))
     )
     group_nets: dict[str, list[float]] = {}
-    for _, row in gdf.iterrows():
+    for _, row in agg.iterrows():
         bid = str(row["broker_id"]).strip()
         net = float(row.get("net", 0) or 0)
         if net == 0:
@@ -69,34 +68,33 @@ def detect_group_sync_from_df(df_1d: pd.DataFrame) -> list[dict[str, Any]]:
             continue
         group_nets.setdefault(gname, []).append(net)
 
+    sync_alerts: list[dict[str, Any]] = []
     for group_name, active in group_nets.items():
         if len(active) < 2:
             continue
-        buy_count = sum(1 for x in active if x > 0)
-        sell_count = sum(1 for x in active if x < 0)
         total = float(sum(active))
+        if total == 0:
+            continue
+        direction = "BUY" if total > 0 else "SELL"
+        same_dir_count = sum(1 for x in active if (x > 0) == (total > 0))
         n = len(active)
-        if buy_count >= n * 0.67:
-            sync_alerts.append(
-                {
-                    "group": group_name,
-                    "direction": "BUY",
-                    "branch_count": buy_count,
-                    "total_branches": n,
-                    "total_net": round(total, 1),
-                }
-            )
-        elif sell_count >= n * 0.67:
-            sync_alerts.append(
-                {
-                    "group": group_name,
-                    "direction": "SELL",
-                    "branch_count": sell_count,
-                    "total_branches": n,
-                    "total_net": round(total, 1),
-                }
-            )
-    return sync_alerts
+        if same_dir_count < n * 0.67:
+            continue
+        if abs(total) < 100:
+            continue
+        if n > 20 and same_dir_count < n * 0.80:
+            continue
+        sync_alerts.append(
+            {
+                "group": group_name,
+                "direction": direction,
+                "branch_count": same_dir_count,
+                "total_branches": n,
+                "total_net": round(total, 1),
+            }
+        )
+    sync_alerts.sort(key=lambda x: abs(x["total_net"]), reverse=True)
+    return sync_alerts[:5]
 
 
 def detect_price_volume_divergence(
@@ -132,10 +130,21 @@ def detect_price_volume_divergence(
     return None
 
 
-def compute_whale_turnover_share(top6_total_volume: float, market_total_volume: float) -> float:
-    if not market_total_volume or market_total_volume == 0:
+def compute_whale_turnover_share_from_tdr(df_day: pd.DataFrame, top6_ids: set[str]) -> float:
+    """
+    Top6 買賣量合計 / 當日全部分點買賣量合計（皆來自 TDR，單位一致）。
+    回傳 0.0~1.0 之間小數。
+    """
+    if df_day is None or df_day.empty:
         return 0.0
-    return round(float(top6_total_volume) / float(market_total_volume), 4)
+    market_vol = float(df_day["buy"].sum()) + float(df_day["sell"].sum())
+    if market_vol <= 0:
+        return 0.0
+    ids = {str(x).strip() for x in top6_ids}
+    sub = df_day[df_day["broker_id"].astype(str).str.strip().isin(ids)]
+    top6_vol = float(sub["buy"].sum()) + float(sub["sell"].sum()) if not sub.empty else 0.0
+    ratio = top6_vol / market_vol
+    return round(max(0.0, min(1.0, ratio)), 4)
 
 
 def compute_anomaly_flags(
@@ -198,16 +207,6 @@ def _broker_abs_daily_volumes(df: pd.DataFrame, broker_id: str, dates: list[str]
         else:
             out.append(float(day["buy"].sum()) + float(day["sell"].sum()))
     return out
-
-
-def _market_volume_lots(ohlcv: pd.DataFrame | None, date_str: str) -> float:
-    if ohlcv is None or ohlcv.empty or "volume" not in ohlcv.columns:
-        return 0.0
-    row = ohlcv[ohlcv["date"].astype(str) == str(date_str)]
-    if row.empty:
-        return 0.0
-    vol = float(row.iloc[-1]["volume"])
-    return vol / 1000.0
 
 
 def _aligned_close_and_top6_net(
@@ -286,19 +285,15 @@ def enrich_phase8(
     closes, nets = _aligned_close_and_top6_net(df_20d, ohlcv_20d, date_20d, top6_ids, lookback=5)
     signals["divergence_detail"] = detect_price_volume_divergence(closes, nets, lookback=5)
 
-    # --- A5 大戶成交佔比 ---
-    sub1 = df_1d[df_1d["broker_id"].astype(str).str.strip().isin(set(str(x).strip() for x in top6_ids))]
-    top6_vol = float(sub1["buy"].sum()) + float(sub1["sell"].sum()) if not sub1.empty else 0.0
-    mkt = _market_volume_lots(ohlcv_20d, last_1d)
-    signals["whale_turnover_share"] = compute_whale_turnover_share(top6_vol, mkt)
+    # --- A5 大戶成交佔比（與全市場量皆取自分點日表，避免張/股混用） ---
+    ids_set = {str(x).strip() for x in top6_ids}
+    signals["whale_turnover_share"] = compute_whale_turnover_share_from_tdr(df_1d, ids_set)
     shares_5d: list[float] = []
     for d in date_20d[-5:]:
         sd = df_20d[df_20d["date"] == d]
-        s6 = sd[sd["broker_id"].astype(str).str.strip().isin(set(str(x).strip() for x in top6_ids))]
-        t6v = float(s6["buy"].sum()) + float(s6["sell"].sum()) if not s6.empty else 0.0
-        mv = _market_volume_lots(ohlcv_20d, str(d))
-        if mv > 0:
-            shares_5d.append(compute_whale_turnover_share(t6v, mv))
+        if sd.empty:
+            continue
+        shares_5d.append(compute_whale_turnover_share_from_tdr(sd, ids_set))
     signals["whale_turnover_share_5d_avg"] = (
         round(sum(shares_5d) / len(shares_5d), 4) if shares_5d else None
     )

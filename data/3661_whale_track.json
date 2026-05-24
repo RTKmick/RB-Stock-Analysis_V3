@@ -1085,39 +1085,10 @@
     ],
     "max_broker_spike": 0.97,
     "spike_alert_count": 0,
-    "group_sync_alerts": [
-      {
-        "group": "統一",
-        "direction": "BUY",
-        "branch_count": 21,
-        "total_branches": 27,
-        "total_net": 24043.0
-      },
-      {
-        "group": "兆豐",
-        "direction": "BUY",
-        "branch_count": 29,
-        "total_branches": 38,
-        "total_net": 24207.0
-      },
-      {
-        "group": "永豐",
-        "direction": "BUY",
-        "branch_count": 31,
-        "total_branches": 45,
-        "total_net": 33212.0
-      },
-      {
-        "group": "台新",
-        "direction": "BUY",
-        "branch_count": 41,
-        "total_branches": 55,
-        "total_net": 8829.0
-      }
-    ],
+    "group_sync_alerts": [],
     "divergence_detail": null,
-    "whale_turnover_share": 297.3082,
-    "whale_turnover_share_5d_avg": 344.247,
+    "whale_turnover_share": 0.1487,
+    "whale_turnover_share_5d_avg": 0.1728,
     "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -335.6,
@@ -1269,5 +1240,5 @@
   "stock_id": "3661",
   "stock_name": "世芯-KY",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:44"
+  "last_update": "2026-05-24 10:53"
 }
