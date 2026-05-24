@@ -156,9 +156,13 @@
         -75.1
       ],
       "km_to_hq": 5.7,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.97,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1360",
@@ -188,9 +192,13 @@
         1.0
       ],
       "km_to_hq": 5.0,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.02,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1440",
@@ -220,9 +228,13 @@
         -40.0
       ],
       "km_to_hq": 5.7,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.36,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9875",
@@ -252,9 +264,13 @@
         0.5
       ],
       "km_to_hq": 16.9,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "元大"
+      "group_name": "元大",
+      "volume_spike_ratio": 0.03,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1480",
@@ -284,9 +300,13 @@
         -11.4
       ],
       "km_to_hq": 6.0,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.52,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "8900",
@@ -316,9 +336,13 @@
         1.0
       ],
       "km_to_hq": 5.7,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.09,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     }
   ],
   "signals": {
@@ -1059,6 +1083,42 @@
         186.3
       ]
     ],
+    "max_broker_spike": 0.97,
+    "spike_alert_count": 0,
+    "group_sync_alerts": [
+      {
+        "group": "統一",
+        "direction": "BUY",
+        "branch_count": 21,
+        "total_branches": 27,
+        "total_net": 24043.0
+      },
+      {
+        "group": "兆豐",
+        "direction": "BUY",
+        "branch_count": 29,
+        "total_branches": 38,
+        "total_net": 24207.0
+      },
+      {
+        "group": "永豐",
+        "direction": "BUY",
+        "branch_count": 31,
+        "total_branches": 45,
+        "total_net": 33212.0
+      },
+      {
+        "group": "台新",
+        "direction": "BUY",
+        "branch_count": 41,
+        "total_branches": 55,
+        "total_net": 8829.0
+      }
+    ],
+    "divergence_detail": null,
+    "whale_turnover_share": 297.3082,
+    "whale_turnover_share_5d_avg": 344.247,
+    "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -335.6,
       "top6_net_5d_lot": 229.5,
@@ -1209,5 +1269,5 @@
   "stock_id": "3661",
   "stock_name": "世芯-KY",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:27"
+  "last_update": "2026-05-24 10:44"
 }

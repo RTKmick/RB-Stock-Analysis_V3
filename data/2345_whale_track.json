@@ -156,9 +156,13 @@
         14.7
       ],
       "km_to_hq": 59.2,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.2,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1480",
@@ -188,9 +192,13 @@
         -182.8
       ],
       "km_to_hq": 57.7,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.62,
+      "volume_spike_alert": false,
+      "reversal_type": "DUMP_AFTER_BUY",
+      "reversal_magnitude": -182.8
     },
     {
       "broker_id": "9A00",
@@ -220,9 +228,13 @@
         0.4
       ],
       "km_to_hq": 55.1,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "永豐"
+      "group_name": "永豐",
+      "volume_spike_ratio": 0.19,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9600",
@@ -252,9 +264,13 @@
         -29.0
       ],
       "km_to_hq": 58.2,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "富邦"
+      "group_name": "富邦",
+      "volume_spike_ratio": 0.16,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1650",
@@ -284,9 +300,13 @@
         -62.3
       ],
       "km_to_hq": 59.8,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 0.51,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9A81",
@@ -316,9 +336,13 @@
         8.7
       ],
       "km_to_hq": 57.5,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "永豐"
+      "group_name": "永豐",
+      "volume_spike_ratio": 0.13,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     }
   ],
   "signals": {
@@ -1062,6 +1086,61 @@
         705.2
       ]
     ],
+    "max_broker_spike": 0.62,
+    "spike_alert_count": 0,
+    "group_sync_alerts": [
+      {
+        "group": "兆豐",
+        "direction": "BUY",
+        "branch_count": 29,
+        "total_branches": 38,
+        "total_net": 15952.0
+      },
+      {
+        "group": "玉山",
+        "direction": "BUY",
+        "branch_count": 13,
+        "total_branches": 17,
+        "total_net": 5228.0
+      },
+      {
+        "group": "群益",
+        "direction": "BUY",
+        "branch_count": 35,
+        "total_branches": 44,
+        "total_net": 39831.0
+      },
+      {
+        "group": "富邦",
+        "direction": "BUY",
+        "branch_count": 40,
+        "total_branches": 54,
+        "total_net": -3088.0
+      },
+      {
+        "group": "元大",
+        "direction": "BUY",
+        "branch_count": 103,
+        "total_branches": 146,
+        "total_net": -33083.0
+      },
+      {
+        "group": "永豐",
+        "direction": "BUY",
+        "branch_count": 31,
+        "total_branches": 44,
+        "total_net": 33348.0
+      }
+    ],
+    "divergence_detail": {
+      "type": "PRICE_DOWN_WHALE_BUY",
+      "label": "🔍 股價下跌、大戶吃貨",
+      "price_chg_pct": -1.0,
+      "whale_net_5d": 1918463.0
+    },
+    "whale_turnover_share": 392.8638,
+    "whale_turnover_share_5d_avg": 544.083,
+    "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -539.5,
       "top6_net_5d_lot": 1918.6,
@@ -1212,5 +1291,5 @@
   "stock_id": "2345",
   "stock_name": "智邦",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:27"
+  "last_update": "2026-05-24 10:43"
 }

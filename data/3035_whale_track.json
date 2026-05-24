@@ -134,7 +134,7 @@
       "net_10d": 1559.0,
       "net_5d": 2419.0,
       "net_1d": 238.0,
-      "avg_price": 182.66,
+      "avg_price": 191.88,
       "city": "台北市",
       "broker_org_type": "foreign",
       "is_proprietary": "",
@@ -156,9 +156,13 @@
         238.0
       ],
       "km_to_hq": 61.9,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 1.45,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1650",
@@ -166,7 +170,7 @@
       "net_10d": 1480.0,
       "net_5d": 1886.0,
       "net_1d": 497.0,
-      "avg_price": 183.59,
+      "avg_price": 190.4,
       "city": "台北市",
       "broker_org_type": "foreign",
       "is_proprietary": "",
@@ -188,9 +192,13 @@
         497.0
       ],
       "km_to_hq": 62.6,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 1.35,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1480",
@@ -198,7 +206,7 @@
       "net_10d": 1432.0,
       "net_5d": 745.0,
       "net_1d": -1181.0,
-      "avg_price": 182.87,
+      "avg_price": 192.06,
       "city": "台北市",
       "broker_org_type": "foreign",
       "is_proprietary": "",
@@ -220,9 +228,13 @@
         -1181.0
       ],
       "km_to_hq": 60.5,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 2.88,
+      "volume_spike_alert": false,
+      "reversal_type": "DUMP_AFTER_BUY",
+      "reversal_magnitude": -1181.0
     },
     {
       "broker_id": "8440",
@@ -230,7 +242,7 @@
       "net_10d": 1185.0,
       "net_5d": 1558.0,
       "net_1d": -129.0,
-      "avg_price": 180.96,
+      "avg_price": 192.56,
       "city": "台北市",
       "broker_org_type": "foreign",
       "is_proprietary": "",
@@ -252,9 +264,13 @@
         -129.0
       ],
       "km_to_hq": 62.1,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 2.66,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "1440",
@@ -262,7 +278,7 @@
       "net_10d": 714.0,
       "net_5d": 952.0,
       "net_1d": -166.0,
-      "avg_price": 180.55,
+      "avg_price": 191.78,
       "city": "台北市",
       "broker_org_type": "foreign",
       "is_proprietary": "",
@@ -284,9 +300,13 @@
         -166.0
       ],
       "km_to_hq": 61.9,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": null
+      "group_name": null,
+      "volume_spike_ratio": 1.77,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9100",
@@ -294,7 +314,7 @@
       "net_10d": 713.8,
       "net_5d": 647.9,
       "net_1d": -39.1,
-      "avg_price": 181.97,
+      "avg_price": 190.15,
       "city": "台北市",
       "broker_org_type": "local",
       "is_proprietary": "",
@@ -316,14 +336,18 @@
         -39.2
       ],
       "km_to_hq": 61.0,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "群益"
+      "group_name": "群益",
+      "volume_spike_ratio": 1.44,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     }
   ],
   "signals": {
     "concentration_5d": 33.09,
-    "concentration_20d": 25.78,
+    "concentration_20d": 15.09,
     "netbuy_1d_lot": 0.0,
     "netbuy_5d_lot": 0.0,
     "netbuy_20d_lot": 0.0,
@@ -331,107 +355,89 @@
     "sell_count_5d": 561,
     "breadth_5d": -310,
     "breadth_ratio_5d": 0.3091,
-    "buy_count_20d": 335,
-    "sell_count_20d": 537,
-    "breadth_20d": -202,
-    "breadth_ratio_20d": 0.3842,
+    "buy_count_20d": 388,
+    "sell_count_20d": 428,
+    "breadth_20d": -40,
+    "breadth_ratio_20d": 0.4755,
     "foreign_net_5d": 7577024.0,
     "local_net_5d": -7174844.0,
     "top_buy_15": [
       {
-        "broker_id": "8440",
-        "broker_name": "摩根大通",
-        "net_lot": 3808.9,
-        "city": "台北市",
-        "broker_org_type": "foreign",
-        "streak_buy": 0,
-        "streak_sell": 1
-      },
-      {
-        "broker_id": "1470",
-        "broker_name": "台灣摩根",
-        "net_lot": 2286.5,
-        "city": "台北市",
-        "broker_org_type": "foreign",
-        "streak_buy": 2,
-        "streak_sell": 0
-      },
-      {
         "broker_id": "1650",
         "broker_name": "瑞銀",
-        "net_lot": 2269.6,
+        "net_lot": 1446.0,
         "city": "台北市",
         "broker_org_type": "foreign",
         "streak_buy": 5,
         "streak_sell": 0
       },
       {
-        "broker_id": "1480",
-        "broker_name": "美商高盛",
-        "net_lot": 1637.4,
+        "broker_id": "8440",
+        "broker_name": "摩根大通",
+        "net_lot": 1224.3,
         "city": "台北市",
         "broker_org_type": "foreign",
         "streak_buy": 0,
         "streak_sell": 1
       },
       {
-        "broker_id": "9100",
-        "broker_name": "群益",
-        "net_lot": 989.1,
+        "broker_id": "1480",
+        "broker_name": "美商高盛",
+        "net_lot": 1189.0,
         "city": "台北市",
-        "broker_org_type": "local",
+        "broker_org_type": "foreign",
         "streak_buy": 0,
-        "streak_sell": 2
+        "streak_sell": 1
       },
       {
         "broker_id": "8888",
         "broker_name": "國泰敦南",
-        "net_lot": 974.4,
+        "net_lot": 782.3,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 1,
         "streak_sell": 0
       },
       {
-        "broker_id": "1440",
-        "broker_name": "美林",
-        "net_lot": 636.8,
-        "city": "台北市",
-        "broker_org_type": "foreign",
-        "streak_buy": 0,
-        "streak_sell": 1
-      },
-      {
-        "broker_id": "989m",
-        "broker_name": "元大信義",
-        "net_lot": 606.1,
-        "city": "台北市",
-        "broker_org_type": "local",
-        "streak_buy": 0,
-        "streak_sell": 2
-      },
-      {
         "broker_id": "9A00",
         "broker_name": "永豐金",
-        "net_lot": 456.7,
+        "net_lot": 526.6,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 1,
+        "streak_sell": 0
+      },
+      {
+        "broker_id": "9A89",
+        "broker_name": "永豐敦北",
+        "net_lot": 447.6,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 5,
         "streak_sell": 0
       },
       {
         "broker_id": "9A8F",
         "broker_name": "永豐敦南",
-        "net_lot": 429.6,
+        "net_lot": 442.5,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 1,
         "streak_sell": 0
       },
       {
-        "broker_id": "9268",
-        "broker_name": "凱基台北",
-        "net_lot": 416.3,
+        "broker_id": "9100",
+        "broker_name": "群益",
+        "net_lot": 436.9,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 0,
+        "streak_sell": 2
+      },
+      {
+        "broker_id": "5852",
+        "broker_name": "統一敦南",
+        "net_lot": 339.0,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 0,
@@ -440,35 +446,53 @@
       {
         "broker_id": "8885",
         "broker_name": "國泰桃園",
-        "net_lot": 390.7,
+        "net_lot": 320.2,
         "city": "桃園市",
         "broker_org_type": "local",
         "streak_buy": 1,
         "streak_sell": 0
       },
       {
-        "broker_id": "9A89",
-        "broker_name": "永豐敦北",
-        "net_lot": 367.0,
-        "city": "台北市",
+        "broker_id": "6461",
+        "broker_name": "大昌樹林",
+        "net_lot": 315.7,
+        "city": "新北市",
         "broker_org_type": "local",
-        "streak_buy": 5,
+        "streak_buy": 1,
         "streak_sell": 0
       },
       {
-        "broker_id": "5852",
-        "broker_name": "統一敦南",
-        "net_lot": 325.2,
+        "broker_id": "989m",
+        "broker_name": "元大信義",
+        "net_lot": 313.8,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 0,
-        "streak_sell": 1
+        "streak_sell": 2
       },
       {
-        "broker_id": "6461",
-        "broker_name": "大昌樹林",
-        "net_lot": 299.8,
-        "city": "新北市",
+        "broker_id": "884A",
+        "broker_name": "玉山士林",
+        "net_lot": 266.1,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 4,
+        "streak_sell": 0
+      },
+      {
+        "broker_id": "700Z",
+        "broker_name": "兆豐高雄",
+        "net_lot": 262.2,
+        "city": "高雄市",
+        "broker_org_type": "local",
+        "streak_buy": 1,
+        "streak_sell": 0
+      },
+      {
+        "broker_id": "8882",
+        "broker_name": "國泰台中",
+        "net_lot": 250.5,
+        "city": "台中市",
         "broker_org_type": "local",
         "streak_buy": 1,
         "streak_sell": 0
@@ -476,72 +500,9 @@
     ],
     "top_sell_15": [
       {
-        "broker_id": "9200",
-        "broker_name": "凱基",
-        "net_lot": -926.2,
-        "city": "台北市",
-        "broker_org_type": "local",
-        "streak_buy": 0,
-        "streak_sell": 1
-      },
-      {
-        "broker_id": "6160",
-        "broker_name": "中國信託",
-        "net_lot": -703.2,
-        "city": "台北市",
-        "broker_org_type": "local",
-        "streak_buy": 0,
-        "streak_sell": 2
-      },
-      {
-        "broker_id": "8880",
-        "broker_name": "國泰綜合",
-        "net_lot": -635.7,
-        "city": "台北市",
-        "broker_org_type": "local",
-        "streak_buy": 0,
-        "streak_sell": 1
-      },
-      {
-        "broker_id": "8150",
-        "broker_name": "台新",
-        "net_lot": -553.9,
-        "city": "台北市",
-        "broker_org_type": "local",
-        "streak_buy": 0,
-        "streak_sell": 0
-      },
-      {
-        "broker_id": "9B00",
-        "broker_name": "台新證券",
-        "net_lot": -543.8,
-        "city": "",
-        "broker_org_type": "unknown",
-        "streak_buy": 0,
-        "streak_sell": 3
-      },
-      {
-        "broker_id": "5857",
-        "broker_name": "統一新竹",
-        "net_lot": -528.1,
-        "city": "新竹市",
-        "broker_org_type": "local",
-        "streak_buy": 0,
-        "streak_sell": 3
-      },
-      {
-        "broker_id": "9623",
-        "broker_name": "富邦台北",
-        "net_lot": -514.6,
-        "city": "台北市",
-        "broker_org_type": "local",
-        "streak_buy": 1,
-        "streak_sell": 0
-      },
-      {
         "broker_id": "9300",
         "broker_name": "華南永昌",
-        "net_lot": -467.9,
+        "net_lot": -1355.7,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 0,
@@ -550,35 +511,89 @@
       {
         "broker_id": "1560",
         "broker_name": "港商野村",
-        "net_lot": -432.0,
+        "net_lot": -1232.0,
         "city": "台北市",
         "broker_org_type": "foreign",
         "streak_buy": 0,
         "streak_sell": 1
       },
       {
-        "broker_id": "989G",
-        "broker_name": "元大大同",
-        "net_lot": -426.3,
+        "broker_id": "6160",
+        "broker_name": "中國信託",
+        "net_lot": -533.8,
         "city": "台北市",
         "broker_org_type": "local",
-        "streak_buy": 1,
+        "streak_buy": 0,
+        "streak_sell": 2
+      },
+      {
+        "broker_id": "1470",
+        "broker_name": "台灣摩根",
+        "net_lot": -453.7,
+        "city": "台北市",
+        "broker_org_type": "foreign",
+        "streak_buy": 2,
         "streak_sell": 0
       },
       {
-        "broker_id": "9800",
-        "broker_name": "元大",
-        "net_lot": -365.9,
+        "broker_id": "9B00",
+        "broker_name": "台新證券",
+        "net_lot": -440.8,
+        "city": "",
+        "broker_org_type": "unknown",
+        "streak_buy": 0,
+        "streak_sell": 3
+      },
+      {
+        "broker_id": "9268",
+        "broker_name": "凱基台北",
+        "net_lot": -436.8,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 0,
         "streak_sell": 1
       },
       {
-        "broker_id": "988C",
-        "broker_name": "元大三重",
-        "net_lot": -362.7,
-        "city": "新北市",
+        "broker_id": "8710",
+        "broker_name": "陽信",
+        "net_lot": -417.8,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 0,
+        "streak_sell": 3
+      },
+      {
+        "broker_id": "9200",
+        "broker_name": "凱基",
+        "net_lot": -411.9,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 0,
+        "streak_sell": 1
+      },
+      {
+        "broker_id": "9800",
+        "broker_name": "元大",
+        "net_lot": -404.5,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 0,
+        "streak_sell": 1
+      },
+      {
+        "broker_id": "9623",
+        "broker_name": "富邦台北",
+        "net_lot": -325.5,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 1,
+        "streak_sell": 0
+      },
+      {
+        "broker_id": "1020",
+        "broker_name": "合庫",
+        "net_lot": -298.0,
+        "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 1,
         "streak_sell": 0
@@ -586,7 +601,16 @@
       {
         "broker_id": "9600",
         "broker_name": "富邦",
-        "net_lot": -298.4,
+        "net_lot": -294.9,
+        "city": "台北市",
+        "broker_org_type": "local",
+        "streak_buy": 1,
+        "streak_sell": 0
+      },
+      {
+        "broker_id": "9676",
+        "broker_name": "富邦仁愛",
+        "net_lot": -256.8,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 1,
@@ -595,63 +619,23 @@
       {
         "broker_id": "779c",
         "broker_name": "國票敦北",
-        "net_lot": -292.3,
+        "net_lot": -221.5,
         "city": "台北市",
         "broker_org_type": "local",
         "streak_buy": 0,
         "streak_sell": 6
       },
       {
-        "broker_id": "2180",
-        "broker_name": "亞東",
-        "net_lot": -267.4,
-        "city": "台北市",
+        "broker_id": "9647",
+        "broker_name": "富邦新竹",
+        "net_lot": -214.9,
+        "city": "新竹市",
         "broker_org_type": "local",
         "streak_buy": 1,
         "streak_sell": 0
       }
     ],
     "labels_20d": [
-      "02-24",
-      "02-25",
-      "02-26",
-      "03-02",
-      "03-03",
-      "03-04",
-      "03-05",
-      "03-06",
-      "03-09",
-      "03-10",
-      "03-11",
-      "03-12",
-      "03-13",
-      "03-16",
-      "03-17",
-      "03-18",
-      "03-19",
-      "03-20",
-      "03-23",
-      "03-24",
-      "03-25",
-      "03-26",
-      "03-27",
-      "03-30",
-      "03-31",
-      "04-01",
-      "04-02",
-      "04-07",
-      "04-08",
-      "04-09",
-      "04-10",
-      "04-13",
-      "04-14",
-      "04-15",
-      "04-16",
-      "04-17",
-      "04-20",
-      "04-21",
-      "04-22",
-      "04-23",
       "04-24",
       "04-27",
       "04-28",
@@ -674,46 +658,6 @@
       "05-22"
     ],
     "buy_count_series_20d": [
-      408,
-      339,
-      365,
-      323,
-      448,
-      539,
-      394,
-      404,
-      526,
-      356,
-      298,
-      339,
-      384,
-      231,
-      234,
-      241,
-      391,
-      339,
-      440,
-      485,
-      212,
-      260,
-      406,
-      427,
-      468,
-      224,
-      420,
-      329,
-      202,
-      240,
-      298,
-      268,
-      265,
-      472,
-      304,
-      337,
-      189,
-      310,
-      375,
-      297,
       229,
       603,
       513,
@@ -736,46 +680,6 @@
       515
     ],
     "sell_count_series_20d": [
-      264,
-      312,
-      340,
-      275,
-      215,
-      179,
-      216,
-      166,
-      197,
-      222,
-      347,
-      247,
-      190,
-      346,
-      355,
-      430,
-      214,
-      229,
-      179,
-      151,
-      334,
-      279,
-      155,
-      175,
-      170,
-      250,
-      187,
-      186,
-      442,
-      312,
-      233,
-      220,
-      317,
-      169,
-      403,
-      378,
-      586,
-      476,
-      409,
-      487,
       576,
       206,
       272,
@@ -798,46 +702,6 @@
       286
     ],
     "breadth_series_20d": [
-      144,
-      27,
-      25,
-      48,
-      233,
-      360,
-      178,
-      238,
-      329,
-      134,
-      -49,
-      92,
-      194,
-      -115,
-      -121,
-      -189,
-      177,
-      110,
-      261,
-      334,
-      -122,
-      -19,
-      251,
-      252,
-      298,
-      -26,
-      233,
-      143,
-      -240,
-      -72,
-      65,
-      48,
-      -52,
-      303,
-      -99,
-      -41,
-      -397,
-      -166,
-      -34,
-      -190,
       -347,
       397,
       241,
@@ -860,46 +724,6 @@
       229
     ],
     "breadth_ratio_series_20d": [
-      0.6071,
-      0.5207,
-      0.5177,
-      0.5401,
-      0.6757,
-      0.7507,
-      0.6459,
-      0.7088,
-      0.7275,
-      0.6159,
-      0.462,
-      0.5785,
-      0.669,
-      0.4003,
-      0.3973,
-      0.3592,
-      0.6463,
-      0.5968,
-      0.7108,
-      0.7626,
-      0.3883,
-      0.4824,
-      0.7237,
-      0.7093,
-      0.7335,
-      0.4726,
-      0.6919,
-      0.6388,
-      0.3137,
-      0.4348,
-      0.5612,
-      0.5492,
-      0.4553,
-      0.7363,
-      0.43,
-      0.4713,
-      0.2439,
-      0.3944,
-      0.4783,
-      0.3788,
       0.2845,
       0.7454,
       0.6535,
@@ -1014,17 +838,17 @@
     "top6_max_wave_score": 0.85,
     "top6_wave_leader_id": "1650",
     "top6_wave_leader_name": "瑞銀",
-    "delta_major_flow_20": 8575.7,
-    "top15_buy_sum_20": 15894.1,
-    "top15_sell_sum_20": 7318.4,
+    "delta_major_flow_20": 1264.1,
+    "top15_buy_sum_20": 8562.7,
+    "top15_sell_sum_20": 7298.6,
     "delta_major_flow_5": 6441.4,
     "top15_buy_sum_5": 10094.3,
     "top15_sell_sum_5": 3652.9,
-    "pressure_ratio_20d": 0.6847,
-    "net_pressure_20d": 0.3694,
+    "pressure_ratio_20d": 0.5398,
+    "net_pressure_20d": 0.0797,
     "pressure_ratio_5d": 0.7343,
     "net_pressure_5d": 0.4686,
-    "top15_buy_stability_20d": 0.1537,
+    "top15_buy_stability_20d": 0.1167,
     "top15_buy_stability_10d": 0.1241,
     "top15_buy_avg_size_10d": 15.0,
     "turning_points": {
@@ -1032,7 +856,7 @@
       "local_buy_switch": 1,
       "whale_reversal": 0,
       "abnormal_buy_spike": 1,
-      "cost_zone_defended": 1
+      "cost_zone_defended": 0
     },
     "whale_radar": {
       "labels": [
@@ -1043,14 +867,14 @@
         "短期加速"
       ],
       "values": [
-        25.8,
+        15.1,
         50.0,
         30.9,
         70.0,
         50.0
       ],
       "debug": {
-        "c20": 25.78,
+        "c20": 15.09,
         "net1": 0.0,
         "net5": 0.0,
         "net20": 0.0,
@@ -1064,84 +888,44 @@
       }
     },
     "enhanced": {
-      "coherence_today": 1.4,
+      "coherence_today": 1.25,
       "buy_cnt_today": 515,
-      "avg_buy_cnt_20d": 366.9,
+      "avg_buy_cnt_20d": 411.5,
       "coherence_series_20d": [
-        1.11,
-        0.92,
-        0.99,
-        0.88,
-        1.22,
+        0.56,
         1.47,
-        1.07,
-        1.1,
-        1.43,
-        0.97,
-        0.81,
-        0.92,
-        1.05,
-        0.63,
-        0.64,
-        0.66,
-        1.07,
-        0.92,
-        1.2,
-        1.32,
-        0.58,
-        0.71,
-        1.11,
-        1.16,
-        1.28,
-        0.61,
+        1.25,
+        1.3,
         1.14,
-        0.9,
-        0.55,
-        0.65,
-        0.81,
-        0.73,
-        0.72,
-        1.29,
-        0.83,
+        1.14,
+        0.88,
         0.92,
-        0.52,
-        0.84,
-        1.02,
-        0.81,
-        0.62,
-        1.64,
-        1.4,
-        1.46,
-        1.28,
-        1.28,
-        0.99,
-        1.04,
-        1.16,
-        0.85,
-        0.42,
-        1.34,
-        1.73,
         1.03,
-        1.33,
-        1.04,
-        1.11,
-        0.91,
-        0.4,
-        1.4
+        0.76,
+        0.37,
+        1.19,
+        1.55,
+        0.92,
+        1.19,
+        0.93,
+        0.99,
+        0.81,
+        0.35,
+        1.25
       ],
-      "coherence_slope_5d": 0.001,
-      "coherence_persistence_20d": 0.267,
-      "coherence_max_20d": 1.73,
-      "cost_low": 180.55,
-      "cost_high": 183.59,
+      "coherence_slope_5d": -0.0,
+      "coherence_persistence_20d": 0.25,
+      "coherence_max_20d": 1.55,
+      "cost_low": 190.15,
+      "cost_high": 192.56,
       "close_last": 211.0,
-      "cost_deviation": 0.169,
+      "cost_deviation": 0.11,
       "cost_zone_status": "above_zone",
-      "cz_touch_20d": 2,
-      "cz_break_up_20d": 2,
+      "cz_touch_20d": 0,
+      "cz_break_up_20d": 3,
       "cz_break_dn_20d": 2,
-      "cz_defense_win_20d": 7,
-      "cz_defense_rate_20d": 0.152,
+      "cz_defense_win_20d": 6,
+      "cz_defense_rate_20d": 0.462,
       "streak_strength": 0.0
     },
     "regime_score": 80,
@@ -1152,76 +936,75 @@
       "break_high_120d",
       "atr_high"
     ],
-    "sig_vwap": 1,
+    "sig_vwap": 0,
     "sig_accumulation": 0,
     "sig_rotation": 0,
     "sig_profile_zone": 0,
     "sig_structure_break": 1,
-    "tv_score": 2,
-    "tv_grade": "watch",
-    "trend_score": 76.0,
+    "tv_score": 1,
+    "tv_grade": "weak",
+    "trend_score": 77.0,
     "trend": "震盪",
     "tags": [
       "外/本分歧",
-      "賣盤擴散",
       "淨買主導",
       "方向拉扯"
     ],
-    "score": 76.0,
-    "score_unified": 76.0,
+    "score": 77.0,
+    "score_unified": 77.0,
     "validation": {
-      "breakout_flag": 1,
-      "divergence_flag": 0,
-      "confirmation_score": 90.4
+      "breakout_flag": 0,
+      "divergence_flag": 1,
+      "confirmation_score": 30.8
     },
     "risk": {
-      "atr_pct_20d": 0.061,
+      "atr_pct_20d": 0.059,
       "avg_turnover_20d": 3820241639.9,
       "invalid_flag": 0
     },
-    "breakout_flag": 1,
-    "divergence_flag": 0,
-    "confirmation_score": 90.4,
-    "atr_pct_20d": 0.061,
+    "breakout_flag": 0,
+    "divergence_flag": 1,
+    "confirmation_score": 30.8,
+    "atr_pct_20d": 0.059,
     "avg_turnover_20d": 3820241639.9,
     "invalid_flag": 0,
-    "geo_top5_avg_km": 61.6,
-    "geo_top5_min_km": 60.5,
-    "geo_top5_wavg_km": 61.8,
-    "geo_affinity_score": 44.7,
+    "geo_top5_avg_km": 60.6,
+    "geo_top5_min_km": 58.2,
+    "geo_top5_wavg_km": 61.1,
+    "geo_affinity_score": 45.0,
     "geo_top5_detail": [
-      {
-        "broker_id": "8440",
-        "broker_name": "摩根大通",
-        "net_lot": 3808.9,
-        "km_to_hq": 62.1
-      },
-      {
-        "broker_id": "1470",
-        "broker_name": "台灣摩根",
-        "net_lot": 2286.5,
-        "km_to_hq": 61.9
-      },
       {
         "broker_id": "1650",
         "broker_name": "瑞銀",
-        "net_lot": 2269.6,
+        "net_lot": 1446.0,
         "km_to_hq": 62.6
+      },
+      {
+        "broker_id": "8440",
+        "broker_name": "摩根大通",
+        "net_lot": 1224.3,
+        "km_to_hq": 62.1
       },
       {
         "broker_id": "1480",
         "broker_name": "美商高盛",
-        "net_lot": 1637.4,
+        "net_lot": 1189.0,
         "km_to_hq": 60.5
       },
       {
-        "broker_id": "9100",
-        "broker_name": "群益",
-        "net_lot": 989.1,
-        "km_to_hq": 61.0
+        "broker_id": "8888",
+        "broker_name": "國泰敦南",
+        "net_lot": 782.3,
+        "km_to_hq": 59.9
+      },
+      {
+        "broker_id": "9A00",
+        "broker_name": "永豐金",
+        "net_lot": 526.6,
+        "km_to_hq": 58.2
       }
     ],
-    "geo_zscore": -0.49,
+    "geo_zscore": -0.5,
     "geo_baseline_mu_km": 98.22,
     "geo_baseline_sd_km": 73.88,
     "geo_baseline_n": 944,
@@ -1229,60 +1012,103 @@
     "geo_baseline_weight": 0.7,
     "geo_grade": "D",
     "geo_tag": "geo_far|baseline_all",
-    "buy_hhi_20d": 0.124,
-    "buy_entropy_20d": 2.3584,
-    "sell_hhi_20d": 0.0752,
-    "sell_entropy_20d": 2.6484,
+    "buy_hhi_20d": 0.0968,
+    "buy_entropy_20d": 2.5134,
+    "sell_hhi_20d": 0.0973,
+    "sell_entropy_20d": 2.5279,
     "dist_risk_flag": 0,
     "dist_risk_tag": "",
     "monitor_state": "NEUTRAL",
     "monitor_reasons": [
       "neutral"
     ],
-    "final_score": 66.0,
+    "final_score": 66.5,
     "final_grade": "B",
     "weights": {
       "whale": 0.6,
       "regime": 0.4
     },
     "geo_adjust": 0.85,
-    "chip_score": 47.6,
-    "chip_light": "yellow",
-    "chip_comment": "籌碼中性偏多，主力並不積極但也沒有明顯倒貨跡象，適合小部位試單或持續關注。",
+    "chip_score": 44.2,
+    "chip_light": "red",
+    "chip_comment": "目前籌碼較不友善（主力偏保守或資金較分散），建議先當作次要標的或等待型態改善。",
     "group_summary": [
       [
-        "摩根大通",
-        3808.9
-      ],
-      [
-        "台灣摩根",
-        2286.5
-      ],
-      [
         "瑞銀",
-        2269.6
-      ],
-      [
-        "美商高盛",
-        1637.4
+        1446.0
       ],
       [
         "永豐",
-        1253.3
+        1416.7
       ],
       [
-        "台新",
-        -1097.7
+        "華南",
+        -1355.7
       ],
       [
-        "中信",
-        -995.5
+        "國泰",
+        1353.0
       ],
       [
-        "群益",
-        989.1
+        "港商野村",
+        -1232.0
+      ],
+      [
+        "摩根大通",
+        1224.3
+      ],
+      [
+        "美商高盛",
+        1189.0
+      ],
+      [
+        "富邦",
+        -1092.1
       ]
     ],
+    "max_broker_spike": 2.88,
+    "spike_alert_count": 0,
+    "group_sync_alerts": [
+      {
+        "group": "玉山",
+        "direction": "BUY",
+        "branch_count": 13,
+        "total_branches": 17,
+        "total_net": 17789.0
+      },
+      {
+        "group": "國泰",
+        "direction": "BUY",
+        "branch_count": 10,
+        "total_branches": 12,
+        "total_net": 553915.0
+      },
+      {
+        "group": "富邦",
+        "direction": "BUY",
+        "branch_count": 39,
+        "total_branches": 55,
+        "total_net": 163751.0
+      },
+      {
+        "group": "元大",
+        "direction": "BUY",
+        "branch_count": 106,
+        "total_branches": 146,
+        "total_net": 473962.0
+      },
+      {
+        "group": "台新",
+        "direction": "BUY",
+        "branch_count": 38,
+        "total_branches": 55,
+        "total_net": 313583.0
+      }
+    ],
+    "divergence_detail": null,
+    "whale_turnover_share": 337.8742,
+    "whale_turnover_share_5d_avg": 339.8328,
+    "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": 8911.2,
       "top6_net_5d_lot": 7462.9,
@@ -1305,10 +1131,10 @@
           "type": "foreign",
           "net_5d_lot": 2419.0,
           "net_1d_lot": 238.0,
-          "avg_cost": 182.66,
+          "avg_cost": 191.88,
           "streak_buy": 2,
           "streak_sell": 0,
-          "position_vs_price": "+15.5%",
+          "position_vs_price": "+10.0%",
           "behavior": "ACCUMULATING"
         },
         {
@@ -1317,10 +1143,10 @@
           "type": "foreign",
           "net_5d_lot": 1886.0,
           "net_1d_lot": 497.0,
-          "avg_cost": 183.59,
+          "avg_cost": 190.4,
           "streak_buy": 5,
           "streak_sell": 0,
-          "position_vs_price": "+14.9%",
+          "position_vs_price": "+10.8%",
           "behavior": "ACCUMULATING"
         },
         {
@@ -1329,10 +1155,10 @@
           "type": "foreign",
           "net_5d_lot": 1558.0,
           "net_1d_lot": -129.0,
-          "avg_cost": 180.96,
+          "avg_cost": 192.56,
           "streak_buy": 0,
           "streak_sell": 1,
-          "position_vs_price": "+16.6%",
+          "position_vs_price": "+9.6%",
           "behavior": "HOLDING"
         },
         {
@@ -1341,10 +1167,10 @@
           "type": "foreign",
           "net_5d_lot": 952.0,
           "net_1d_lot": -166.0,
-          "avg_cost": 180.55,
+          "avg_cost": 191.78,
           "streak_buy": 0,
           "streak_sell": 1,
-          "position_vs_price": "+16.9%",
+          "position_vs_price": "+10.0%",
           "behavior": "FLIPPING"
         }
       ],
@@ -1352,8 +1178,8 @@
         "total_net_5d": 6815.0,
         "direction": "BUY",
         "avg_cost_range": [
-          180.55,
-          183.59
+          190.4,
+          192.56
         ],
         "consensus": "STRONG_BUY"
       }
@@ -1367,10 +1193,10 @@
           "type": "local",
           "net_5d_lot": 647.9,
           "net_1d_lot": -39.1,
-          "avg_cost": 181.97,
+          "avg_cost": 190.15,
           "streak_buy": 0,
           "streak_sell": 2,
-          "position_vs_price": "+16.0%",
+          "position_vs_price": "+11.0%",
           "behavior": "HOLDING"
         }
       ],
@@ -1378,8 +1204,8 @@
         "total_net_5d": 647.9,
         "direction": "BUY",
         "avg_cost_range": [
-          181.97,
-          181.97
+          190.15,
+          190.15
         ],
         "consensus": "STRONG_BUY"
       }
@@ -1393,10 +1219,10 @@
           "type": "foreign",
           "net_5d_lot": 745.0,
           "net_1d_lot": -1181.0,
-          "avg_cost": 182.87,
+          "avg_cost": 192.06,
           "streak_buy": 0,
           "streak_sell": 1,
-          "position_vs_price": "+15.4%",
+          "position_vs_price": "+9.9%",
           "behavior": "FLIPPING"
         }
       ],
@@ -1411,10 +1237,10 @@
     }
   },
   "headline": {
-    "summary": "外資主力共4家（台灣摩根、瑞銀、摩根大通、美林），五日淨買超約6815張；本土分點共1家，五日淨買超約648張；估算大戶成本區 181~184，現價 211；外資與本土五日方向分歧",
+    "summary": "外資主力共4家（台灣摩根、瑞銀、摩根大通、美林），五日淨買超約6815張；本土分點共1家，五日淨買超約648張；估算大戶成本區 190~193，現價 211；外資與本土五日方向分歧",
     "action_signal": "HOLD_WATCH",
-    "confidence": 48,
-    "confidence_hint": "外資／本土 Top6 五日方向亦相反，訊號抵觸。",
+    "confidence": 44,
+    "confidence_hint": "信心偏低：多項訊號相互矛盾，不宜重押或追高。 外資／本土 Top6 五日方向亦相反，訊號抵觸。",
     "chip_arbitration": {
       "inst_three_net_5d_lot": 8911.2,
       "top6_net_5d_lot": 7462.9,
@@ -1432,13 +1258,13 @@
       "摩根大通 五日淨額 +1558 張",
       "外資／本土五日淨額方向相反",
       "隔日沖大戶 美商高盛 五日淨買超745張（重倉警示）",
-      "現價相對大戶成本中位 +15.9%",
+      "現價相對大戶成本中位 +10.3%",
       "外/本分歧",
-      "賣盤擴散"
+      "淨買主導"
     ]
   },
   "stock_id": "3035",
   "stock_name": "智原",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 09:59"
+  "last_update": "2026-05-24 10:44"
 }

@@ -30,6 +30,7 @@ from core.signals.whale_extras import compute_turning_points, compute_whale_rada
 from core.broker_archetype import apply_broker_archetype
 from core.signals.institutional import compute_institutional_and_margin_signals
 from core.top6_history import enrich_top6_phase7, update_top6_history
+from core.phase8_anomaly import enrich_phase8
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -1029,6 +1030,19 @@ def analyze_whale_trajectory(
     _data_root = Path(__file__).resolve().parents[1] / "data"
     enrich_top6_phase7(stock_id, top6_details, signals, trade_date_str, _data_root)
     update_top6_history(stock_id, top6_details, trade_date_str, _data_root)
+
+    # Phase 8：異常偵測（爆量、反轉、集團同步、價量背離、大戶佔比、指標 Z-Score）
+    enrich_phase8(
+        stock_id=stock_id,
+        top6_details=top6_details,
+        signals=signals,
+        df_20d=df_20d,
+        df_1d=df_1d,
+        date_20d=date_20d,
+        ohlcv_20d=ohlcv_20d,
+        top6_ids=top6_ids,
+        data_dir=_data_root,
+    )
 
     whale_layers = _build_whale_layers_phase0(top6_details, signals)
     headline = _build_headline_phase0(stock_id, whale_layers, signals)

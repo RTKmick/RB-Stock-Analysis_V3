@@ -1,0 +1,12 @@
+{
+  "stock_id": "2603",
+  "records": [
+    {
+      "date": "2026-05-22",
+      "concentration_5d": 58.79,
+      "pressure_ratio_5d": 0.6741,
+      "coherence_slope_5d": -0.637,
+      "top15_buy_stability_10d": 0.1668
+    }
+  ]
+}

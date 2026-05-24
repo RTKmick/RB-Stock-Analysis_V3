@@ -156,9 +156,13 @@
         -234.4
       ],
       "km_to_hq": 63.6,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "統一"
+      "group_name": "統一",
+      "volume_spike_ratio": 0.35,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9200",
@@ -188,9 +192,13 @@
         -544.4
       ],
       "km_to_hq": 64.4,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "凱基"
+      "group_name": "凱基",
+      "volume_spike_ratio": 0.54,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9100",
@@ -220,9 +228,13 @@
         60.4
       ],
       "km_to_hq": 61.8,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "群益"
+      "group_name": "群益",
+      "volume_spike_ratio": 0.09,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9A81",
@@ -252,9 +264,13 @@
         2752.4
       ],
       "km_to_hq": 61.1,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "永豐"
+      "group_name": "永豐",
+      "volume_spike_ratio": 1.74,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "8888",
@@ -284,9 +300,13 @@
         -12.1
       ],
       "km_to_hq": 60.6,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "國泰"
+      "group_name": "國泰",
+      "volume_spike_ratio": 0.55,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     },
     {
       "broker_id": "9600",
@@ -316,9 +336,13 @@
         -0.5
       ],
       "km_to_hq": 61.8,
-      "consecutive_days": 1,
+      "consecutive_days": 2,
       "is_newcomer": false,
-      "group_name": "富邦"
+      "group_name": "富邦",
+      "volume_spike_ratio": 0.12,
+      "volume_spike_alert": false,
+      "reversal_type": null,
+      "reversal_magnitude": 0.0
     }
   ],
   "signals": {
@@ -1066,6 +1090,35 @@
         -8533.3
       ]
     ],
+    "max_broker_spike": 1.74,
+    "spike_alert_count": 0,
+    "group_sync_alerts": [
+      {
+        "group": "中信",
+        "direction": "BUY",
+        "branch_count": 26,
+        "total_branches": 35,
+        "total_net": 219071.0
+      },
+      {
+        "group": "兆豐",
+        "direction": "BUY",
+        "branch_count": 28,
+        "total_branches": 41,
+        "total_net": 28599.0
+      },
+      {
+        "group": "玉山",
+        "direction": "BUY",
+        "branch_count": 12,
+        "total_branches": 17,
+        "total_net": -33581.0
+      }
+    ],
+    "divergence_detail": null,
+    "whale_turnover_share": 193.2951,
+    "whale_turnover_share_5d_avg": 172.4748,
+    "metric_anomalies": [],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -22969.2,
       "top6_net_5d_lot": 9352.4,
@@ -1217,5 +1270,5 @@
   "stock_id": "2330",
   "stock_name": "台積電",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-24 10:26"
+  "last_update": "2026-05-24 10:43"
 }
