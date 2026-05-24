@@ -1170,6 +1170,49 @@
            '籌碼凝聚度走勢：' + slopeText +
            '</div></div>';
   }
+  function buildMomentumSpark(rolling5d, turnPoint, dates) {
+    if (!rolling5d || rolling5d.length === 0) return '';
+    var w = 200, h = 40, pad = 2;
+    var pairs = [];
+    for (var i = 0; i < rolling5d.length; i++) {
+      var v = rolling5d[i];
+      if (v !== null && v !== undefined && !isNaN(Number(v))) {
+        pairs.push({ i: i, v: Number(v) });
+      }
+    }
+    if (pairs.length < 2) return '';
+    var vals = pairs.map(function(p) { return Math.abs(p.v); });
+    var maxAbs = Math.max.apply(null, vals);
+    if (!maxAbs || maxAbs === 0) maxAbs = 1;
+    var mid = h / 2;
+    var span = (dates && dates.length > 1) ? (dates.length - 1) : Math.max(1, pairs[pairs.length - 1].i);
+    var points = [];
+    for (var j = 0; j < pairs.length; j++) {
+      var gi = pairs[j].i;
+      var x = pad + (gi / span) * (w - 2 * pad);
+      var y = mid - (pairs[j].v / maxAbs) * (mid - pad);
+      points.push(x.toFixed(1) + ',' + y.toFixed(1));
+    }
+    var svg = '<svg width="' + w + '" height="' + h + '" class="momentum-spark-svg" style="display:block;max-width:100%;">';
+    svg += '<line x1="' + pad + '" y1="' + mid + '" x2="' + (w - pad) + '" y2="' + mid + '" stroke="#374151" stroke-width="0.5" />';
+    svg += '<polyline points="' + points.join(' ') + '" fill="none" stroke="#60a5fa" stroke-width="1.5" />';
+    if (turnPoint && dates && dates.length) {
+      var tIdx = dates.indexOf(turnPoint);
+      if (tIdx >= 0) {
+        var tx = pad + (tIdx / span) * (w - 2 * pad);
+        var tv = null;
+        for (var k = 0; k < pairs.length; k++) {
+          if (pairs[k].i === tIdx) { tv = pairs[k].v; break; }
+        }
+        if (tv != null) {
+          var ty = mid - (tv / maxAbs) * (mid - pad);
+          svg += '<circle cx="' + tx.toFixed(1) + '" cy="' + ty.toFixed(1) + '" r="3" fill="#f59e0b" stroke="#fff" stroke-width="0.5" />';
+        }
+      }
+    }
+    svg += '</svg>';
+    return svg;
+  }
   function buildBrokerBarSpark(dailySeries, whaleData, brokerName) {
     var series = dailySeries;
     if ((!series || series.length < 2) && whaleData) {
@@ -1600,8 +1643,8 @@
       wtsHtml += '<span style="font-size:0.78rem;margin-left:12px;" class="' + csrCls + '">' + tip('沉澱率', 'Top6 二十日淨額絕對值合計／全市場二十日買賣量。偏高代表大戶成交相對沉澱在籌碼面。') + ' ' + csr + '%</span>';
     }
     html += '<h6 class="text-warning mt-4">Top 6 大戶（綜合總覽）' + wtsHtml + '</h6><div class="card shadow-lg"><div class="card-body"><div class="table-responsive"><table class="table table-dark table-hover border-secondary"><thead><tr>';
-    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">' + tip('波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th><th class="text-end">' + tip('爆量', '今日分點買賣量合計相對過去20日均量倍數；≥3x 為爆量警報。') + '</th><th class="text-end">' + tip('累積', '依 data/cache/tdr 各日 CSV 加總該分點淨額（張）；天數為有出現在快取檔的交易日數。') + '</th><th class="text-center">' + tip('駐留', '依 data/{代號}_top6_history.json 連續出現在 Top6 的交易日數；每日 pipeline 會追加紀錄。') + '</th></tr></thead><tbody>';
-    if (top6.length === 0) html += '<tr><td colspan="11" class="text-center text-muted">暫無大戶數據</td></tr>';
+    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">' + tip('波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th><th class="text-end">' + tip('爆量', '今日分點買賣量合計相對過去20日均量倍數；≥3x 為爆量警報。') + '</th><th class="text-end">' + tip('累積', '依 data/cache/tdr 各日 CSV 加總該分點淨額（千張，股數÷1000）；天數為有出現在快取檔的交易日數。') + '</th><th class="text-center">' + tip('駐留', '依 data/{代號}_top6_history.json 連續出現在 Top6 的交易日數；每日 pipeline 會追加紀錄。') + '</th><th class="text-center">' + tip('動量', '近60日分點 5 日滾動淨額（千張）迷你走勢；橘點為最近偵測之轉向（由買轉賣／由賣轉買）。') + '</th></tr></thead><tbody>';
+    if (top6.length === 0) html += '<tr><td colspan="12" class="text-center text-muted">暫無大戶數據</td></tr>';
     else top6.forEach(function(b){
       const c = b.color || colorMap[b.broker_name] || '#888';
       const typeBadge = (b.broker_org_type==='foreign') ? '<span class="badge bg-secondary">外資</span>' : '<span class="badge bg-dark">本土</span>';
@@ -1639,7 +1682,16 @@
       var accumSign = accum > 0 ? '+' : '';
       var ad = b.active_days != null ? b.active_days : 0;
       html += '<td class="text-end ' + accumColor + '" title="快取內有資料天數：' + ad + ' 日">' + accumSign + (isNaN(accum) ? '0' : accum.toFixed(0)) + '</td>';
-      html += '<td class="text-center ' + stabClass + '">' + stabIcon + days + '日</td></tr>';
+      html += '<td class="text-center ' + stabClass + '">' + stabIcon + days + '日</td>';
+      var momDates = sig.momentum_dates || [];
+      var momSpark = buildMomentumSpark(b.momentum_rolling_5d || null, b.momentum_turn_point || null, momDates);
+      var turnLabel = '';
+      if (b.momentum_turn_type === 'BEAR_TURN' && b.momentum_turn_point) {
+        turnLabel = '<div style="color:#ef4444;font-size:0.7rem;">轉空 ' + b.momentum_turn_point + '</div>';
+      } else if (b.momentum_turn_type === 'BULL_TURN' && b.momentum_turn_point) {
+        turnLabel = '<div style="color:#22c55e;font-size:0.7rem;">轉多 ' + b.momentum_turn_point + '</div>';
+      }
+      html += '<td class="text-center" style="min-width:210px;">' + momSpark + turnLabel + '</td></tr>';
     });
     html += '</tbody></table></div>';
     html += buildOpponentPanel(sig) + buildGroupSummary(sig) + buildGroupSyncAlerts(sig);

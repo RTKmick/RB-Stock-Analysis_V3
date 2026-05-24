@@ -1,0 +1,90 @@
+{
+  "records": [
+    {
+      "date": "2026-05-24",
+      "rotation_count": 33,
+      "top_rotators": [
+        {
+          "broker": "8440",
+          "stock_count": 8,
+          "buying": "長榮",
+          "buying_net": 21608.5,
+          "selling": "台積電",
+          "selling_net": -8015.4
+        },
+        {
+          "broker": "1560",
+          "stock_count": 8,
+          "buying": "長榮",
+          "buying_net": 5371.5,
+          "selling": "台積電",
+          "selling_net": -12783.6
+        },
+        {
+          "broker": "1480",
+          "stock_count": 8,
+          "buying": "智邦",
+          "buying_net": 5604.8,
+          "selling": "台積電",
+          "selling_net": -22598.3
+        },
+        {
+          "broker": "1440",
+          "stock_count": 8,
+          "buying": "長榮",
+          "buying_net": 14697.8,
+          "selling": "聯發科",
+          "selling_net": -9504.7
+        },
+        {
+          "broker": "9268",
+          "stock_count": 7,
+          "buying": "一詮",
+          "buying_net": 1240.3,
+          "selling": "台積電",
+          "selling_net": -17566.3
+        },
+        {
+          "broker": "9100",
+          "stock_count": 7,
+          "buying": "台積電",
+          "buying_net": 9667.7,
+          "selling": "高端疫苗",
+          "selling_net": -415.4
+        },
+        {
+          "broker": "8880",
+          "stock_count": 7,
+          "buying": "長榮",
+          "buying_net": 6567.9,
+          "selling": "智原",
+          "selling_net": -635.7
+        },
+        {
+          "broker": "1650",
+          "stock_count": 7,
+          "buying": "長榮",
+          "buying_net": 22416.1,
+          "selling": "台積電",
+          "selling_net": -23121.2
+        },
+        {
+          "broker": "9800",
+          "stock_count": 7,
+          "buying": "台積電",
+          "buying_net": 12347.5,
+          "selling": "長榮",
+          "selling_net": -20898.6
+        },
+        {
+          "broker": "9200",
+          "stock_count": 6,
+          "buying": "台積電",
+          "buying_net": 11556.6,
+          "selling": "智原",
+          "selling_net": -926.2
+        }
+      ]
+    }
+  ]
+}

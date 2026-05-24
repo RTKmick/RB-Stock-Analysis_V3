@@ -32,6 +32,7 @@ from core.signals.institutional import compute_institutional_and_margin_signals
 from core.top6_history import enrich_top6_phase7, update_top6_history
 from core.phase8_anomaly import enrich_phase8
 from core.phase9_deep import enrich_phase9
+from core.phase10_turning import enrich_phase10_momentum
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -1052,6 +1053,14 @@ def analyze_whale_trajectory(
         signals=signals,
         df_20d=df_20d,
         top6_ids=top6_ids,
+        data_dir=_data_root,
+    )
+
+    # Phase 10：Top6 動量時間線（5 日滾動淨額千張）與轉向點
+    enrich_phase10_momentum(
+        stock_id=stock_id,
+        top6_details=top6_details,
+        signals=signals,
         data_dir=_data_root,
     )
 

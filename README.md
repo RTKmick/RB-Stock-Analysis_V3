@@ -124,7 +124,7 @@ For RUMBOR Data Mining
 
 - **FinMind 資料流**：仍以 `scraper_chip.py` 為主（分點、價格、法人／融資等經 FinMind v4 API），寫入 `data/{stock_id}_whale_track.json` 與 `data/cache/tdr/{stock_id}/`。
 - **R1 跨股資金流**：`generate_cross_stock.py` 掃描 `data/*_whale_track.json`，產出 **`data/cross_stock_flow.json`**（儀表板讀取「輪動」券商）。`5_run_all_for_stock.bat` 在個股 scraper 跑完後會自動執行 **`[1b]`** 此步驟。
-- **R2 累積部位**：`core/phase9_deep.py` 依快取 CSV 彙總 Top6 分點之 **`accumulated_net` / `active_days`**。快取欄位為 **`securities_trader_id`** 時會對應為內部使用的 `broker_id`。
+- **R2 累積部位**：`core/phase9_deep.py` 依快取 CSV 彙總 Top6 分點之 **`accumulated_net` / `active_days`**（**股數加總÷1000**，與「10日/5日」欄位同口徑）。快取欄位為 **`securities_trader_id`** 時會對應為內部使用的 `broker_id`。
 - **R3 籌碼沉澱率**：`signals["chip_settlement_rate"]`（Top6 淨額絕對值合計 ÷ 全市場買賣量合計，上限 1）。
 - **靜態儀表板**：`index.html` 新增跨股區塊（讀 `cross_stock_flow.json`）；Top6 表可顯示累積淨額與沉澱率提示。
 
@@ -137,6 +137,15 @@ python sub-py/build_manifest.py
 ```
 
 追蹤清單內 8 檔可於 PowerShell 迴圈執行，或雙擊 `5_run_all_for_stock.bat` 並對提示直接按 Enter（預設 8 檔、`days=60`）。
+
+### Phase 10：大船轉向偵測（V2.0.6）
+
+規格：`phase10_turning_signal_spec.md`（目標版號可與專案 `Version.txt` 分開標示）。
+
+- **Bugfix（R2 單位）**：FinMind 分點 CSV 的 `buy`/`sell` 為**股數**；`accumulated_net` 與 Top6「10日/5日」一致改為 **股數加總後 ÷1000**（與 `core/signals_whale.py` 註解一致），避免累積欄位出現百萬級誤讀。
+- **T1 動量時間線**：`core/phase10_turning.py` 自 `data/cache/tdr/{stock_id}/` 計算 Top6 各分點之 **5 日滾動淨額**（`momentum_rolling_5d`）、**轉向點**（`momentum_turn_point` / `momentum_turn_type`），並寫入 `signals.momentum_dates`；`core/pipeline.py` 於 Phase 9 之後呼叫。
+- **T2 跨股歷史**：`generate_cross_stock.py` 產出 `cross_stock_flow.json` 後會 **`append_cross_flow_history()`**，累積至 **`data/cross_flow_history.json`**（同日不重複寫入，最多 60 筆）；前端可待資料累積後再擴充。
+- **儀表板**：`index.html` Top6 表新增「**動量**」欄（SVG 迷你折線 + 轉多/轉空文字）。
 
 ---
 

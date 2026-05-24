@@ -11,6 +11,9 @@ from typing import Any
 
 import pandas as pd
 
+# FinMind TaiwanStockTradingDailyReport：buy/sell 為股數；與 pipeline 千張欄位一致須除以 1000
+SHARES_PER_KLOT = 1000.0
+
 
 def _cache_csv_paths(cache_dir: Path) -> list[Path]:
     if not cache_dir.is_dir():
@@ -47,8 +50,8 @@ def enrich_top6_accumulated_from_cache(
     data_dir: Path | str,
 ) -> None:
     """
-    依 data/cache/tdr/{stock_id}/*.csv 彙總各分點累積淨額與有資料天數。
-    快取涵蓋幾天就加總幾天（規格以 60 天為目標，與 scraper --days 一致即可）。
+    依 data/cache/tdr/{stock_id}/*.csv 彙總各分點累積淨額（千張）與有資料天數。
+    快取 buy/sell 為股數時除以 1000，與 Top6「10日/5日(千張)」一致。
     """
     root = Path(data_dir)
     cache_dir = root / "cache" / "tdr" / str(stock_id)
@@ -66,8 +69,9 @@ def enrich_top6_accumulated_from_cache(
             b = str(bid).strip()
             if not b:
                 continue
-            day_net = float(grp["buy"].sum()) - float(grp["sell"].sum())
-            acc_net[b] += day_net
+            day_net_shares = float(grp["buy"].sum()) - float(grp["sell"].sum())
+            day_net_klot = day_net_shares / SHARES_PER_KLOT
+            acc_net[b] += day_net_klot
             acc_days[b] += 1
 
     for broker in top6_details:

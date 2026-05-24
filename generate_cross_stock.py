@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from datetime import datetime
 from glob import glob
 from pathlib import Path
 from typing import Any
@@ -139,6 +140,74 @@ def generate_cross_stock_flow(data_dir: str | Path = "data") -> dict[str, Any]:
     return result
 
 
+def append_cross_flow_history(data_dir: str | Path = "data") -> None:
+    """將當日跨股流向摘要 append 至 data/cross_flow_history.json（最多保留 60 筆）。"""
+    data_dir = Path(data_dir)
+    today = datetime.now().strftime("%Y-%m-%d")
+    history_path = data_dir / "cross_flow_history.json"
+
+    history: dict[str, Any] = {"records": []}
+    if history_path.is_file():
+        try:
+            with open(history_path, encoding="utf-8") as f:
+                history = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            history = {"records": []}
+
+    if not isinstance(history.get("records"), list):
+        history["records"] = []
+
+    existing_dates = {str(r.get("date", "")) for r in history["records"]}
+    if today in existing_dates:
+        print(f"[skip] cross_flow_history: {today} already recorded")
+        return
+
+    flow_path = data_dir / "cross_stock_flow.json"
+    if not flow_path.is_file():
+        print("[warn] cross_stock_flow.json missing; skip history append")
+        return
+
+    try:
+        with open(flow_path, encoding="utf-8") as f:
+            flow = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        print("[warn] cross_stock_flow.json unreadable; skip history append")
+        return
+
+    snapshot: dict[str, Any] = {
+        "date": today,
+        "rotation_count": int(flow.get("rotation_count", 0) or 0),
+        "top_rotators": [],
+    }
+
+    for item in (flow.get("flows") or [])[:10]:
+        if not isinstance(item, dict) or not item.get("is_rotation"):
+            continue
+        positions = list(item.get("positions") or [])
+        top_buy = max(positions, key=lambda x: float(x.get("net_lot", 0) or 0)) if positions else None
+        top_sell = min(positions, key=lambda x: float(x.get("net_lot", 0) or 0)) if positions else None
+
+        snapshot["top_rotators"].append(
+            {
+                "broker": str(item.get("broker_name") or item.get("broker_id") or ""),
+                "stock_count": int(item.get("stock_count", 0) or 0),
+                "buying": str(top_buy.get("stock_name", "")) if top_buy else "",
+                "buying_net": round(float(top_buy.get("net_lot", 0) or 0), 1) if top_buy else 0.0,
+                "selling": str(top_sell.get("stock_name", "")) if top_sell else "",
+                "selling_net": round(float(top_sell.get("net_lot", 0) or 0), 1) if top_sell else 0.0,
+            }
+        )
+
+    history["records"].append(snapshot)
+    history["records"] = history["records"][-60:]
+
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(history_path, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+
+    print(f"[OK] cross_flow_history: appended {today} ({len(snapshot['top_rotators'])} rotators)")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Phase 9：產出跨股資金流向 JSON")
     ap.add_argument(
@@ -148,6 +217,7 @@ def main() -> None:
     )
     args = ap.parse_args()
     generate_cross_stock_flow(args.data_dir)
+    append_cross_flow_history(args.data_dir)
 
 
 if __name__ == "__main__":
