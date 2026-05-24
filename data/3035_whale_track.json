@@ -155,7 +155,10 @@
         2570.0,
         238.0
       ],
-      "km_to_hq": 61.9
+      "km_to_hq": 61.9,
+      "consecutive_days": 1,
+      "is_newcomer": false,
+      "group_name": null
     },
     {
       "broker_id": "1650",
@@ -184,7 +187,10 @@
         1245.0,
         497.0
       ],
-      "km_to_hq": 62.6
+      "km_to_hq": 62.6,
+      "consecutive_days": 1,
+      "is_newcomer": false,
+      "group_name": null
     },
     {
       "broker_id": "1480",
@@ -213,7 +219,10 @@
         1128.0,
         -1181.0
       ],
-      "km_to_hq": 60.5
+      "km_to_hq": 60.5,
+      "consecutive_days": 1,
+      "is_newcomer": false,
+      "group_name": null
     },
     {
       "broker_id": "8440",
@@ -242,7 +251,10 @@
         1442.0,
         -129.0
       ],
-      "km_to_hq": 62.1
+      "km_to_hq": 62.1,
+      "consecutive_days": 1,
+      "is_newcomer": false,
+      "group_name": null
     },
     {
       "broker_id": "1440",
@@ -271,7 +283,10 @@
         873.0,
         -166.0
       ],
-      "km_to_hq": 61.9
+      "km_to_hq": 61.9,
+      "consecutive_days": 1,
+      "is_newcomer": false,
+      "group_name": null
     },
     {
       "broker_id": "9100",
@@ -300,7 +315,10 @@
         -6.0,
         -39.2
       ],
-      "km_to_hq": 61.0
+      "km_to_hq": 61.0,
+      "consecutive_days": 1,
+      "is_newcomer": false,
+      "group_name": "群益"
     }
   ],
   "signals": {
@@ -1231,6 +1249,40 @@
     "chip_score": 47.6,
     "chip_light": "yellow",
     "chip_comment": "籌碼中性偏多，主力並不積極但也沒有明顯倒貨跡象，適合小部位試單或持續關注。",
+    "group_summary": [
+      [
+        "摩根大通",
+        3808.9
+      ],
+      [
+        "台灣摩根",
+        2286.5
+      ],
+      [
+        "瑞銀",
+        2269.6
+      ],
+      [
+        "美商高盛",
+        1637.4
+      ],
+      [
+        "永豐",
+        1253.3
+      ],
+      [
+        "台新",
+        -1097.7
+      ],
+      [
+        "中信",
+        -995.5
+      ],
+      [
+        "群益",
+        989.1
+      ]
+    ],
     "chip_arbitration": {
       "inst_three_net_5d_lot": 8911.2,
       "top6_net_5d_lot": 7462.9,
@@ -1388,5 +1440,5 @@
   "stock_id": "3035",
   "stock_name": "智原",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-23 18:20"
+  "last_update": "2026-05-24 09:59"
 }

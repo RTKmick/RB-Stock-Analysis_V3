@@ -155,7 +155,10 @@
         21.7,
         156.1
       ],
-      "km_to_hq": 6.6
+      "km_to_hq": 6.6,
+      "consecutive_days": 2,
+      "is_newcomer": false,
+      "group_name": "富邦"
     },
     {
       "broker_id": "9A8F",
@@ -184,7 +187,10 @@
         26.1,
         11.9
       ],
-      "km_to_hq": 10.6
+      "km_to_hq": 10.6,
+      "consecutive_days": 2,
+      "is_newcomer": false,
+      "group_name": "永豐"
     },
     {
       "broker_id": "616A",
@@ -213,7 +219,10 @@
         132.0,
         54.4
       ],
-      "km_to_hq": 26.0
+      "km_to_hq": 26.0,
+      "consecutive_days": 2,
+      "is_newcomer": false,
+      "group_name": "中信"
     },
     {
       "broker_id": "6489",
@@ -242,7 +251,10 @@
         206.9,
         11.1
       ],
-      "km_to_hq": 51.7
+      "km_to_hq": 51.7,
+      "consecutive_days": 2,
+      "is_newcomer": false,
+      "group_name": null
     },
     {
       "broker_id": "9A00",
@@ -271,7 +283,10 @@
         63.6,
         24.7
       ],
-      "km_to_hq": 6.2
+      "km_to_hq": 6.2,
+      "consecutive_days": 2,
+      "is_newcomer": false,
+      "group_name": "永豐"
     },
     {
       "broker_id": "8888",
@@ -300,7 +315,10 @@
         130.5,
         143.2
       ],
-      "km_to_hq": 10.5
+      "km_to_hq": 10.5,
+      "consecutive_days": 2,
+      "is_newcomer": false,
+      "group_name": "國泰"
     }
   ],
   "signals": {
@@ -1221,6 +1239,40 @@
     "chip_score": 38.0,
     "chip_light": "red",
     "chip_comment": "目前籌碼較不友善（主力偏保守或資金較分散），建議先當作次要標的或等待型態改善。",
+    "group_summary": [
+      [
+        "元大",
+        2900.3
+      ],
+      [
+        "瑞銀",
+        -2887.0
+      ],
+      [
+        "美林",
+        -2868.2
+      ],
+      [
+        "美商高盛",
+        -2250.1
+      ],
+      [
+        "凱基",
+        2238.8
+      ],
+      [
+        "國泰",
+        2089.7
+      ],
+      [
+        "港商野村",
+        -1823.9
+      ],
+      [
+        "台新",
+        -1448.6
+      ]
+    ],
     "chip_arbitration": {
       "inst_three_net_5d_lot": -6245.2,
       "top6_net_5d_lot": 1026.5,
@@ -1364,5 +1416,5 @@
   "stock_id": "2486",
   "stock_name": "一詮",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-23 18:18"
+  "last_update": "2026-05-24 09:59"
 }

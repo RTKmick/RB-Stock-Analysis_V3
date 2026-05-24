@@ -1,6 +1,7 @@
 # core/pipeline.py
 import pandas as pd
 import math
+from pathlib import Path
 
 from core.signals.validation import compute_validation_signals
 from core.signals.risk import compute_risk_signals
@@ -28,6 +29,7 @@ from core.signals.monitor import compute_monitor_state
 from core.signals.whale_extras import compute_turning_points, compute_whale_radar
 from core.broker_archetype import apply_broker_archetype
 from core.signals.institutional import compute_institutional_and_margin_signals
+from core.top6_history import enrich_top6_phase7, update_top6_history
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -1021,6 +1023,12 @@ def analyze_whale_trajectory(
     signals["chip_score"] = round(chip_score, 1)
     signals["chip_light"] = chip_light
     signals["chip_comment"] = chip_comment
+
+    # Phase 7：Top6 駐留／新進大戶歷史 + 集團合併摘要
+    trade_date_str = str(last_1d)[:10]
+    _data_root = Path(__file__).resolve().parents[1] / "data"
+    enrich_top6_phase7(stock_id, top6_details, signals, trade_date_str, _data_root)
+    update_top6_history(stock_id, top6_details, trade_date_str, _data_root)
 
     whale_layers = _build_whale_layers_phase0(top6_details, signals)
     headline = _build_headline_phase0(stock_id, whale_layers, signals)
