@@ -145,7 +145,21 @@ python sub-py/build_manifest.py
 - **Bugfix（R2 單位）**：FinMind 分點 CSV 的 `buy`/`sell` 為**股數**；`accumulated_net` 與 Top6「10日/5日」一致改為 **股數加總後 ÷1000**（與 `core/signals_whale.py` 註解一致），避免累積欄位出現百萬級誤讀。
 - **T1 動量時間線**：`core/phase10_turning.py` 自 `data/cache/tdr/{stock_id}/` 計算 Top6 各分點之 **5 日滾動淨額**（`momentum_rolling_5d`）、**轉向點**（`momentum_turn_point` / `momentum_turn_type`），並寫入 `signals.momentum_dates`；`core/pipeline.py` 於 Phase 9 之後呼叫。
 - **T2 跨股歷史**：`generate_cross_stock.py` 產出 `cross_stock_flow.json` 後會 **`append_cross_flow_history()`**，累積至 **`data/cross_flow_history.json`**（同日不重複寫入，最多 60 筆）；前端可待資料累積後再擴充。
-- **儀表板**：`index.html` Top6 表新增「**動量**」欄（SVG 迷你折線 + 轉多/轉空文字）。
+- **儀表板**：`index.html` Top6 表「**動量**」欄（SVG 迷你折線 + 轉向標示）；`phase10_review_v2_0_6.md` 建議之 **轉向掃描視窗延伸（近 30 根滾動索引）** 與 **📉／📈** 轉向文字。
+
+### Phase 11：大戶異常走向偵測（V2.0.7）
+
+規格：`phase11_anomaly_spec.md`。
+
+- **T1 分點爆量／加速**：`core/phase11_anomaly.py` 之 `detect_volume_anomaly`，重用 `compute_whale_momentum_timeline` 的 **daily_net**（不重複讀檔）；寫入 `top6_details[].anomaly`（`z_score`、`is_spike`、`is_accelerating`、`severity` 等）。
+- **T2 共振**：`signals["whale_resonance"]`（Top6 當日方向門檻 STRONG／MODERATE；fallback 用 **`net_1d`**）。
+- **T3 量價背離**：`signals["pv_divergence"]`；`signals["price_change_pct"]` 由 **OHLCV 20 日** 最後兩根收盤計算；Top6 合計淨額用 **`net_1d`**（千張口徑）。
+- **Pipeline**：`enrich_phase10_momentum` 之後呼叫 **`enrich_phase11_anomaly(..., ohlcv_20d=...)`**。
+- **儀表板**：Top6「**異常**」欄（`buildAnomalyBadge`）；LED 區 **`getResonanceLED` / `getDivergenceLED`**。
+
+### Phase 10 Review（文件）
+
+- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10／11 與 `index.html`。
 
 ---
 

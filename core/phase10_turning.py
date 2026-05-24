@@ -70,8 +70,8 @@ def compute_whale_momentum_timeline(
 
         turn_point: str | None = None
         turn_type: str | None = None
-        # 由最近往回找 20 個有效區間內的符號反轉
-        for i in range(len(rolling) - 1, max(0, len(rolling) - 20), -1):
+        # 由最近往回找 30 個索引區間內的符號反轉（Phase10 review：慢主力轉向可能較長）
+        for i in range(len(rolling) - 1, max(0, len(rolling) - 30), -1):
             a, b = rolling[i - 1], rolling[i]
             if a is None or b is None:
                 continue
