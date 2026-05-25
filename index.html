@@ -384,6 +384,11 @@
 <script>
 (function(){
   const DATA_BASE = 'data';
+  /** 避免 GitHub Pages／瀏覽器快取導致 HTML 已更新但 JSON 仍舊，或反過來。 */
+  function fetchNoStore(url) {
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + '_cb=' + Date.now(), { cache: 'no-store' });
+  }
   var signalStats = null;
   const DEFAULT_STOCK = '2454';
   let manifest = { stock_ids: [], stocks: [] };
@@ -611,7 +616,7 @@
   function preloadAllStocks(stockIds) {
     var ids = (stockIds || []).map(function(s) { return String(s); });
     var promises = ids.map(function(sid) {
-      return fetch(DATA_BASE + '/' + encodeURIComponent(sid) + '_whale_track.json')
+      return fetchNoStore(DATA_BASE + '/' + encodeURIComponent(sid) + '_whale_track.json')
         .then(function(r) { return r.ok ? r.json() : null; })
         .then(function(d) { if (d) allStockData[sid] = d; })
         .catch(function() {});
@@ -1090,7 +1095,7 @@
     if (!stocks || !stocks.length) return;
     stocks.forEach(function(s) {
       var url = DATA_BASE + '/' + encodeURIComponent(s.id) + '_whale_track.json';
-      fetch(url)
+      fetchNoStore(url)
         .then(function(r) { return r.ok ? r.json() : null; })
         .then(function(d) {
           if (!d) return;
@@ -1228,6 +1233,7 @@
     return badges.join(' ');
   }
   function buildBrokerTypeBadge(dayhop) {
+    try {
     if (!dayhop || dayhop.broker_type === 'UNKNOWN') return '';
     var type = dayhop.broker_type;
     var label = dayhop.broker_type_label || '';
@@ -1249,6 +1255,7 @@
       Number(stats.avg_hold_days || 0).toFixed(1) + '日 · 大量日快速反向 ' +
       ((stats.quick_reverse_rate || 0) * 100).toFixed(0) + '%';
     return '<span style="background:' + color + ';color:#fff;padding:2px 6px;border-radius:4px;font-size:0.7rem;margin:2px;display:inline-block;" title="' + escapeHtml(title) + '">' + icon + label + ' ' + sc + '</span>';
+    } catch (e) { return ''; }
   }
   function getResonanceLED(resonance) {
     if (!resonance || resonance.severity_label === 'NONE') return '';
@@ -1386,7 +1393,7 @@
   function applyVersion(){
     var badge = document.getElementById('versionBadge');
     if (!badge) return;
-    fetch('Version.txt').then(function(r){
+    fetch('Version.txt?_cb=' + Date.now(), { cache: 'no-store' }).then(function(r){
       if (!r.ok) return null;
       return r.text();
     }).then(function(t){
@@ -2126,12 +2133,20 @@
   function loadStock(id){
     el('loading').style.display = 'block';
     el('loading').textContent = '載入中…';
-    fetch(DATA_BASE + '/' + id + '_whale_track.json')
+    fetchNoStore(DATA_BASE + '/' + id + '_whale_track.json')
       .then(function(r){ if (!r.ok) throw new Error('無法載入 ' + id); return r.json(); })
       .then(function(raw){
         allStockData[String(id)] = raw;
-        const stock = buildStockInfo(raw);
-        render(stock);
+        try {
+          const stock = buildStockInfo(raw);
+          render(stock);
+        } catch (err) {
+          console.error('render', err);
+          el('loading').style.display = 'block';
+          el('loading').innerHTML = '<div class="text-danger">儀表板渲染失敗（請試 Ctrl+F5 硬性重新整理）。<br><code style="font-size:0.78rem;word-break:break-all;">' +
+            escapeHtml(String(err && err.message ? err.message : err)) + '</code></div>';
+          return;
+        }
         buildCompareTable();
       })
       .catch(function(err){
@@ -2141,7 +2156,7 @@
   }
 
   function loadManifest(){
-    fetch(DATA_BASE + '/manifest.json')
+    fetchNoStore(DATA_BASE + '/manifest.json')
       .then(function(r){
         if (!r.ok) throw new Error('找不到 manifest.json');
         return r.json();
