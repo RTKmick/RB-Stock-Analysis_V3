@@ -181,9 +181,17 @@ python sub-py/build_manifest.py
 - **Pipeline**：於 **`enrich_phase13_dayhop`** 之後呼叫 **`enrich_phase14_filtered_resonance`**。
 - **儀表板**：**`getFilteredResonanceLED(sig.filtered_resonance)`** 與 **`getResonanceLED`** 並排（深綠／深紅＋🛡）。
 
+### Phase 15：訊號歷史追蹤（V2.0.11）
+
+規格：`phase15_history_spec.md`。
+
+- **T1**：`core/phase15_history.py` 之 **`append_signals_history`** 將每日最小 **`signals` 快照** append 至 **`data/{stock_id}_signals_history.json`**（同日覆寫、最多 **60** 筆）；**`get_signals_history`** 供後續 Phase 讀取。
+- **Pipeline**：於 **Phase 14 之後**、**`whale_layers` 之前** 呼叫（**try/except**，失敗不阻擋主流程）；**`analyze_whale_trajectory`** 新增選用參數 **`stock_name`**，`scraper_chip.py` 傳入正確簡稱。
+- **前端**：無變更（純後端／外部檔）。
+
 ### Phase 10 Review（文件）
 
-- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10～14 與 `index.html`。
+- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10～15 與 `index.html`。
 
 ---
 

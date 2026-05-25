@@ -168,6 +168,7 @@ def run_strategy(
         broker_map=broker_map,
         adapter=adapter,
         stock_id=stock_id,
+        stock_name=stock_name,
         debug_tv=debug_tv,
     )
     if insight is None or boss_list_df is None:

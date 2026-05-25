@@ -40,6 +40,7 @@ from core.phase14_filtered_resonance import (
     enrich_phase14_filtered_resonance,
     empty_filtered_resonance_snapshot,
 )
+from core.phase15_history import append_signals_history
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -554,6 +555,7 @@ def analyze_whale_trajectory(
     broker_map: dict,
     adapter,
     stock_id: str,
+    stock_name: str | None = None,
     debug_tv: bool = False,
     cfg: PipelineConfig | None = None,
 ) -> tuple[Insight | None, pd.DataFrame | None]:
@@ -1133,6 +1135,19 @@ def analyze_whale_trajectory(
     except Exception as e:
         print(f"⚠ Phase14 filtered_resonance failed for {stock_id}: {e!r}")
         signals["filtered_resonance"] = empty_filtered_resonance_snapshot()
+
+    # Phase 15：訊號歷史（寫入 data/{id}_signals_history.json，不修改 signals）
+    try:
+        append_signals_history(
+            stock_id=stock_id,
+            stock_name=str(stock_name or stock_id),
+            signals=signals,
+            top6_details=top6_details,
+            trade_date=str(last_1d)[:10],
+            data_dir=_data_root,
+        )
+    except Exception as e:
+        print(f"⚠ Phase15 signals_history failed for {stock_id}: {e!r}")
 
     whale_layers = _build_whale_layers_phase0(top6_details, signals)
     headline = _build_headline_phase0(stock_id, whale_layers, signals)
