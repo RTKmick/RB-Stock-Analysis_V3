@@ -1227,6 +1227,29 @@
     }
     return badges.join(' ');
   }
+  function buildBrokerTypeBadge(dayhop) {
+    if (!dayhop || dayhop.broker_type === 'UNKNOWN') return '';
+    var type = dayhop.broker_type;
+    var label = dayhop.broker_type_label || '';
+    var sc = dayhop.day_hop_score != null ? dayhop.day_hop_score : 0;
+    var color = '#6b7280';
+    var icon = '';
+    if (type === 'DAY_HOPPER') {
+      color = '#f97316';
+      icon = '⚠';
+    } else if (type === 'SWING_TRADER') {
+      color = '#eab308';
+      icon = '↔';
+    } else if (type === 'POSITION_HOLDER') {
+      color = '#10b981';
+      icon = '🛡';
+    }
+    var stats = dayhop.stats || {};
+    var title = '60日翻轉率 ' + ((stats.flip_rate || 0) * 100).toFixed(0) + '% · 平均持有 ' +
+      Number(stats.avg_hold_days || 0).toFixed(1) + '日 · 大量日快速反向 ' +
+      ((stats.quick_reverse_rate || 0) * 100).toFixed(0) + '%';
+    return '<span style="background:' + color + ';color:#fff;padding:2px 6px;border-radius:4px;font-size:0.7rem;margin:2px;display:inline-block;" title="' + escapeHtml(title) + '">' + icon + label + ' ' + sc + '</span>';
+  }
   function getResonanceLED(resonance) {
     if (!resonance || resonance.severity_label === 'NONE') return '';
     var dir = resonance.direction;
@@ -1251,7 +1274,7 @@
     var itSc = it.score != null ? it.score : 0;
     var frSc = fr.score != null ? fr.score : 0;
     if (lockup.is_dual_lockup) {
-      return '<span class="led-pill on" style="background:#a855f7;color:#fff;border-color:transparent;" title="投信與外資鎖碼分數同時偏高（Phase 12）"><span class="led-dot"></span>雙鎖碼 ' + itSc + '/' + frSc + '</span>';
+      return '<span class="led-pill on" style="background:#dc2626;color:#fff;border-color:transparent;" title="投信與外資鎖碼分數同時偏高（Phase 12）"><span class="led-dot"></span>🔒🔒雙鎖碼 ' + itSc + '/' + frSc + '</span>';
     }
     var parts = [];
     function pillParty(party, zh) {
@@ -1264,7 +1287,7 @@
       else if (lb === 'WEAK_LOCKUP') color = '#64748b';
       var cd = party.consecutive_buy_days != null ? party.consecutive_buy_days : 0;
       var title = '連買' + cd + '日 · 分數' + sc + '（Phase 12）';
-      parts.push('<span class="led-pill" style="background:' + color + ';color:#fff;border-color:transparent;" title="' + escapeHtml(title) + '"><span class="led-dot"></span>' + zh + ' ' + sc + '</span>');
+      parts.push('<span class="led-pill" style="background:' + color + ';color:#fff;border-color:transparent;" title="' + escapeHtml(title) + '"><span class="led-dot"></span>🔒' + zh + ' ' + sc + '</span>');
     }
     pillParty(it, '投信鎖');
     pillParty(fr, '外資鎖');
@@ -1703,7 +1726,7 @@
       wtsHtml += '<span style="font-size:0.78rem;margin-left:12px;" class="' + csrCls + '">' + tip('沉澱率', 'Top6 二十日淨額絕對值合計／全市場二十日買賣量。偏高代表大戶成交相對沉澱在籌碼面。') + ' ' + csr + '%</span>';
     }
     html += '<h6 class="text-warning mt-4">Top 6 大戶（綜合總覽）' + wtsHtml + '</h6><div class="card shadow-lg"><div class="card-body"><div class="table-responsive"><table class="table table-dark table-hover border-secondary"><thead><tr>';
-    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">' + tip('波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th><th class="text-end">' + tip('爆量', '今日分點買賣量合計相對過去20日均量倍數；≥3x 為爆量警報。') + '</th><th class="text-end">' + tip('累積', '依 data/cache/tdr 各日 CSV 加總該分點淨額（千張，股數÷1000）；天數為有出現在快取檔的交易日數。') + '</th><th class="text-center">' + tip('駐留', '依 data/{代號}_top6_history.json 連續出現在 Top6 的交易日數；每日 pipeline 會追加紀錄。') + '</th><th class="text-center">' + tip('動量', '近60日分點 5 日滾動淨額（千張）迷你走勢；橘點為最近偵測之轉向（由買轉賣／由賣轉買）。') + '</th><th class="text-center">' + tip('異常', 'Phase 11：相對自身60日節奏之爆量(Z)、連續加速；嚴重度≥30 才顯示徽章。') + '</th></tr></thead><tbody>';
+    html += '<th>券商</th><th>類型</th><th class="text-end">10日(千張)</th><th class="text-end">5日(千張)</th><th class="text-end">' + tip('波段分數', '分點的波段操作特徵強度(0~1)。越高代表該分點越像有計畫的波段操作者。') + '</th><th>波段類型</th><th class="text-end">成本</th><th class="text-end">距HQ(KM)</th><th class="text-end">' + tip('爆量', '今日分點買賣量合計相對過去20日均量倍數；≥3x 為爆量警報。') + '</th><th class="text-end">' + tip('累積', '依 data/cache/tdr 各日 CSV 加總該分點淨額（千張，股數÷1000）；天數為有出現在快取檔的交易日數。') + '</th><th class="text-center">' + tip('駐留', '依 data/{代號}_top6_history.json 連續出現在 Top6 的交易日數；每日 pipeline 會追加紀錄。') + '</th><th class="text-center">' + tip('動量', '近60日分點 5 日滾動淨額（千張）迷你走勢；橘點為最近偵測之轉向（由買轉賣／由賣轉買）。') + '</th><th class="text-center">' + tip('異常／身分', 'Phase 11：相對自身60日節奏之爆量(Z)、連續加速（嚴重度≥30 才顯示異常徽章）；Phase 13：隔日沖傾向（🛡長線持有／↔短線型／⚠隔日沖型）。') + '</th></tr></thead><tbody>';
     if (top6.length === 0) html += '<tr><td colspan="13" class="text-center text-muted">暫無大戶數據</td></tr>';
     else top6.forEach(function(b){
       const c = b.color || colorMap[b.broker_name] || '#888';
@@ -1752,7 +1775,7 @@
         turnLabel = '<div style="color:#22c55e;font-size:0.7rem;">📈轉多 ' + b.momentum_turn_point + '</div>';
       }
       html += '<td class="text-center" style="min-width:210px;">' + momSpark + turnLabel + '</td>';
-      html += '<td class="text-center">' + buildAnomalyBadge(b.anomaly) + '</td></tr>';
+      html += '<td class="text-center">' + buildAnomalyBadge(b.anomaly) + ' ' + buildBrokerTypeBadge(b.dayhop) + '</td></tr>';
     });
     html += '</tbody></table></div>';
     html += buildOpponentPanel(sig) + buildGroupSummary(sig) + buildGroupSyncAlerts(sig);

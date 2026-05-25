@@ -163,11 +163,19 @@ python sub-py/build_manifest.py
 
 - **T1**：`core/phase12_lockup.py` 自 FinMind **`TaiwanStockInstitutionalInvestorsBuySell`**（`Investment_Trust` / `Foreign_Investor`）與 **`TaiwanStockShareholding.NumberOfSharesIssued`**、**OHLCV 20 日** 計算連買、買超／股本比、連買期漲幅，寫入 **`signals.lockup`**（`investment_trust`、`foreign`、`is_dual_lockup`）。
 - **Pipeline**：`compute_institutional_and_margin_signals` 回傳 **`(signals_pack, inst_df)`**；於 **`enrich_phase11_anomaly`** 之後呼叫 **`enrich_phase12_lockup`**。
-- **儀表板**：`index.html` 之 **`getLockupLED(sig.lockup)`**（雙鎖碼／投信鎖／外資鎖 LED）。
+- **儀表板**：`index.html` 之 **`getLockupLED(sig.lockup)`**（雙鎖碼深紅 🔒🔒／🔒投信鎖／🔒外資鎖 LED）。
+
+### Phase 13：隔日沖分點識別（V2.0.9）
+
+規格：`phase13_dayhop_spec.md`。
+
+- **T1**：`core/phase13_dayhop.py` 復用 **`compute_whale_momentum_timeline`** 之 60 日 **`daily_net`**（無額外 IO），計算 **`day_hop_score`**、`broker_type`（`DAY_HOPPER` / `SWING_TRADER` / `POSITION_HOLDER` / `UNKNOWN`），寫入 **`top6_details[].dayhop`**。
+- **Pipeline**：於 **`enrich_phase12_lockup`** 之後呼叫 **`enrich_phase13_dayhop`**。
+- **儀表板**：Top6 欄 **`buildBrokerTypeBadge(b.dayhop)`**（與異常徽章同欄）；Phase 12 LED 視覺依 R1 微調。
 
 ### Phase 10 Review（文件）
 
-- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10／11／12 與 `index.html`。
+- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10／11／12／13 與 `index.html`。
 
 ---
 

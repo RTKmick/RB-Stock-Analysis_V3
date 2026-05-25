@@ -237,6 +237,23 @@
         "consecutive_direction": "SELL",
         "is_accelerating": false,
         "severity": 17
+      },
+      "dayhop": {
+        "day_hop_score": 87,
+        "broker_type": "DAY_HOPPER",
+        "broker_type_label": "隔日沖型",
+        "score_breakdown": {
+          "flip": 33,
+          "hold": 20,
+          "quick_reverse": 34
+        },
+        "stats": {
+          "flip_count": 26,
+          "flip_rate": 0.441,
+          "avg_hold_days": 2.2,
+          "big_day_count": 18,
+          "quick_reverse_rate": 0.556
+        }
       }
     },
     {
@@ -348,6 +365,23 @@
         "consecutive_direction": "SELL",
         "is_accelerating": false,
         "severity": 17
+      },
+      "dayhop": {
+        "day_hop_score": 87,
+        "broker_type": "DAY_HOPPER",
+        "broker_type_label": "隔日沖型",
+        "score_breakdown": {
+          "flip": 33,
+          "hold": 20,
+          "quick_reverse": 34
+        },
+        "stats": {
+          "flip_count": 19,
+          "flip_rate": 0.322,
+          "avg_hold_days": 3.0,
+          "big_day_count": 18,
+          "quick_reverse_rate": 0.667
+        }
       }
     },
     {
@@ -459,6 +493,23 @@
         "consecutive_direction": "BUY",
         "is_accelerating": false,
         "severity": 65
+      },
+      "dayhop": {
+        "day_hop_score": 100,
+        "broker_type": "DAY_HOPPER",
+        "broker_type_label": "隔日沖型",
+        "score_breakdown": {
+          "flip": 33,
+          "hold": 33,
+          "quick_reverse": 34
+        },
+        "stats": {
+          "flip_count": 34,
+          "flip_rate": 0.576,
+          "avg_hold_days": 1.5,
+          "big_day_count": 18,
+          "quick_reverse_rate": 0.889
+        }
       }
     },
     {
@@ -570,6 +621,23 @@
         "consecutive_direction": "SELL",
         "is_accelerating": false,
         "severity": 49
+      },
+      "dayhop": {
+        "day_hop_score": 87,
+        "broker_type": "DAY_HOPPER",
+        "broker_type_label": "隔日沖型",
+        "score_breakdown": {
+          "flip": 33,
+          "hold": 20,
+          "quick_reverse": 34
+        },
+        "stats": {
+          "flip_count": 21,
+          "flip_rate": 0.356,
+          "avg_hold_days": 2.7,
+          "big_day_count": 18,
+          "quick_reverse_rate": 0.722
+        }
       }
     },
     {
@@ -681,6 +749,23 @@
         "consecutive_direction": "SELL",
         "is_accelerating": false,
         "severity": 15
+      },
+      "dayhop": {
+        "day_hop_score": 100,
+        "broker_type": "DAY_HOPPER",
+        "broker_type_label": "隔日沖型",
+        "score_breakdown": {
+          "flip": 33,
+          "hold": 33,
+          "quick_reverse": 34
+        },
+        "stats": {
+          "flip_count": 30,
+          "flip_rate": 0.508,
+          "avg_hold_days": 1.9,
+          "big_day_count": 18,
+          "quick_reverse_rate": 0.778
+        }
       }
     },
     {
@@ -792,6 +877,23 @@
         "consecutive_direction": "BUY",
         "is_accelerating": false,
         "severity": 34
+      },
+      "dayhop": {
+        "day_hop_score": 87,
+        "broker_type": "DAY_HOPPER",
+        "broker_type_label": "隔日沖型",
+        "score_breakdown": {
+          "flip": 33,
+          "hold": 20,
+          "quick_reverse": 34
+        },
+        "stats": {
+          "flip_count": 28,
+          "flip_rate": 0.475,
+          "avg_hold_days": 2.1,
+          "big_day_count": 18,
+          "quick_reverse_rate": 0.556
+        }
       }
     }
   ],
@@ -1803,5 +1905,5 @@
   "stock_id": "2454",
   "stock_name": "聯發科",
   "probe_date": "2026-05-22",
-  "last_update": "2026-05-25 22:02"
+  "last_update": "2026-05-25 22:21"
 }
