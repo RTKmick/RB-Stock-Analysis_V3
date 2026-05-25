@@ -1267,6 +1267,22 @@
     var text = (lbl === 'STRONG' ? '強' : '中') + (dir === 'BUY' ? '共識買' : '共識賣') + ' ' + resonance.consensus_count + '/6';
     return '<span class="led-pill" style="background:' + color + ';color:#fff;border-color:transparent;"><span class="led-dot"></span>' + icon + text + '</span>';
   }
+  function getFilteredResonanceLED(filtered) {
+    if (!filtered || filtered.severity_label === 'NONE') return '';
+    var dir = filtered.direction;
+    if (dir !== 'BUY' && dir !== 'SELL') return '';
+    var lbl = filtered.severity_label;
+    var color = dir === 'BUY' ? '#15803d' : '#b91c1c';
+    var text = (lbl === 'STRONG' ? '強' : '中') + '真主力共識' +
+      (dir === 'BUY' ? '買' : '賣') + ' ' +
+      filtered.consensus_count + '/' + filtered.non_dayhop_total;
+    var excluded = filtered.excluded_dayhopper_count || 0;
+    var title = '排除 ' + excluded + ' 個 DAY_HOPPER 後的共識比例 ' +
+      Math.round((filtered.consensus_ratio || 0) * 100) + '%';
+    return '<span class="led-pill" style="background:' + color +
+      ';color:#fff;border-color:transparent;" title="' + escapeHtml(title) +
+      '"><span class="led-dot"></span>🛡' + text + '</span>';
+  }
   function getDivergenceLED(div) {
     if (!div || div.type === 'NORMAL' || div.type === 'UNKNOWN') return '';
     var color = div.type === 'STEALTH_BUY' ? '#0ea5e9' : '#f59e0b';
@@ -1429,6 +1445,7 @@
     ledHtml += '<span class="led-pill ' + alignClass + '"><span class="led-dot"></span>' + alignText + '</span>';
     ledHtml += '<span class="led-pill ' + flags.trust_momentum_class + '"><span class="led-dot"></span>' + flags.trust_momentum_text + '</span>';
     ledHtml += getResonanceLED(sig.whale_resonance);
+    ledHtml += getFilteredResonanceLED(sig.filtered_resonance);
     ledHtml += getDivergenceLED(sig.pv_divergence);
     ledHtml += getLockupLED(sig.lockup);
 

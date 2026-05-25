@@ -36,6 +36,10 @@ from core.phase10_turning import enrich_phase10_momentum
 from core.phase11_anomaly import enrich_phase11_anomaly
 from core.phase12_lockup import enrich_phase12_lockup
 from core.phase13_dayhop import enrich_phase13_dayhop, empty_dayhop_snapshot
+from core.phase14_filtered_resonance import (
+    enrich_phase14_filtered_resonance,
+    empty_filtered_resonance_snapshot,
+)
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -1122,6 +1126,13 @@ def analyze_whale_trajectory(
         print(f"⚠ Phase13 dayhop failed for {stock_id}: {e!r}")
         for b in top6_details:
             b["dayhop"] = empty_dayhop_snapshot()
+
+    # Phase 14：過濾型共振（排除 DAY_HOPPER 後之真主力共識）
+    try:
+        enrich_phase14_filtered_resonance(top6_details, signals)
+    except Exception as e:
+        print(f"⚠ Phase14 filtered_resonance failed for {stock_id}: {e!r}")
+        signals["filtered_resonance"] = empty_filtered_resonance_snapshot()
 
     whale_layers = _build_whale_layers_phase0(top6_details, signals)
     headline = _build_headline_phase0(stock_id, whale_layers, signals)

@@ -173,9 +173,17 @@ python sub-py/build_manifest.py
 - **Pipeline**：於 **`enrich_phase12_lockup`** 之後呼叫 **`enrich_phase13_dayhop`**。
 - **儀表板**：Top6 欄 **`buildBrokerTypeBadge(b.dayhop)`**（與異常徽章同欄）；Phase 12 LED 視覺依 R1 微調。
 
+### Phase 14：過濾型共振／真主力共識（V2.0.10）
+
+規格：`phase14_filtered_resonance_spec.md`。
+
+- **T1**：`core/phase14_filtered_resonance.py` 排除 **`DAY_HOPPER`** 後，沿用 Phase 11 之方向判定（`anomaly.consecutive_direction` → **`net_1d` / `net_lot`**），寫入 **`signals.filtered_resonance`**（與 **`whale_resonance`** 並存）。
+- **Pipeline**：於 **`enrich_phase13_dayhop`** 之後呼叫 **`enrich_phase14_filtered_resonance`**。
+- **儀表板**：**`getFilteredResonanceLED(sig.filtered_resonance)`** 與 **`getResonanceLED`** 並排（深綠／深紅＋🛡）。
+
 ### Phase 10 Review（文件）
 
-- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10／11／12／13 與 `index.html`。
+- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10～14 與 `index.html`。
 
 ---
 
