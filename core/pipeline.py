@@ -34,6 +34,7 @@ from core.phase8_anomaly import enrich_phase8
 from core.phase9_deep import enrich_phase9
 from core.phase10_turning import enrich_phase10_momentum
 from core.phase11_anomaly import enrich_phase11_anomaly
+from core.phase12_lockup import enrich_phase12_lockup
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -723,8 +724,9 @@ def analyze_whale_trajectory(
     }
 
     # 三大法人 + 融資 cross-check（使用 FinMind 原始資料）
+    inst_lockup_df: pd.DataFrame | None = None
     try:
-        inst_margin_pack = compute_institutional_and_margin_signals(
+        inst_margin_pack, inst_lockup_df = compute_institutional_and_margin_signals(
             adapter.client,  # type: ignore[attr-defined]
             stock_id=stock_id,
             last_trade_date=last_1d,
@@ -1073,6 +1075,40 @@ def analyze_whale_trajectory(
         data_dir=_data_root,
         ohlcv_20d=ohlcv_20d,
     )
+
+    # Phase 12：投信／外資鎖碼分數（法人長表 + 股本 + OHLCV）
+    try:
+        enrich_phase12_lockup(
+            stock_id=stock_id,
+            signals=signals,
+            institutional_df=inst_lockup_df,
+            ohlcv_20d=ohlcv_20d,
+            client=adapter.client,  # type: ignore[attr-defined]
+            last_trade_date=str(last_1d)[:10],
+        )
+    except Exception as e:
+        print(f"⚠ Phase12 lockup failed for {stock_id}: {e!r}")
+        signals["lockup"] = {
+            "investment_trust": {
+                "consecutive_buy_days": 0,
+                "accumulated_net_shares": 0,
+                "accumulated_ratio": 0.0,
+                "price_lift_pct": 0.0,
+                "score": 0,
+                "label": "NO_LOCKUP",
+                "score_breakdown": {"consecutive": 0, "ratio": 0, "price_lift": 0},
+            },
+            "foreign": {
+                "consecutive_buy_days": 0,
+                "accumulated_net_shares": 0,
+                "accumulated_ratio": 0.0,
+                "price_lift_pct": 0.0,
+                "score": 0,
+                "label": "NO_LOCKUP",
+                "score_breakdown": {"consecutive": 0, "ratio": 0, "price_lift": 0},
+            },
+            "is_dual_lockup": False,
+        }
 
     whale_layers = _build_whale_layers_phase0(top6_details, signals)
     headline = _build_headline_phase0(stock_id, whale_layers, signals)

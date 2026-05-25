@@ -1244,6 +1244,32 @@
     var title = div.description ? escapeHtml(String(div.description)) : '';
     return '<span class="led-pill" style="background:' + color + ';color:#fff;border-color:transparent;" title="' + title + '"><span class="led-dot"></span>' + icon + ' ' + (div.divergence_strength != null ? div.divergence_strength : '') + '</span>';
   }
+  function getLockupLED(lockup) {
+    if (!lockup) return '';
+    var it = lockup.investment_trust || {};
+    var fr = lockup.foreign || {};
+    var itSc = it.score != null ? it.score : 0;
+    var frSc = fr.score != null ? fr.score : 0;
+    if (lockup.is_dual_lockup) {
+      return '<span class="led-pill on" style="background:#a855f7;color:#fff;border-color:transparent;" title="投信與外資鎖碼分數同時偏高（Phase 12）"><span class="led-dot"></span>雙鎖碼 ' + itSc + '/' + frSc + '</span>';
+    }
+    var parts = [];
+    function pillParty(party, zh) {
+      var sc = party.score != null ? party.score : 0;
+      var lb = party.label || 'NO_LOCKUP';
+      if (lb === 'NO_LOCKUP' && sc < 30) return;
+      var color = '#64748e';
+      if (lb === 'STRONG_LOCKUP') color = '#16a34a';
+      else if (lb === 'MODERATE_LOCKUP') color = '#ca8a04';
+      else if (lb === 'WEAK_LOCKUP') color = '#64748b';
+      var cd = party.consecutive_buy_days != null ? party.consecutive_buy_days : 0;
+      var title = '連買' + cd + '日 · 分數' + sc + '（Phase 12）';
+      parts.push('<span class="led-pill" style="background:' + color + ';color:#fff;border-color:transparent;" title="' + escapeHtml(title) + '"><span class="led-dot"></span>' + zh + ' ' + sc + '</span>');
+    }
+    pillParty(it, '投信鎖');
+    pillParty(fr, '外資鎖');
+    return parts.join('');
+  }
   function buildBrokerBarSpark(dailySeries, whaleData, brokerName) {
     var series = dailySeries;
     if ((!series || series.length < 2) && whaleData) {
@@ -1374,6 +1400,7 @@
     ledHtml += '<span class="led-pill ' + flags.trust_momentum_class + '"><span class="led-dot"></span>' + flags.trust_momentum_text + '</span>';
     ledHtml += getResonanceLED(sig.whale_resonance);
     ledHtml += getDivergenceLED(sig.pv_divergence);
+    ledHtml += getLockupLED(sig.lockup);
 
     let statusCls = 'status-warn';
     if (stock.status && stock.status.indexOf('✅')>=0) statusCls = 'status-pass';

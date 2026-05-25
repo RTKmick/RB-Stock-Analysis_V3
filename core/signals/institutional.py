@@ -65,11 +65,11 @@ def compute_institutional_and_margin_signals(
     stock_id: str,
     last_trade_date: str,
     lookback_days: int = 60,
-) -> SignalsDict:
+) -> tuple[SignalsDict, pd.DataFrame | None]:
     """
     從 FinMind 抓三大法人 + 融資資料，產出簡單的 inst_*/margin_* signals。
-    - time window: [last_trade_date - lookback_days, last_trade_date]
-    - 以 calendar days 粗略拉取，再由 FinMind dataset 自身的 date 篩選
+    回傳 (signals, lockup_inst_df)：lockup_inst_df 為含 date,name,buy,sell 之長表，供 Phase 12 鎖碼分數；
+    若非 v4 長表結構則為 None。
     """
     try:
         end_date = _to_date_str(last_trade_date)
@@ -101,12 +101,16 @@ def compute_institutional_and_margin_signals(
     )
 
     out: SignalsDict = {}
+    lockup_inst_df: pd.DataFrame | None = None
 
     # --- 三大法人 ---
     if inst_df is not None and not inst_df.empty and "date" in inst_df.columns:
         df = inst_df.copy()
         df["date"] = df["date"].astype(str)
         df = df.sort_values("date").reset_index(drop=True)
+
+        if "name" in df.columns and "buy" in df.columns and "sell" in df.columns:
+            lockup_inst_df = df[["date", "name", "buy", "sell"]].copy()
 
         # Debug dump：把前幾列 schema 寫到 data/debug/inst_{stock_id}.json 方便檢查欄位
         try:
@@ -361,5 +365,5 @@ def compute_institutional_and_margin_signals(
 
     _apply_foreign_momentum(out)
 
-    return out
+    return out, lockup_inst_df
 
