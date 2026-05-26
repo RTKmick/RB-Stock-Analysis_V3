@@ -1,4 +1,4 @@
-# cd C:\ngrok\RB-stock-analysis
+# RB-Stock-Analysis_V3：請在專案根目錄使用 venv 後 pip install -r requirements.txt
 # rmdir /s /q venv
 # python -m venv venv
 # .\venv\Scripts\activate

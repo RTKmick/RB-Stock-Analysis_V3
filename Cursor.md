@@ -17,6 +17,7 @@
 ## 專案背景（與現況對齊）
 
 - 專案名稱：**`RB-Stock-Analysis_V3`**（台股籌碼／主力／法人與資料管線）。
+- **GitHub 官方倉庫**：`RTKmick/RB-Stock-Analysis_V3`（遠端名稱慣用 **`rtkmick`**）；靜態站 **`https://rtkmick.github.io/RB-Stock-Analysis_V3/`**。舊倉 **`runbordev111/RB-stock-analysis`** 已不使用。
 - 技術棧包含：**Python pipeline**（`scraper_chip.py`、`core/`）、**FinMind／TWSE** 資料、輸出至 **`data/`**；**靜態儀表板**（根目錄 **`index.html`**，GitHub Pages）。
 - 目標涵蓋（依既有設計延續即可，不必重寫）：籌碼與分點、法人、異常資金流監控意涵、策略／回測支援、儀表板監看等。
 
