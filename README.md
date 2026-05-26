@@ -34,6 +34,14 @@ For RUMBOR Data Mining
 
 **Git 遠端**：若本機仍設定已刪除的 `origin`（`runbordev111/RB-stock-analysis`），可只保留 **`rtkmick`**：`git remote remove origin`（若不需要該別名）。
 
+### GitHub Pages：網頁版號仍舊、但 `main` 已是新版？
+
+- Actions 裡 **`report-build-status` 打勾** 只代表「回報狀態」那一步成功；若 **`build` 失敗**，**`deploy` 會被跳過**，`https://<user>.github.io/<repo>/` 就不會更新（例如 `Version.txt` 仍停在舊版）。
+- GitHub **內建**的 **「pages build and deployment」** 流程無法在本倉庫改 YAML 修復。
+- **建議（擇一即可）**
+  1. **Settings → Pages → Build and deployment** 改為 **Deploy from a branch** → 分支 **`main`**、資料夾 **`/`（root）** → Save。之後由分支直接提供靜態檔，不依賴該內建 Actions，通常最省事。
+  2. 若堅持用 **GitHub Actions** 發佈：本倉已提供 **`.github/workflows/deploy-static-pages.yml`**。在 Pages 設定中改為使用**自訂 workflow**（介面上若有「選擇 workflow」請選此檔），避免沿用預設且失敗的那一條。
+
 ---
 
 ### 一、分層架構總覽

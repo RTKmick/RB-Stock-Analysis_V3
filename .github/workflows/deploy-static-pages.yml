@@ -1,0 +1,41 @@
+# 自訂 GitHub Pages：靜態內容（index.html、data/、Version.txt）
+# 若 Settings → Pages 使用內建「pages build and deployment」且 build 失敗又無法改檔，
+# 請改為使用本 workflow：Pages → Build and deployment → GitHub Actions → 選此 workflow；
+# 或改用「Deploy from a branch」→ main → /（root），無需 Actions。
+name: Deploy static site to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
