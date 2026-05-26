@@ -1,13 +1,12 @@
-# 僅在 Settings → Pages 選「GitHub Actions」時使用。
+# 請在 Settings → Pages → Build and deployment 選「GitHub Actions」，並在介面選用本 workflow。
+# （本倉若選「Deploy from a branch」，內建 pages-build-deployment 常失敗，github.io 會卡在舊版。）
 # deploy-pages 必須獨立 job（needs: build），不可與 upload-pages-artifact 同 job。
-# 若 Pages 已設為「Deploy from a branch」：保持下方 push 註解，只用手動 Run workflow，避免與內建 pages-build-deployment 重複。
-# 若 Pages 改為「GitHub Actions」且要走本 workflow：取消 push 註解。
 name: Deploy static site to Pages
 
 on:
   workflow_dispatch:
-# push:
-#   branches: [main]
+  push:
+    branches: [main]
 
 permissions:
   contents: read

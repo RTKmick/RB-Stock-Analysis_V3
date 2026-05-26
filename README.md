@@ -23,11 +23,13 @@ For RUMBOR Data Mining
    ```
 3. **Push 到 GitHub**（含 `data/`、`index.html`）。  
    官方倉庫：**[RTKmick/RB-Stock-Analysis_V3](https://github.com/RTKmick/RB-Stock-Analysis_V3)**；本機可執行根目錄 **`upl_rb.bat`** 或 **`6_publish_to_pages.bat`**（皆為推送到遠端 **`rtkmick`** 的 **`main`**）。舊倉 **`runbordev111/RB-stock-analysis`** 已停用，請勿再依賴該路徑。
-4. **開啟 GitHub Pages**  
-   倉庫 → **Settings** → **Pages** → **Source** 選「Deploy from a branch」→ Branch 選 **`main`** → Folder 選 **/ (root)** → Save。
+4. **開啟 GitHub Pages（建議用 GitHub Actions）**  
+   倉庫 → **Settings** → **Pages** → **Build and deployment** → **Source** 選 **「GitHub Actions」**（勿選「Deploy from a branch」：本倉內建 **pages build and deployment** 常因體量失敗，會導致 **`https://rtkmick.github.io/.../Version.txt` 卡在舊版**）。  
+   若介面要求選 workflow，請選 **`.github/workflows/deploy-static-pages.yml`**（會組精簡 **`_site`** 再 `deploy-pages`）。  
+   首次可到 **Actions** → **Deploy static site to Pages** → **Run workflow** 手動跑一次；之後每次 **push `main`** 會自動佈署。
 5. **開啟 Dashboard**  
    網址：**`https://rtkmick.github.io/RB-Stock-Analysis_V3/`**  
-   之後只要 push 更新 `data/`，重新整理頁面即可看到最新數據。
+   之後只要 push 更新 `data/`，等 Actions **build + deploy 綠燈**後重新整理頁面即可看到最新數據。
 
 **不需要**執行 `ngrok http ...` 或 `python rb_tv_app.py`。  
 若需要即時對外網址或 TradingView webhook，再使用 `bat/1_ngrok_http.bat` 與 `bat/2_start_flask_rb.bat`。
@@ -36,13 +38,47 @@ For RUMBOR Data Mining
 
 ### GitHub Pages：網頁版號仍舊、但 `main` 已是新版？
 
-- **不要同時依賴兩種來源**：若 **Settings → Pages** 選 **Deploy from a branch**，建議將 **`.github/workflows/deploy-static-pages.yml`** 裡的 **`push` 觸發註解掉**（只留 `workflow_dispatch`），否則每次 push 仍可能觸發 **內建 `pages-build-deployment`** 與自訂 workflow 並行，除錯混亂。若選 **GitHub Actions** 發佈，則用自訂 workflow（**build → deploy 兩個 job**，且 **不要整包複製 `data/`**，見該 YAML）。
-- Actions 裡 **`report-build-status` 打勾** 只代表「回報狀態」那一步成功；若 **`build` 失敗**，**`deploy` 會被跳過**，`https://<user>.github.io/<repo>/` 就不會更新（例如 `Version.txt` 仍停在舊版）。
-- GitHub **內建**的 **「pages build and deployment」** 流程無法在本倉庫改 YAML 修復。
+- **先比對兩個網址**：`https://raw.githubusercontent.com/RTKmick/RB-Stock-Analysis_V3/main/Version.txt`（應為新版）與 `https://rtkmick.github.io/RB-Stock-Analysis_V3/Version.txt`（若仍舊＝**線上站沒成功佈署**）。
+- **本倉請用「GitHub Actions」當 Pages 來源**：**Settings → Pages → Source → GitHub Actions**，並選 **`.github/workflows/deploy-static-pages.yml`**。自訂 workflow 會 **build（組 `_site`）→ deploy**，且 **不整包複製 `data/`**（見該 YAML）。**push `main` 會觸發佈署**；亦可 **Actions → Run workflow** 手動跑一次。
+- 若 Pages 仍設為 **Deploy from a branch**：GitHub 會跑內建 **「pages build and deployment」**，在本倉庫常 **failure**，失敗時 **`github.io` 不會更新**（例如卡在 **V2.0.11**）。此情況無法只靠改本倉 YAML 修好，請改為上一步的 **Actions 來源**。
+- Actions 裡 **`report-build-status` 打勾** 只代表「回報狀態」那一步成功；若 **`build` 失敗**，**`deploy` 會被跳過**，`https://<user>.github.io/<repo>/` 就不會更新。
 - **`data/cache/`**、**`data/models/`**、**`data/signal_vs_returns_figures/`** 等勿提交到 Git（見 **`.gitignore`**），以免 Pages／clone 負擔過大。
-- **建議（擇一即可）**
-  1. **Settings → Pages → Build and deployment** 改為 **Deploy from a branch** → 分支 **`main`**、資料夾 **`/`（root）** → Save。之後由分支直接提供靜態檔，不依賴該內建 Actions，通常最省事。
-  2. 若堅持用 **GitHub Actions** 發佈：本倉已提供 **`.github/workflows/deploy-static-pages.yml`**。在 Pages 設定中改為使用**自訂 workflow**（介面上若有「選擇 workflow」請選此檔），避免沿用預設且失敗的那一條。
+
+---
+
+### 資料分層：GitHub 放什麼、CSV 放哪、前端怎麼讀、長期歸檔
+
+對齊「**程式與展示在 GitHub；大量原始資料不要塞進同一個 repo**」的做法，建議心照四層：
+
+| 層級 | 建議放什麼 | 本專案對應 |
+|------|------------|------------|
+| **1. GitHub Repo** | Python、`index.html`／`dashboard.html`、儀表板用**小型 JSON**、設定與說明 | `core/`、`*.html`、`Version.txt`、`data/manifest.json`、`data/*_whale_track.json`、`signal_stats.json`、`market_context.json` 等 |
+| **2. 大檔／歷史 CSV** | 分點快取、長期匯出、回測 raw | **`data/cache/`**、歷史 CSV → **Google Drive**（或本機），以 **`scripts/sync_data_from_gdrive.py`** 拉回再跑 pipeline |
+| **3. 前端讀取** | GitHub Pages **只穩定讀小 JSON**（不要讓瀏覽器直接 fetch Drive CSV） | 儀表板 `fetch('data/...json')`；部署見 **`.github/workflows/deploy-static-pages.yml`**（精簡 `data/`） |
+| **4. 長期歸檔** | 備份、換機、稽核 | Drive 資料夾分區（raw／processed／reports）；進階再考慮 **GCS / BigQuery** 等 |
+
+**`.gitignore` 原則**：已忽略 `data/cache/`、`data/models/`、`data/raw/` 等目錄，以及 **`data/*.csv` 預設不提交**，但**保留** `*_boss_list.csv` 與 `broker_master_enriched.csv` 可進版控（小表）。**`rawdata/`** 內公司／券商主檔**不**套用全 repo 的 `*.csv` 規則，避免誤擋。
+
+若大檔曾經進過 Git **歷史**，僅改 `.gitignore` 無法縮小遠端體積，需另做 **`git filter-repo` / BFG**（請自行備份後操作）。
+
+### Google Drive 大檔（CSV 等）外置備份（可選）
+
+若不想把大量 CSV／快取放進 GitHub，可上傳到 **Google Drive 共用資料夾**（須設為「**知道連結的使用者可檢視**」），本機再用腳本拉回專案目錄後，**`scraper_chip.py` 仍讀本機 `data/cache/tdr/...`**（與原本一致）。
+
+- **範例資料夾**（請自行確認共用權限）：[RB-Stock-Analysis_V3_Data](https://drive.google.com/drive/u/0/folders/1L9H-Suhii63Zur1Md0FbUtA65a5n9UM4)
+- **依賴**：`pip install -r requirements.txt`（內含 **`gdown`**）
+- **`.env`（擇一）**  
+  - `RB_GDRIVE_DATA_FOLDER_ID=1L9H-Suhii63Zur1Md0FbUtA65a5n9UM4`  
+  - 或 `RB_GDRIVE_DATA_FOLDER_URL=https://drive.google.com/drive/folders/1L9H-Suhii63Zur1Md0FbUtA65a5n9UM4`
+- **下載到本機**（專案根目錄執行）：
+
+```bash
+python scripts/sync_data_from_gdrive.py --output data/cache/tdr
+```
+
+若 Drive 內層級與本專 **`data/cache/tdr/<股號>/<日期>.csv`** 一致，可直接用 `--output data/cache/tdr`；否則先下載到預設 **`data/_gdrive_sync`** 再手動整理。
+
+**說明**：FinMind 分點快取仍以**本機路徑**讀寫較穩；Drive 適合備份／換機還原，不建議在每次 `scraper_chip` 內自動連線 Drive（延遲與配額）。
 
 ---
 
@@ -77,7 +113,7 @@ For RUMBOR Data Mining
 - **Web 與視覺化層**
   - **靜態 Dashboard（推薦，不需本機伺服器）**  
     - `index.html`：單頁靜態儀表板，直接讀取 `data/*_whale_track.json` 與 `data/manifest.json`。  
-    - 部署方式：將專案 push 到 **[RTKmick/RB-Stock-Analysis_V3](https://github.com/RTKmick/RB-Stock-Analysis_V3)** 的 **`main`**，開啟 **GitHub Pages**（Settings → Pages → Source: 分支根目錄），即可在 **`https://rtkmick.github.io/RB-Stock-Analysis_V3/`** 查看。**不需 ngrok、不需執行 Flask**，只要在本地跑 scraper、push 更新，重新整理網頁即可看到最新數據。
+    - 部署方式：將專案 push 到 **[RTKmick/RB-Stock-Analysis_V3](https://github.com/RTKmick/RB-Stock-Analysis_V3)** 的 **`main`**，**GitHub Pages** 請設為 **Source: GitHub Actions** 並使用 **`deploy-static-pages.yml`**（見上方「快速開始」步驟 4），即可在 **`https://rtkmick.github.io/RB-Stock-Analysis_V3/`** 查看。**不需 ngrok、不需執行 Flask**；本地跑 scraper、push 後等 Actions **deploy** 完成再重新整理即可看到最新數據。
   - `rb_tv_app.py`（Flask，可選）：
     - `/dashboard/`：讀取 `*_whale_track.json` + 券商 master，完整版儀表板。
     - `/webhook`：串 TradingView 訊號 + TWSE T86，Telegram 推播。
