@@ -12,3 +12,5 @@ __pycache__/
 *.pyc
 ztemp/
 data/debug/
+# FinMind 分點日快取（本機 scraper 用；不應進 repo，否則 GitHub Pages 建置易失敗）
+data/cache/

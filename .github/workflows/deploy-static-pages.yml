@@ -1,7 +1,5 @@
-# 自訂 GitHub Pages：靜態內容（index.html、data/、Version.txt）
-# 若 Settings → Pages 使用內建「pages build and deployment」且 build 失敗又無法改檔，
-# 請改為使用本 workflow：Pages → Build and deployment → GitHub Actions → 選此 workflow；
-# 或改用「Deploy from a branch」→ main → /（root），無需 Actions。
+# 自訂 GitHub Pages：只打包儀表板需要的檔案（排除 data/cache 等大檔）
+# Settings → Pages → Build and deployment 選「GitHub Actions」時，請選此 workflow。
 name: Deploy static site to Pages
 
 on:
@@ -28,13 +26,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Assemble site (no data/cache — 僅 dashboard 所需)
+        run: |
+          set -e
+          mkdir -p _site/data
+          for f in index.html dashboard.html Version.txt .nojekyll; do
+            if [ -f "$f" ]; then cp "$f" _site/; fi
+          done
+          if [ -d data ]; then
+            cp -r data/. _site/data/
+            rm -rf _site/data/cache
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: "_site"
 
       - name: Deploy to GitHub Pages
         id: deployment
