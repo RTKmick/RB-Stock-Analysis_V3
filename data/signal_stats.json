@@ -1,6 +1,6 @@
 {
-  "updated": "2026-05-25 23:27",
-  "total_records": 14,
+  "updated": "2026-05-26 20:01",
+  "total_records": 15,
   "total_with_5d_return": 6,
   "total_with_10d_return": 0,
   "total_with_20d_return": 0,
@@ -18,7 +18,7 @@
       "win_rate_20d": null
     },
     "EXIT_ALERT": {
-      "count": 4,
+      "count": 5,
       "sample_size_5d": 2,
       "avg_return_5d_pct": null,
       "win_rate_5d": null,

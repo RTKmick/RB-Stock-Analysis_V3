@@ -189,9 +189,17 @@ python sub-py/build_manifest.py
 - **Pipeline**：於 **Phase 14 之後**、**`whale_layers` 之前** 呼叫（**try/except**，失敗不阻擋主流程）；**`analyze_whale_trajectory`** 新增選用參數 **`stock_name`**，`scraper_chip.py` 傳入正確簡稱。
 - **前端**：無變更（純後端／外部檔）。
 
+### Phase 16：共識升級警報與 Dashboard 精簡（V2.0.12）
+
+規格：`phase16_consensus_alert_and_cleanup_spec.md`。
+
+- **T1**：`core/phase16_consensus_alert.py` 以 **`get_signals_history`** 比對今日 **`signals.filtered_resonance`** 與歷史中「非今日」最後一筆；寫入 **`signals.consensus_alert`**（無跳變為 `null`）；歷史快照欄位 **`count`／`total`／`label`** 與即時 **`consensus_count`／`non_dayhop_total`／`severity_label`** 皆支援。
+- **Pipeline**：於 **Phase 15 `append_signals_history` 之後**、**`_build_whale_layers_phase0` 之前** 呼叫 **`enrich_phase16_consensus_alert`**（**try/except**，失敗時 **`consensus_alert`** 設為 **`null`**）。
+- **前端**：**`getConsensusAlertLED`** 串在 **`getFilteredResonanceLED` 之後**；移除策略顧問面板與 **「TV 主力行為偵測」** 區塊；NetBuy 說明改為與 TV 無關之用語（後端 TV 欄位可仍保留於 JSON）。
+
 ### Phase 10 Review（文件）
 
-- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10～15 與 `index.html`。
+- `phase10_review_v2_0_6.md`：與規格對照之驗收清單與工程觀察；程式調整已反映於 Phase 10～16 與 `index.html`。
 
 ---
 

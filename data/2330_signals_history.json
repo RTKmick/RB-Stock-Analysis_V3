@@ -1,0 +1,51 @@
+{
+  "stock_id": "2330",
+  "stock_name": "台積電",
+  "records": [
+    {
+      "date": "2026-05-25",
+      "chip_score": 36,
+      "monitor_state": "FADING",
+      "whale_resonance": {
+        "direction": "BUY",
+        "count": 4,
+        "label": "MODERATE",
+        "severity": 60
+      },
+      "pv_divergence": {
+        "type": "NORMAL",
+        "strength": 0.0,
+        "severity": 0
+      },
+      "lockup": {
+        "trust": 0,
+        "trust_label": "NO_LOCKUP",
+        "foreign": 39,
+        "foreign_label": "WEAK_LOCKUP",
+        "dual": false
+      },
+      "filtered_resonance": {
+        "direction": null,
+        "count": 0,
+        "total": 1,
+        "label": "NONE",
+        "severity": 0,
+        "high_confidence": false
+      },
+      "turn_summary": {
+        "bear_turn_count": 1,
+        "bull_turn_count": 5
+      },
+      "top6_summary": {
+        "dayhopper": 5,
+        "swing": 1,
+        "holder": 0,
+        "spike": 0,
+        "accelerating": 1
+      },
+      "composite_severity": 60,
+      "trap_signal": false
+    }
+  ],
+  "updated_at": "2026-05-26T20:01:45"
+}

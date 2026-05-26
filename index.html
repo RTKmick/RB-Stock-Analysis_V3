@@ -171,29 +171,6 @@
     .cmp-cell-bad { background: rgba(239,68,68,0.1); }
     .cmp-clickable { cursor: pointer; }
     .cmp-clickable:hover { text-decoration: underline; color: #60a5fa; }
-    /* Phase 5：策略建議面板 */
-    .strategy-panel {
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      border: 1px solid #4338ca;
-      border-radius: 10px;
-      padding: 16px;
-      margin-top: 12px;
-      margin-bottom: 12px;
-    }
-    .strategy-title {
-      color: #818cf8;
-      font-size: 0.9rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .strategy-text {
-      font-size: 0.88rem;
-      color: #d1d5db;
-      line-height: 1.6;
-    }
-    .strategy-text b.pos { color: #22c55e; }
-    .strategy-text b.neg { color: #ef4444; }
-    .strategy-text b.neu { color: #eab308; }
     /* Phase 5：條件警報 */
     .alert-banner {
       padding: 10px 20px;
@@ -627,88 +604,6 @@
       var alerts = checkAlerts(allStockData, marketCtx);
       renderAlerts(alerts);
     });
-  }
-
-  function buildStrategyPanel(signals, headline, enhanced) {
-    var lines = [];
-    var sig = signals || {};
-    var hl = headline || {};
-    var ez = enhanced || {};
-
-    var action = hl.action_signal || 'NEUTRAL';
-    var conf = parseFloat(hl.confidence || 50);
-    var f5d = parseFloat(sig.inst_foreign_net_5d || 0);
-    var t5d = parseFloat(sig.inst_trust_net_5d || 0);
-    var three5d = parseFloat(sig.inst_three_net_5d || 0);
-    var cohSlope = parseFloat(ez.coherence_slope_5d || 0);
-    var pr5 = parseFloat(sig.pressure_ratio_5d || 0.5);
-
-    if (action === 'BUY_ZONE') {
-      lines.push('🟢 <b class="pos">系統判定為買入區域</b>。');
-    } else if (action === 'EXIT_ALERT') {
-      lines.push('🔴 <b class="neg">系統發出退出警示</b>，建議減倉或停損。');
-    } else {
-      lines.push('🟡 <b class="neu">持股觀望</b>，等待更明確訊號。');
-    }
-
-    if (conf < 35) {
-      lines.push('⚠️ 信心度僅 ' + conf.toFixed(0) + '，<b class="neg">訊號混沌，不宜重押</b>。');
-    } else if (conf >= 65) {
-      lines.push('✅ 信心度 ' + conf.toFixed(0) + '，訊號可信度較高。');
-    }
-
-    var fDir = f5d > 0 ? '買超' : '賣超';
-    var tDir = t5d > 0 ? '買超' : '賣超';
-    var fAmt = Math.abs(f5d / 10000).toFixed(0);
-    var tAmt = Math.abs(t5d / 10000).toFixed(0);
-
-    if (f5d > 0 && t5d > 0) {
-      lines.push('📈 外資 + 投信 5日均<b class="pos">買超</b>（外資 ' + fAmt + '萬、投信 ' + tAmt + '萬），法人方向一致偏多。');
-    } else if (f5d < 0 && t5d < 0) {
-      lines.push('📉 外資 + 投信 5日均<b class="neg">賣超</b>（外資 ' + fAmt + '萬、投信 ' + tAmt + '萬），法人方向一致偏空。');
-    } else {
-      lines.push('⚡ 外資 5日' + fDir + ' ' + fAmt + '萬，投信 ' + tDir + ' ' + tAmt + '萬，<b class="neu">法人方向分歧</b>，觀望為宜。');
-    }
-
-    if (cohSlope > 0.1) {
-      lines.push('🔬 籌碼凝聚度<b class="pos">快速上升</b>（斜率 +' + cohSlope.toFixed(2) + '），主力有集中佈局跡象。');
-    } else if (cohSlope < -0.05) {
-      lines.push('🔬 籌碼凝聚度<b class="neg">下降</b>（斜率 ' + cohSlope.toFixed(2) + '），主力有分散或退場跡象。');
-    }
-
-    if (pr5 > 0.55) {
-      lines.push('💪 壓力比 ' + pr5.toFixed(2) + '，<b class="pos">買方佔優</b>。');
-    } else if (pr5 < 0.42) {
-      lines.push('⛔ 壓力比 ' + pr5.toFixed(2) + '，<b class="neg">賣方佔優</b>。');
-    }
-
-    var divPx = sig.divergence_detail;
-    if (divPx && divPx.label) {
-      var px = divPx.price_chg_pct;
-      var w5 = divPx.whale_net_5d;
-      var divLine = escapeHtml(String(divPx.label));
-      if (px != null) divLine += '｜5日價格 ' + (px > 0 ? '+' : '') + px + '%';
-      if (w5 != null) divLine += '｜大戶5日淨額 ' + (w5 > 0 ? '+' : '') + w5 + ' 張';
-      lines.push('🧭 <b>價量背離</b>：' + divLine);
-    }
-
-    if (action === 'EXIT_ALERT' && conf < 40) {
-      lines.push('📋 <b>建議操作</b>：訊號偏空且信心度低，建議<b class="neg">降低持倉或觀望</b>，等待信心度回升再考慮進場。');
-    } else if (action === 'BUY_ZONE' && f5d > 0 && t5d > 0) {
-      lines.push('📋 <b>建議操作</b>：法人同步買超 + 系統判定買入區，可<b class="pos">分批布局</b>。');
-    } else if (f5d < 0 && t5d < 0 && three5d < 0) {
-      lines.push('📋 <b>建議操作</b>：三大法人均賣超，即使評分中等，建議<b class="neg">暫時觀望</b>不急進場。');
-    } else {
-      lines.push('📋 <b>建議操作</b>：訊號混合，建議<b class="neu">維持現有部位</b>，等待法人方向明確化。');
-    }
-
-    var html = '<div class="strategy-panel">';
-    html += '<div class="strategy-title">🧠 策略顧問建議</div>';
-    html += '<div class="strategy-text">';
-    html += lines.join('<br>');
-    html += '</div></div>';
-
-    return html;
   }
 
   function checkAlerts(allData, ctx) {
@@ -1283,6 +1178,29 @@
       ';color:#fff;border-color:transparent;" title="' + escapeHtml(title) +
       '"><span class="led-dot"></span>🛡' + text + '</span>';
   }
+  function getConsensusAlertLED(alert) {
+    if (!alert || !alert.alert_type) return '';
+    var emoji = alert.alert_emoji || '';
+    var text = alert.alert_text || '';
+    var prev = alert.previous || {};
+    var today = alert.today || {};
+    var prevDir = prev.direction === 'BUY' ? '買' : (prev.direction === 'SELL' ? '賣' : String(prev.direction || ''));
+    var todayDir = today.direction === 'BUY' ? '買' : (today.direction === 'SELL' ? '賣' : String(today.direction || ''));
+    var title = '相較 ' + (prev.date || '?') + '：' + String(prev.label || '-') + ' ' + prevDir +
+      ' (' + (prev.count != null ? prev.count : '-') + '/' + (prev.total != null ? prev.total : '-') + ') → ' +
+      String(today.label || '-') + ' ' + todayDir +
+      ' (' + (today.count != null ? today.count : '-') + '/' + (today.total != null ? today.total : '-') + ')';
+    var typeColors = {
+      CONSENSUS_REVERSED: '#dc2626',
+      CONSENSUS_UPGRADED: '#16a34a',
+      CONSENSUS_FORMED: '#2563eb',
+      CONSENSUS_COLLAPSED: '#a16207',
+      CONSENSUS_DOWNGRADED: '#ca8a04'
+    };
+    var bg = typeColors[alert.alert_type] || '#7c3aed';
+    return '<span class="led-pill" style="background:' + bg + ';color:#fff;border-color:transparent;" title="' +
+      escapeHtml(title) + '"><span class="led-dot"></span>' + escapeHtml(emoji) + ' ' + escapeHtml(text) + '</span>';
+  }
   function getDivergenceLED(div) {
     if (!div || div.type === 'NORMAL' || div.type === 'UNKNOWN') return '';
     var color = div.type === 'STEALTH_BUY' ? '#0ea5e9' : '#f59e0b';
@@ -1446,6 +1364,7 @@
     ledHtml += '<span class="led-pill ' + flags.trust_momentum_class + '"><span class="led-dot"></span>' + flags.trust_momentum_text + '</span>';
     ledHtml += getResonanceLED(sig.whale_resonance);
     ledHtml += getFilteredResonanceLED(sig.filtered_resonance);
+    ledHtml += getConsensusAlertLED(sig.consensus_alert);
     ledHtml += getDivergenceLED(sig.pv_divergence);
     ledHtml += getLockupLED(sig.lockup);
 
@@ -1496,8 +1415,6 @@
     }
 
     html += buildPhase8AnomalyBlocks(sig);
-
-    html += buildStrategyPanel(sig, hl, ez);
 
     var instThreeNet5 = parseFloat(sig.inst_three_net_5d || 0);
     var wl = stock.whale_layers || {};
@@ -1598,45 +1515,18 @@
       html += '</div>';
     }
 
-    html += '<h6 class="text-info-dash mt-4 mb-2">📡 TV 主力行為偵測</h6><div class="row mb-4 g-3">';
-    var tvScore = sig.tv_score != null ? sig.tv_score : 0;
-    var tvGrade = sig.tv_grade || 'weak';
-    var tvGradeMap = { weak:'弱勢觀察', watch:'關注中', strong:'積極行為' };
-    var tvColorMap = { weak:'#9ca3af', watch:'#eab308', strong:'#22c55e' };
-    var tvZh = tvGradeMap[tvGrade] || tvGrade;
-    var tvColor = tvColorMap[tvGrade] || '#9ca3af';
-    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">' + tip('TV 綜合得分', 'TradingView 五大結構訊號的綜合分數。0=無結構訊號，越高=技術面越強。') + '</div><div class="metric-value" style="color:' + tvColor + ';">' + tvScore + '</div><div class="metric-label" style="color:' + tvColor + ';">' + tvZh + '</div></div></div>';
-    html += '<div class="col-md-9"><div class="metric-card" style="text-align:left;"><div class="metric-label mb-2">五大價格訊號</div><div class="d-flex flex-wrap gap-2">';
-    var tvNames = {sig_vwap:'均價偏離（VWAP）',sig_accumulation:'吸籌訊號',sig_rotation:'換手/輪動',sig_profile_zone:'價量重心',sig_structure_break:'結構突破'};
-    var tvTips = {
-      sig_vwap: '成交量加權平均價。主力常以 VWAP 作為當日操作的基準價格。',
-      sig_accumulation: '吸籌／累積相關結構訊號，搭配量價與籌碼觀察。',
-      sig_rotation: '換手或輪動結構訊號，反映資金在族群間移動。',
-      sig_profile_zone: '價量重心區間訊號，用於判斷多空平衡位置。',
-      sig_structure_break: '結構突破訊號，代表價格型態出現方向性變化。'
-    };
-    ['sig_vwap','sig_accumulation','sig_rotation','sig_profile_zone','sig_structure_break'].forEach(function(k){
-      var v = sig[k] != null ? sig[k] : 0;
-      var on = v ? '啟動' : '未觸發';
-      var labelTip = k === 'sig_vwap'
-        ? tip('VWAP', '成交量加權平均價。主力常以 VWAP 作為當日操作的基準價格。收盤 > VWAP 代表買方佔優。')
-        : tip(tvNames[k], tvTips[k]);
-      html += '<span class="tag-pill">' + labelTip + '：<b style="color:' + (v?'#2ecc71':'#666') + '">' + on + '</b></span>';
-    });
-    html += '</div></div></div></div>';
-
     var n1 = sig.netbuy_1d_lot != null ? Number(sig.netbuy_1d_lot) : null;
     var n5 = sig.netbuy_5d_lot != null ? Number(sig.netbuy_5d_lot) : null;
     var n20 = sig.netbuy_20d_lot != null ? Number(sig.netbuy_20d_lot) : null;
     var allZero = (n1 === 0 || n1 === null) && (n5 === 0 || n5 === null) && (n20 === 0 || n20 === null);
-    var tvFlowDesc = allZero
-      ? 'TV 主力近 20 日幾乎沒有明顯淨買賣，僅供參考。'
-      : 'TV 主力近期有實際淨買賣行為，可搭配籌碼、趨勢一起評估。';
+    var netBuyFlowDesc = allZero
+      ? '近 20 日淨買賣張數接近零，僅供參考。'
+      : '近期有明顯淨買或淨賣張數，可搭配籌碼、趨勢一起評估。';
 
     html += '<div class="row mb-4 g-3"><div class="col-md-3"><div class="metric-card"><div class="metric-label">主力得分</div><div class="metric-value">' + scoreU + '</div></div></div>';
     html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">1日 NetBuy(張)</div><div class="metric-value">' + (n1 != null ? n1 : '-') + '</div></div></div>';
     html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">5日 NetBuy(張)</div><div class="metric-value">' + (n5 != null ? n5 : '-') + '</div></div></div>';
-    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">20日 NetBuy(張)</div><div class="metric-value">' + (n20 != null ? n20 : '-') + '</div><div class="metric-label mt-1" style="font-size:0.75rem;color:#9ca3af;">' + tvFlowDesc + '</div></div></div></div>';
+    html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">20日 NetBuy(張)</div><div class="metric-value">' + (n20 != null ? n20 : '-') + '</div><div class="metric-label mt-1" style="font-size:0.75rem;color:#9ca3af;">' + netBuyFlowDesc + '</div></div></div></div>';
 
     // 三大法人 × 融資 × 借券 Regime 卡片
     var instThree20 = Number(sig.inst_three_net_20d || 0);

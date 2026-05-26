@@ -41,6 +41,7 @@ from core.phase14_filtered_resonance import (
     empty_filtered_resonance_snapshot,
 )
 from core.phase15_history import append_signals_history
+from core.phase16_consensus_alert import enrich_phase16_consensus_alert
 
 
 # --- Phase 0：whale_layers + headline（藍圖 V1）--------------------------------
@@ -1148,6 +1149,18 @@ def analyze_whale_trajectory(
         )
     except Exception as e:
         print(f"⚠ Phase15 signals_history failed for {stock_id}: {e!r}")
+
+    # Phase 16：共識升級警報（須在 append 之後，歷史含今日以利比對「非今日最後一筆」）
+    try:
+        enrich_phase16_consensus_alert(
+            signals,
+            stock_id=stock_id,
+            data_dir=_data_root,
+            trade_date=str(last_1d)[:10],
+        )
+    except Exception as e:
+        print(f"⚠ Phase16 consensus_alert failed for {stock_id}: {e!r}")
+        signals["consensus_alert"] = None
 
     whale_layers = _build_whale_layers_phase0(top6_details, signals)
     headline = _build_headline_phase0(stock_id, whale_layers, signals)
