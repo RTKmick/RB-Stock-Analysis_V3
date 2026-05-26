@@ -14,3 +14,16 @@ ztemp/
 data/debug/
 # FinMind 分點日快取（本機 scraper 用；不應進 repo，否則 GitHub Pages 建置易失敗）
 data/cache/
+
+# 分析／模型產物（不必進版控；縮小 clone 與 Pages 負擔）
+data/models/
+data/signal_vs_returns_figures/
+data/_tmp*.txt
+data/*.pkl
+data/*.joblib
+data/*.png
+data/*.jpg
+data/*.jpeg
+data/*.svg
+data/backtest_signals_60d.csv
+data/ml_feature_importance*.csv

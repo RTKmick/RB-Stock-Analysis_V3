@@ -36,9 +36,10 @@ For RUMBOR Data Mining
 
 ### GitHub Pages：網頁版號仍舊、但 `main` 已是新版？
 
+- **不要同時依賴兩種來源**：若 **Settings → Pages** 選 **Deploy from a branch**，建議將 **`.github/workflows/deploy-static-pages.yml`** 裡的 **`push` 觸發註解掉**（只留 `workflow_dispatch`），否則每次 push 仍可能觸發 **內建 `pages-build-deployment`** 與自訂 workflow 並行，除錯混亂。若選 **GitHub Actions** 發佈，則用自訂 workflow（**build → deploy 兩個 job**，且 **不要整包複製 `data/`**，見該 YAML）。
 - Actions 裡 **`report-build-status` 打勾** 只代表「回報狀態」那一步成功；若 **`build` 失敗**，**`deploy` 會被跳過**，`https://<user>.github.io/<repo>/` 就不會更新（例如 `Version.txt` 仍停在舊版）。
 - GitHub **內建**的 **「pages build and deployment」** 流程無法在本倉庫改 YAML 修復。
-- **`data/cache/`**（FinMind 分點日 CSV）勿提交到 Git：檔數多、易讓 Pages 建置失敗；請維持在 **`.gitignore`**（本機 scraper 仍會寫入）。
+- **`data/cache/`**、**`data/models/`**、**`data/signal_vs_returns_figures/`** 等勿提交到 Git（見 **`.gitignore`**），以免 Pages／clone 負擔過大。
 - **建議（擇一即可）**
   1. **Settings → Pages → Build and deployment** 改為 **Deploy from a branch** → 分支 **`main`**、資料夾 **`/`（root）** → Save。之後由分支直接提供靜態檔，不依賴該內建 Actions，通常最省事。
   2. 若堅持用 **GitHub Actions** 發佈：本倉已提供 **`.github/workflows/deploy-static-pages.yml`**。在 Pages 設定中改為使用**自訂 workflow**（介面上若有「選擇 workflow」請選此檔），避免沿用預設且失敗的那一條。
