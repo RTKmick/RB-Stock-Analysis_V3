@@ -58,8 +58,6 @@
       background:#2a1515; border:1px solid #7f1d1d; color:#fecaca; }
     .phase3-error.show{ display:block; }
     .nav-link-ext .tab-ext-icon{ font-size:0.85em; opacity:0.85; margin-left:2px; }
-    .coherence-spark { margin-top: 10px; }
-    .coherence-spark-label { font-size: 0.75rem; color: #9ca3af; margin-top: 2px; }
     .market-bar {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
       border: 1px solid #333;
@@ -372,7 +370,7 @@
   var marketCtx = null;
   var allStockData = {};
   var compareStockOrder = [];
-  let charts = { whale: null, radar: null, breadth: null, coherence: null, tornadoBuy: null, tornadoSell: null };
+  let charts = { whale: null, radar: null, breadth: null, tornadoBuy: null, tornadoSell: null };
 
   function loadSignalStats() {
     return fetch(DATA_BASE + '/signal_stats.json')
@@ -679,7 +677,7 @@
   }
 
   function destroyCharts(){
-    ['whale','radar','breadth','coherence','tornadoBuy','tornadoSell'].forEach(function(k){ if (charts[k]) { try { charts[k].destroy(); } catch(e){} charts[k]=null; } });
+    ['whale','radar','breadth','tornadoBuy','tornadoSell'].forEach(function(k){ if (charts[k]) { try { charts[k].destroy(); } catch(e){} charts[k]=null; } });
   }
 
   function el(id){ return document.getElementById(id); }
@@ -897,178 +895,18 @@
   function normText(s){
     return String(s || '').trim().toLowerCase();
   }
-  function computeForeignMomentumLabel(signals) {
-    if (signals.inst_foreign_momentum_label) {
-      return String(signals.inst_foreign_momentum_label);
-    }
-    const f5 = parseFloat(signals.inst_foreign_net_5d || 0) || 0;
-    const f20 = parseFloat(signals.inst_foreign_net_20d || 0) || 0;
-    const speed5 = f5 / 5;
-    const speed20 = f20 / 20;
-    let momentum = 'NEUTRAL';
-    if (speed20 !== 0) {
-      const ratio = speed5 / speed20;
-      if (ratio >= 1.3) momentum = 'ACCELERATING';
-      else if (ratio <= 0.7) momentum = 'DECELERATING';
-      else momentum = 'STABLE';
-    }
-    let base = 'NEUTRAL';
-    if (f20 > 0) base = 'BUY';
-    else if (f20 < 0) base = 'SELL';
-    return base + '_' + momentum;
-  }
-  function getForeignMomentumClass(label) {
-    if (label === 'BUY_ACCELERATING') return 'on';
-    if (label === 'BUY_DECELERATING') return 'warn';
-    if (label === 'SELL_DECELERATING') return 'warn';
-    if (label === 'SELL_ACCELERATING') return 'danger';
-    return 'off';
-  }
-  function getForeignMomentumText(label) {
-    const map = {
-      'BUY_ACCELERATING': '外資加速買',
-      'BUY_STABLE': '外資穩定買',
-      'BUY_DECELERATING': '外資買力減弱',
-      'SELL_ACCELERATING': '外資加速賣',
-      'SELL_STABLE': '外資穩定賣',
-      'SELL_DECELERATING': '外資賣力減弱',
-      'NEUTRAL_STABLE': '外資觀望中',
-      'NEUTRAL_NEUTRAL': '外資觀望中'
-    };
-    return map[label] || '外資動向不明';
-  }
-  function computeTrustMomentumLabel(signals) {
-    if (signals.inst_trust_momentum_label) {
-      return String(signals.inst_trust_momentum_label);
-    }
-    var t5 = parseFloat(signals.inst_trust_net_5d || 0) || 0;
-    var t20 = parseFloat(signals.inst_trust_net_20d || 0) || 0;
-    var speed5 = t5 / 5;
-    var speed20 = t20 / 20;
-    var momentum = 'NEUTRAL';
-    if (speed20 !== 0) {
-      var ratio = speed5 / speed20;
-      if (ratio >= 1.3) momentum = 'ACCELERATING';
-      else if (ratio <= 0.7) momentum = 'DECELERATING';
-      else momentum = 'STABLE';
-    }
-    var base = t20 > 0 ? 'BUY' : (t20 < 0 ? 'SELL' : 'NEUTRAL');
-    return base + '_' + momentum;
-  }
-  function getTrustMomentumClass(label) {
-    if (label === 'BUY_ACCELERATING') return 'on';
-    if (label === 'BUY_DECELERATING') return 'warn';
-    if (label === 'SELL_DECELERATING') return 'warn';
-    if (label === 'SELL_ACCELERATING') return 'danger';
-    return 'off';
-  }
-  function getTrustMomentumText(label) {
-    var map = {
-      'BUY_ACCELERATING': '投信加速買',
-      'BUY_STABLE': '投信穩定買',
-      'BUY_DECELERATING': '投信買力減弱',
-      'SELL_ACCELERATING': '投信加速賣',
-      'SELL_STABLE': '投信穩定賣',
-      'SELL_DECELERATING': '投信賣力減弱',
-      'NEUTRAL_STABLE': '投信觀望',
-      'NEUTRAL_NEUTRAL': '投信觀望'
-    };
-    return map[label] || '投信動向不明';
-  }
-  function foreignMomentumEmoji(label) {
-    var emoji = {
-      'BUY_ACCELERATING': '🟢買↑↑',
-      'BUY_STABLE': '🟢買→',
-      'BUY_DECELERATING': '🟡買↓',
-      'SELL_ACCELERATING': '🔴賣↑↑',
-      'SELL_STABLE': '⚫賣→',
-      'SELL_DECELERATING': '🔵賣↓'
-    };
-    return emoji[label] || '⚫—';
-  }
-  function loadMomentumLabels(stocks) {
-    if (!stocks || !stocks.length) return;
-    stocks.forEach(function(s) {
-      var url = DATA_BASE + '/' + encodeURIComponent(s.id) + '_whale_track.json';
-      fetchNoStore(url)
-        .then(function(r) { return r.ok ? r.json() : null; })
-        .then(function(d) {
-          if (!d) return;
-          var sig = d.signals || {};
-          var label = computeForeignMomentumLabel(sig);
-          var tag = foreignMomentumEmoji(label);
-          var sel = document.getElementById('stockSelect');
-          if (!sel) return;
-          Array.from(sel.options).forEach(function(opt) {
-            if (opt.value === s.id) {
-              opt.textContent = (s.name ? s.name + ' (' + s.id + ')' : s.id) + '  ' + tag;
-            }
-          });
-        })
-        .catch(function() {});
-    });
-  }
   function buildFlags(signals){
     const buy5 = parseFloat(signals.buy_count_5d || 0) || 0;
     const sell5 = parseFloat(signals.sell_count_5d || 0) || 0;
     const score_u = parseFloat(signals.score_unified || signals.score || 0) || 0;
     const trend = String(signals.trend || '');
-    const fMomentum = computeForeignMomentumLabel(signals);
-    const tMomentum = computeTrustMomentumLabel(signals);
     const alignVal = parseInt(signals.inst_three_align_5d || 0, 10);
     return {
-      foreign_momentum_class: getForeignMomentumClass(fMomentum),
-      foreign_momentum_text: getForeignMomentumText(fMomentum),
-      foreign_momentum_label: fMomentum,
-      trust_momentum_class: getTrustMomentumClass(tMomentum),
-      trust_momentum_text: getTrustMomentumText(tMomentum),
       breadth_expand: (buy5-sell5)>0 ? 1 : 0,
       net_sell_dominate: (trend.indexOf('偏空')>=0 || score_u<=30) ? 1 : 0,
       strength_high: score_u>=75 ? 1 : 0,
       inst_align: alignVal
     };
-  }
-  function buildCoherenceSparkline(series, slope) {
-    if (!series || series.length < 2) return '';
-    var W = 280, H = 48, PAD = 5;
-    var n = series.length;
-    var minV = Math.min.apply(null, series);
-    var maxV = Math.max.apply(null, series);
-    minV = Math.min(minV, 0.5);
-    maxV = Math.max(maxV, 1.5);
-    var range = maxV - minV || 1;
-    var drawW = W - PAD * 2;
-    var drawH = H - PAD * 2;
-    var pts = series.map(function(v, i) {
-      var x = PAD + (i / (n - 1)) * drawW;
-      var y = PAD + (1 - (v - minV) / range) * drawH;
-      return x.toFixed(1) + ',' + y.toFixed(1);
-    }).join(' ');
-    var refY = (PAD + (1 - (1.0 - minV) / range) * drawH).toFixed(1);
-    var lastPt = pts.split(' ').pop().split(',');
-    var lastX = lastPt[0];
-    var lastY = lastPt[1];
-    var todayV = series[series.length - 1].toFixed(2);
-    var slopeVal = parseFloat(slope || 0);
-    var lineColor = slopeVal > 0.05 ? '#22c55e' : (slopeVal < -0.05 ? '#ef4444' : '#9ca3af');
-    var dotColor = lineColor;
-    var slopeText = slopeVal > 0.05 ? '↑ 凝聚度上升' : (slopeVal < -0.05 ? '↓ 凝聚度下降' : '→ 凝聚度持平');
-    var slopeColor = lineColor;
-    var svg =
-      '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="display:block;">' +
-      '<line x1="' + PAD + '" y1="' + refY + '" x2="' + (W - PAD) + '" y2="' + refY + '" ' +
-            'stroke="#444" stroke-width="1" stroke-dasharray="3,3"/>' +
-      '<polyline points="' + pts + '" fill="none" stroke="' + lineColor + '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>' +
-      '<circle cx="' + lastX + '" cy="' + lastY + '" r="3" fill="' + dotColor + '"/>' +
-      '<text x="' + (parseFloat(lastX) + 6) + '" y="' + (parseFloat(lastY) + 4) + '" ' +
-            'fill="' + dotColor + '" font-size="9" font-family="monospace">' + todayV + '</text>' +
-      '<text x="' + PAD + '" y="' + (H - 1) + '" fill="#555" font-size="8">20日</text>' +
-      '</svg>';
-    return '<div class="coherence-spark">' +
-           svg +
-           '<div class="coherence-spark-label" style="color:' + slopeColor + ';">' +
-           '籌碼凝聚度走勢：' + slopeText +
-           '</div></div>';
   }
   function buildMomentumSpark(rolling5d, turnPoint, dates) {
     if (!rolling5d || rolling5d.length === 0) return '';
@@ -1354,14 +1192,12 @@
     (stock.whale_data || []).forEach(function(w){ colorMap[w.name]= w.color || '#888'; });
 
     let ledHtml = '';
-    ledHtml += '<span class="led-pill ' + flags.foreign_momentum_class + '"><span class="led-dot"></span>' + flags.foreign_momentum_text + '</span>';
     ledHtml += '<span class="led-pill ' + (flags.breadth_expand===1?'on':'off') + '"><span class="led-dot"></span>實盤擴散</span>';
     ledHtml += '<span class="led-pill ' + (flags.net_sell_dominate===1?'danger':'off') + '"><span class="led-dot"></span>淨賣主導</span>';
     ledHtml += '<span class="led-pill ' + (flags.strength_high===1?'on':'off') + '"><span class="led-dot"></span>強度高</span>';
     var alignClass = flags.inst_align === 1 ? 'on' : (flags.inst_align === -1 ? 'danger' : 'off');
     var alignText = flags.inst_align === 1 ? '法人同向買' : (flags.inst_align === -1 ? '法人同向賣' : '法人方向分歧');
     ledHtml += '<span class="led-pill ' + alignClass + '"><span class="led-dot"></span>' + alignText + '</span>';
-    ledHtml += '<span class="led-pill ' + flags.trust_momentum_class + '"><span class="led-dot"></span>' + flags.trust_momentum_text + '</span>';
     ledHtml += getResonanceLED(sig.whale_resonance);
     ledHtml += getFilteredResonanceLED(sig.filtered_resonance);
     ledHtml += getConsensusAlertLED(sig.consensus_alert);
@@ -1379,8 +1215,7 @@
     html += '<span class="update-time">最後更新：' + (stock.last_update || '-') + '</span>';
     if (stock.probe_date) html += '<div class="update-time">分點參考日：' + stock.probe_date + '</div>';
     html += '</div><div class="text-end"><span class="badge bg-warning text-dark mb-1">Top 6 核心大戶監控 (10日)</span>';
-    var sparkHtml = buildCoherenceSparkline(ez.coherence_series_20d || [], ez.coherence_slope_5d);
-    html += '<div class="' + statusCls + '">' + (stock.status || '') + '</div><div class="led-group mt-2">' + ledHtml + '</div>' + sparkHtml + '</div></div>';
+    html += '<div class="' + statusCls + '">' + (stock.status || '') + '</div><div class="led-group mt-2">' + ledHtml + '</div></div></div>';
 
     var hl = stock.headline || null;
     if (hl && hl.summary) {
@@ -1389,7 +1224,7 @@
       html += '<div class="metric-card mb-3" style="text-align:left;border-left:4px solid #f1c40f;background:#141414;">';
       html += '<div class="metric-label mb-1">📰 一句話結論（Phase 0 headline）</div>';
       html += '<div style="font-size:1.05rem;line-height:1.55;color:#e5e7eb;">' + escapeHtml(hl.summary) + '</div>';
-      html += '<div class="mt-2"><span class="tag-pill">訊號：' + escapeHtml(actZh) + '</span>' + getBacktestBadge(hl.action_signal);
+      html += '<div class="mt-2"><span class="tag-pill">訊號：' + escapeHtml(actZh) + '</span>';
       if (hl.confidence != null && hl.confidence !== '') {
         html += '<span class="tag-pill">信心度 ' + escapeHtml(String(hl.confidence)) + '</span>';
         var conf = parseFloat(hl.confidence || 50);
@@ -1406,6 +1241,14 @@
           html += '<li>' + escapeHtml(String(ev)) + '</li>';
         });
         html += '</ul>';
+      }
+      var btBadge = getBacktestBadge(hl.action_signal);
+      if (btBadge) {
+        html += '<details style="margin-top:8px;"><summary style="font-size:0.8rem;color:#6b7280;cursor:pointer;">📊 訊號可靠性研究（進階）</summary>';
+        html += '<div style="margin-top:6px;padding:8px 12px;background:#111;border:1px solid #333;border-radius:6px;">';
+        html += btBadge;
+        html += '<div style="font-size:0.7rem;color:#6b7280;margin-top:4px;">⚠️ 僅作為訊號可靠性參考，非交易建議。歷史統計不代表未來表現。</div>';
+        html += '</div></details>';
       }
       html += '</div>';
     } else {
@@ -1574,16 +1417,7 @@
 
     html += '<h6 class="text-info-dash mt-3 mb-2">🕸️ 主力強度雷達</h6><div class="chart-container-mini" style="height:300px;"><canvas id="radarCanvas"></canvas></div>';
 
-    var val = sig.validation || {};
-    var risk = sig.risk || {};
-    html += '<h6 class="text-info-dash mt-4 mb-2">✅ 交易有效性 / 🛡 風控</h6><div class="row mb-4 g-3">';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">突破成立</div><div class="metric-value" style="color:' + (val.breakout_flag===1?'#2ecc71':'#999') + '">' + (val.breakout_flag===1?'通過':'未通過') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">背離警示</div><div class="metric-value" style="color:' + (val.divergence_flag===1?'#f1c40f':'#2ecc71') + '">' + (val.divergence_flag===1?'有背離':'正常') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('確認分數', '量價配合度。越高代表技術面與籌碼面方向一致，訊號越可信。') + '</div><div class="metric-value">' + (val.confirmation_score != null ? val.confirmation_score : '-') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('20日波動率 (ATR%)', '近 20 日平均真實波幅佔價格的比例。越高=波動越大，風險越高。') + '</div><div class="metric-value">' + (risk.atr_pct_20d != null ? (risk.atr_pct_20d*100).toFixed(2) + '%' : '-') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">成交動能(20D億)</div><div class="metric-value">' + (risk.avg_turnover_20d != null ? (risk.avg_turnover_20d/1e8).toFixed(2) : '-') + '</div></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">失效條件</div><div class="metric-value" style="color:' + (risk.invalid_flag===1?'#e74c3c':'#2ecc71') + '">' + (risk.invalid_flag===1?'已觸發':'安全') + '</div></div></div></div>';
-
+    html += '<h6 class="text-info-dash mt-4 mb-2">🛡 大戶集中度與分佈風險</h6>';
     var dr = (sig.dist_risk_flag || 0) ? 1 : 0;
     var hhiBuy = sig.buy_hhi_20d;
     var entBuy = sig.buy_entropy_20d;
@@ -1603,11 +1437,6 @@
     html += '<div class="col-md-3"><div class="metric-card"><div class="metric-label">5日賣超家數</div><div class="metric-value">' + (sig.sell_count_5d != null ? sig.sell_count_5d : '-') + '</div></div></div></div>';
 
     html += '<h6 class="text-info-dash mt-3 mb-2">' + tip('📉 廣度趨勢', '買方分點數 vs 賣方分點數的變化。正值=買盤擴散，負值=賣壓擴散。') + '</h6><div class="chart-container-mini"><canvas id="breadthCanvas"></canvas></div>';
-
-    html += '<h6 class="text-info-dash mt-3 mb-2">' + tip('👥 主力群聚連貫性 (Coherence)', '衡量主力買賣行為的一致程度。>1.0 代表主力集中且有方向性，<1.0 代表分散或觀望。走勢圖越往上代表主力共識越強。') + '</h6><div class="row g-3 mb-4"><div class="col-md-8"><div class="chart-container-mini" style="height:220px;"><canvas id="coherenceCanvas"></canvas></div></div>';
-    html += '<div class="col-md-4"><div class="metric-card"><div class="metric-label">' + tip('本日連貫性', '主力買賣行為的一致程度。>1.0 代表主力集中且有方向性，<1.0 代表分散或觀望。') + '</div><div class="metric-value">' + (ez.coherence_today != null ? ez.coherence_today : '-') + '</div></div>';
-    html += '<div class="metric-card mt-2"><div class="metric-label">斜率 (5日)</div><div class="metric-value">' + (ez.coherence_slope_5d != null ? ez.coherence_slope_5d : '-') + '</div></div>';
-    html += '<div class="metric-card mt-2"><div class="metric-label">持久性 (20日)</div><div class="metric-value">' + (ez.coherence_persistence_20d != null ? (ez.coherence_persistence_20d*100).toFixed(1) + '%' : '-') + '</div></div></div></div>';
 
     var f5 = parseFloat(sig.foreign_net_5d) || 0, l5 = parseFloat(sig.local_net_5d) || 0;
     html += '<div class="row mb-4 g-3"><div class="col-md-6"><div class="kpi-hero ' + (f5>=0?'pos':'neg') + '"><div class="kpi-title"><span class="org-foreign">外資</span>主力 5日(張)</div><div class="kpi-num">' + (f5/1000).toFixed(1) + '</div><div class="kpi-sub">' + (f5>=0?'▲ 偏多':'▼ 偏空') + '</div></div></div>';
@@ -1805,20 +1634,6 @@
           { label: '差值', data: breadthSer, borderColor: '#f1c40f', borderWidth: 3, tension: 0, pointRadius: 2 }
         ]},
         options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { x: { ticks: { color: '#aaa' }, grid: { color: '#333' } }, y: { ticks: { color: '#aaa' }, grid: { color: '#333' } } }, plugins: { legend: { position: 'bottom' } } }
-      });
-    }
-
-    var cohSer = (sig.enhanced && sig.enhanced.coherence_series_20d) ? sig.enhanced.coherence_series_20d : [];
-    var cCtx = document.getElementById('coherenceCanvas');
-    if (cCtx && labels20.length && cohSer.length) {
-      var refLine = labels20.map(function(){ return 1.2; });
-      charts.coherence = new Chart(cCtx.getContext('2d'), {
-        type: 'line',
-        data: { labels: labels20, datasets: [
-          { label: 'Coherence', data: cohSer, borderColor: '#f1c40f', borderWidth: 3, tension: 0.2, pointRadius: 2 },
-          { label: 'Threshold(1.2)', data: refLine, borderColor: '#66b2ff', borderWidth: 1, borderDash: [6,6], pointRadius: 0 }
-        ]},
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#aaa' }, grid: { color: '#333' } }, y: { suggestedMin: 0, suggestedMax: 3, ticks: { color: '#aaa' }, grid: { color: '#333' } } }, plugins: { legend: { position: 'bottom' } } }
       });
     }
 
@@ -2115,7 +1930,6 @@
           input.value = '';
         }
         renderOptions('');
-        loadMomentumLabels(stocks);
 
         sel.addEventListener('change', function(){
           if (sel.value) {
