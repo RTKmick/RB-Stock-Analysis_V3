@@ -12,12 +12,27 @@ __pycache__/
 *.pyc
 ztemp/
 data/debug/
-# FinMind 分點日快取（本機 scraper 用；不應進 repo，否則 GitHub Pages 建置易失敗）
-data/cache/
 
-# 分析／模型產物（不必進版控；縮小 clone 與 Pages 負擔）
+# ---------------------------------------------------------------------------
+# 資料分層（GitHub = 程式碼 + 儀表板用小型 JSON；大檔／歷史放 Drive 或本機）
+# 勿用全 repo 的 *.csv / *.xlsx，以免擋到 rawdata/ 內 TWSE 主檔與券商主檔。
+# ---------------------------------------------------------------------------
+
+# 可重建或大型目錄（不進 Git）
+data/cache/
+data/raw/
+data/processed/
+data/archive/
+data/reports/
+data/backtest/
 data/models/
 data/signal_vs_returns_figures/
+
+# data 根目錄：其餘 CSV 預設忽略；儀表板／pipeline 仍會用的小表白名單
+data/*.csv
+!data/*_boss_list.csv
+!data/broker_master_enriched.csv
+
 data/_tmp*.txt
 data/*.pkl
 data/*.joblib
@@ -25,5 +40,7 @@ data/*.png
 data/*.jpg
 data/*.jpeg
 data/*.svg
-data/backtest_signals_60d.csv
-data/ml_feature_importance*.csv
+data/*.xlsx
+data/*.parquet
+data/*.zip
+data/*.7z

@@ -10,6 +10,7 @@
 requests
 python-dotenv
 urllib3
+gdown>=5.2.0
 
 # 數據分析
 tqdm
@@ -24,7 +25,6 @@ python-dateutil
 flask
 flask-cors
 gunicorn
-requests
 matplotlib
 
 # 金融 API
