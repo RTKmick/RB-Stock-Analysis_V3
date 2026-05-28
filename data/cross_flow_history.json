@@ -85,6 +85,92 @@
           "selling_net": -926.2
         }
       ]
+    },
+    {
+      "date": "2026-05-28",
+      "rotation_count": 30,
+      "top_rotators": [
+        {
+          "broker": "1480",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 117080.6,
+          "selling": "台積電",
+          "selling_net": -22142.3
+        },
+        {
+          "broker": "8440",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 78642.2,
+          "selling": "台積電",
+          "selling_net": -10646.6
+        },
+        {
+          "broker": "9A00",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 42211.3,
+          "selling": "長榮",
+          "selling_net": -992.9
+        },
+        {
+          "broker": "1440",
+          "stock_count": 8,
+          "buying": "長榮",
+          "buying_net": 14697.8,
+          "selling": "群創",
+          "selling_net": -41972.2
+        },
+        {
+          "broker": "8880",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 17098.8,
+          "selling": "智原",
+          "selling_net": -635.7
+        },
+        {
+          "broker": "1650",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 23254.8,
+          "selling": "台積電",
+          "selling_net": -22084.2
+        },
+        {
+          "broker": "9800",
+          "stock_count": 7,
+          "buying": "台積電",
+          "buying_net": 12707.7,
+          "selling": "群創",
+          "selling_net": -41880.7
+        },
+        {
+          "broker": "9200",
+          "stock_count": 7,
+          "buying": "群創",
+          "buying_net": 25240.4,
+          "selling": "聯發科",
+          "selling_net": -2901.7
+        },
+        {
+          "broker": "9100",
+          "stock_count": 7,
+          "buying": "群創",
+          "buying_net": 21187.2,
+          "selling": "世芯-KY",
+          "selling_net": -318.3
+        },
+        {
+          "broker": "1470",
+          "stock_count": 7,
+          "buying": "群創",
+          "buying_net": 45916.3,
+          "selling": "台積電",
+          "selling_net": -15938.4
+        }
+      ]
     }
   ]
 }
