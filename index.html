@@ -608,18 +608,6 @@
     var alerts = [];
     var ids = Object.keys(allData);
 
-    var exitCount = 0;
-    ids.forEach(function(sid) {
-      var hl = (allData[sid].headline || {});
-      if (hl.action_signal === 'EXIT_ALERT') exitCount++;
-    });
-    if (exitCount >= 2) {
-      alerts.push({
-        level: 'danger',
-        text: '🚨 系統對 ' + exitCount + '/' + ids.length + ' 檔股票發出 EXIT_ALERT，請檢視整體持倉風險。'
-      });
-    }
-
     if (ctx && ctx.market_state === 'RISK_OFF') {
       alerts.push({
         level: 'danger',
@@ -997,7 +985,7 @@
     var lbl = resonance.severity_label;
     var color = dir === 'BUY' ? '#22c55e' : '#ef4444';
     var icon = lbl === 'STRONG' ? '⚡⚡' : '⚡';
-    var text = (lbl === 'STRONG' ? '強' : '中') + (dir === 'BUY' ? '共識買' : '共識賣') + ' ' + resonance.consensus_count + '/6';
+    var text = (lbl === 'STRONG' ? '強' : '中度') + (dir === 'BUY' ? '共識買' : '共識賣') + ' ' + resonance.consensus_count + '/6';
     return '<span class="led-pill" style="background:' + color + ';color:#fff;border-color:transparent;"><span class="led-dot"></span>' + icon + text + '</span>';
   }
   function getFilteredResonanceLED(filtered) {
@@ -1006,7 +994,7 @@
     if (dir !== 'BUY' && dir !== 'SELL') return '';
     var lbl = filtered.severity_label;
     var color = dir === 'BUY' ? '#15803d' : '#b91c1c';
-    var text = (lbl === 'STRONG' ? '強' : '中') + '真主力共識' +
+    var text = (lbl === 'STRONG' ? '強' : '中度') + '真主力共識' +
       (dir === 'BUY' ? '買' : '賣') + ' ' +
       filtered.consensus_count + '/' + filtered.non_dayhop_total;
     var excluded = filtered.excluded_dayhopper_count || 0;
