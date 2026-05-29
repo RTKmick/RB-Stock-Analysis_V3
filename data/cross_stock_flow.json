@@ -1,232 +1,118 @@
 {
-  "updated": "2026-05-27",
+  "updated": "2026-05-28",
   "total_brokers_tracked": 38,
-  "rotation_count": 30,
+  "rotation_count": 34,
   "flows": [
-    {
-      "broker_id": "1480",
-      "broker_name": "1480",
-      "stock_count": 8,
-      "is_rotation": true,
-      "total_net": 109193.1,
-      "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 117080.6,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 5604.8,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": 5260.2,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 2890.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": 1637.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": 1112.1,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -2250.1,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": -22142.3,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "8440",
-      "broker_name": "8440",
-      "stock_count": 8,
-      "is_rotation": true,
-      "total_net": 103146.4,
-      "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 78642.2,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": 21608.5,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 7461.7,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": 3808.9,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 2992.5,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": 663.7,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -1384.5,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": -10646.6,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "9A00",
-      "broker_name": "9A00",
-      "stock_count": 8,
-      "is_rotation": true,
-      "total_net": 45997.6,
-      "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 42211.3,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": 4212.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 1538.5,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": 456.7,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -223.6,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": -582.9,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -621.9,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": -992.9,
-          "side": "SELL"
-        }
-      ]
-    },
     {
       "broker_id": "1440",
       "broker_name": "1440",
       "stock_count": 8,
       "is_rotation": true,
-      "total_net": -40641.2,
+      "total_net": -118945.0,
       "positions": [
         {
           "stock_id": "2603",
           "stock_name": "長榮",
-          "net_lot": 14697.8,
+          "net_lot": 6068.9,
           "side": "BUY"
         },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": 1917.8,
+          "net_lot": 1742.7,
           "side": "BUY"
         },
         {
           "stock_id": "3035",
           "stock_name": "智原",
-          "net_lot": 636.8,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -436.5,
+          "net_lot": -306.1,
           "side": "SELL"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": -2789.3,
+          "net_lot": -365.8,
           "side": "SELL"
         },
         {
           "stock_id": "2486",
           "stock_name": "一詮",
-          "net_lot": -2868.2,
+          "net_lot": -1477.2,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -9629.2,
           "side": "SELL"
         },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": -9827.4,
+          "net_lot": -27592.4,
           "side": "SELL"
         },
         {
           "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": -41972.2,
+          "stock_name": "群創",
+          "net_lot": -87385.9,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "9800",
+      "broker_name": "9800",
+      "stock_count": 8,
+      "is_rotation": true,
+      "total_net": -40573.3,
+      "positions": [
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 19864.3,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": 9258.6,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": 1808.6,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 1350.1,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": -213.2,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": -2076.4,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": -19141.0,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": -51424.3,
           "side": "SELL"
         }
       ]
@@ -236,264 +122,225 @@
       "broker_name": "8880",
       "stock_count": 8,
       "is_rotation": true,
-      "total_net": 27386.4,
+      "total_net": 36630.0,
       "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 17098.8,
-          "side": "BUY"
-        },
         {
           "stock_id": "2603",
           "stock_name": "長榮",
-          "net_lot": 6567.9,
+          "net_lot": 16090.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": 13338.3,
           "side": "BUY"
         },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": 1577.5,
+          "net_lot": 4710.6,
           "side": "BUY"
         },
         {
           "stock_id": "2486",
           "stock_name": "一詮",
-          "net_lot": 1256.6,
+          "net_lot": 1638.8,
           "side": "BUY"
         },
         {
           "stock_id": "2454",
           "stock_name": "聯發科",
-          "net_lot": 1023.9,
+          "net_lot": 1109.4,
           "side": "BUY"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": 791.8,
+          "net_lot": 721.8,
           "side": "BUY"
         },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": -294.4,
+          "net_lot": -259.6,
           "side": "SELL"
         },
         {
           "stock_id": "3035",
           "stock_name": "智原",
-          "net_lot": -635.7,
+          "net_lot": -719.5,
           "side": "SELL"
         }
       ]
     },
     {
-      "broker_id": "1650",
-      "broker_name": "1650",
+      "broker_id": "8440",
+      "broker_name": "8440",
       "stock_count": 8,
       "is_rotation": true,
-      "total_net": 26379.2,
+      "total_net": 34043.4,
       "positions": [
         {
           "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 23254.8,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": 22416.1,
+          "stock_name": "群創",
+          "net_lot": 29607.9,
           "side": "BUY"
         },
         {
           "stock_id": "2454",
           "stock_name": "聯發科",
-          "net_lot": 4183.1,
+          "net_lot": 17231.8,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": 13859.5,
           "side": "BUY"
         },
         {
           "stock_id": "3035",
           "stock_name": "智原",
-          "net_lot": 2269.6,
+          "net_lot": 3456.5,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 2861.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": 595.2,
           "side": "BUY"
         },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": -174.2,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": -599.0,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -2887.0,
-          "side": "SELL"
+          "net_lot": 132.0,
+          "side": "BUY"
         },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": -22084.2,
+          "net_lot": -33700.7,
           "side": "SELL"
         }
       ]
     },
     {
-      "broker_id": "9800",
-      "broker_name": "9800",
-      "stock_count": 7,
+      "broker_id": "1480",
+      "broker_name": "1480",
+      "stock_count": 8,
       "is_rotation": true,
-      "total_net": -43318.2,
+      "total_net": -8302.1,
       "positions": [
         {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": 12707.7,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 3464.9,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 2295.9,
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": 51426.9,
           "side": "BUY"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": 1358.5,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": -365.9,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": -20898.6,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": -41880.7,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "9200",
-      "broker_name": "9200",
-      "stock_count": 7,
-      "is_rotation": true,
-      "total_net": 41603.4,
-      "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 25240.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": 10939.1,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": 6125.5,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 2352.1,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 774.2,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": -926.2,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -2901.7,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "9100",
-      "broker_name": "9100",
-      "stock_count": 7,
-      "is_rotation": true,
-      "total_net": 37018.2,
-      "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 21187.2,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": 10063.1,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": 3363.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 1029.0,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": 989.1,
+          "net_lot": 4666.0,
           "side": "BUY"
         },
         {
           "stock_id": "2454",
           "stock_name": "聯發科",
-          "net_lot": 704.7,
+          "net_lot": 2879.6,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": 1435.8,
           "side": "BUY"
         },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": -318.3,
+          "net_lot": 1326.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": -1099.1,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": -3749.2,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": -65188.3,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "9268",
+      "broker_name": "9268",
+      "stock_count": 8,
+      "is_rotation": true,
+      "total_net": -5761.5,
+      "positions": [
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": 11976.4,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": 1333.9,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": 1202.5,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": 269.8,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": -819.1,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -1316.9,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": -8633.7,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": -9774.4,
           "side": "SELL"
         }
       ]
@@ -503,48 +350,99 @@
       "broker_name": "1470",
       "stock_count": 7,
       "is_rotation": true,
-      "total_net": 36349.3,
+      "total_net": -132591.2,
       "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 45916.3,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": 9827.0,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": 2286.5,
-          "side": "BUY"
-        },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": 952.9,
+          "net_lot": 1068.7,
           "side": "BUY"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": 514.0,
+          "net_lot": 738.6,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": 643.9,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": 287.0,
           "side": "BUY"
         },
         {
           "stock_id": "2454",
           "stock_name": "聯發科",
-          "net_lot": -7209.0,
+          "net_lot": -9888.6,
           "side": "SELL"
         },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": -15938.4,
+          "net_lot": -45637.3,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": -79803.5,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "9100",
+      "broker_name": "9100",
+      "stock_count": 7,
+      "is_rotation": true,
+      "total_net": 45330.8,
+      "positions": [
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": 17111.6,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 14082.9,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": 13983.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 863.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": 700.3,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": -541.2,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": -869.2,
           "side": "SELL"
         }
       ]
@@ -554,138 +452,150 @@
       "broker_name": "1560",
       "stock_count": 7,
       "is_rotation": true,
-      "total_net": -13891.2,
+      "total_net": -36886.8,
       "positions": [
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": 172.7,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": -413.0,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": -1248.9,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": -1693.3,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -3265.4,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": -14576.9,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": -15862.0,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "9600",
+      "broker_name": "9600",
+      "stock_count": 7,
+      "is_rotation": true,
+      "total_net": 19659.6,
+      "positions": [
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": 22739.8,
+          "side": "BUY"
+        },
         {
           "stock_id": "2603",
           "stock_name": "長榮",
-          "net_lot": 5371.5,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": 275.0,
+          "net_lot": 3955.5,
           "side": "BUY"
         },
         {
           "stock_id": "3035",
           "stock_name": "智原",
-          "net_lot": -432.0,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -1269.0,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -1823.9,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": -2004.1,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": -14008.7,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "9268",
-      "broker_name": "9268",
-      "stock_count": 6,
-      "is_rotation": true,
-      "total_net": 66593.3,
-      "positions": [
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": 81999.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 1240.3,
+          "net_lot": 732.4,
           "side": "BUY"
         },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": 420.4,
+          "net_lot": -203.8,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": -410.9,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": -439.8,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": -6713.6,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "9200",
+      "broker_name": "9200",
+      "stock_count": 7,
+      "is_rotation": true,
+      "total_net": 15993.4,
+      "positions": [
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 17295.4,
           "side": "BUY"
+        },
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": 6200.3,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 2322.5,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": -185.2,
+          "side": "SELL"
         },
         {
           "stock_id": "3035",
           "stock_name": "智原",
-          "net_lot": 416.3,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": -369.0,
+          "net_lot": -426.9,
           "side": "SELL"
         },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": -17114.1,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "8890",
-      "broker_name": "8890",
-      "stock_count": 6,
-      "is_rotation": true,
-      "total_net": -55092.7,
-      "positions": [
         {
           "stock_id": "2454",
           "stock_name": "聯發科",
-          "net_lot": 508.5,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": 88.0,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -634.0,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": -1709.6,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": -6829.6,
+          "net_lot": -670.5,
           "side": "SELL"
         },
         {
           "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": -46516.0,
+          "stock_name": "群創",
+          "net_lot": -8542.2,
           "side": "SELL"
         }
       ]
@@ -695,81 +605,216 @@
       "broker_name": "1590",
       "stock_count": 6,
       "is_rotation": true,
-      "total_net": -23638.5,
+      "total_net": -67190.4,
       "positions": [
         {
           "stock_id": "2603",
           "stock_name": "長榮",
-          "net_lot": 20837.2,
+          "net_lot": 10406.5,
           "side": "BUY"
         },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": -387.3,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -2170.0,
+          "net_lot": -438.7,
           "side": "SELL"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": -3137.2,
+          "net_lot": -4336.8,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -7548.3,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": -27498.3,
           "side": "SELL"
         },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": -6759.5,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": -32021.7,
+          "net_lot": -37774.8,
           "side": "SELL"
         }
       ]
     },
     {
-      "broker_id": "8960",
-      "broker_name": "8960",
-      "stock_count": 5,
+      "broker_id": "1650",
+      "broker_name": "1650",
+      "stock_count": 6,
       "is_rotation": true,
-      "total_net": -41756.9,
+      "total_net": -59917.8,
       "positions": [
         {
           "stock_id": "2603",
           "stock_name": "長榮",
-          "net_lot": 3316.7,
+          "net_lot": 5230.9,
           "side": "BUY"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": 2276.6,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": -819.0,
+          "side": "SELL"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": -963.3,
+          "net_lot": -1127.5,
           "side": "SELL"
         },
         {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -2024.2,
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": -30781.9,
           "side": "SELL"
         },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": -3039.3,
+          "net_lot": -34696.9,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "9A00",
+      "broker_name": "9A00",
+      "stock_count": 6,
+      "is_rotation": true,
+      "total_net": 48024.8,
+      "positions": [
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": 34852.3,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 12341.3,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 1705.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": 525.0,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": -590.9,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": -808.1,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "5850",
+      "broker_name": "5850",
+      "stock_count": 6,
+      "is_rotation": true,
+      "total_net": 15586.7,
+      "positions": [
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 18614.1,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 2965.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": 2504.1,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": 796.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": -338.3,
           "side": "SELL"
         },
         {
           "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": -39046.8,
+          "stock_name": "群創",
+          "net_lot": -8954.6,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "8890",
+      "broker_name": "8890",
+      "stock_count": 5,
+      "is_rotation": true,
+      "total_net": -51349.9,
+      "positions": [
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": 105.9,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": -714.0,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": -1781.0,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": -7068.8,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": -41892.0,
           "side": "SELL"
         }
       ]
@@ -779,153 +824,36 @@
       "broker_name": "8900",
       "stock_count": 5,
       "is_rotation": true,
-      "total_net": -22795.9,
+      "total_net": -35176.4,
       "positions": [
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": 295.6,
+          "net_lot": 183.6,
           "side": "BUY"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": -1472.1,
+          "net_lot": -1535.9,
           "side": "SELL"
         },
         {
           "stock_id": "2454",
           "stock_name": "聯發科",
-          "net_lot": -2276.1,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": -6295.9,
+          "net_lot": -1987.1,
           "side": "SELL"
         },
         {
           "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": -13047.4,
+          "stock_name": "群創",
+          "net_lot": -14064.4,
           "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "5850",
-      "broker_name": "5850",
-      "stock_count": 5,
-      "is_rotation": true,
-      "total_net": 19051.6,
-      "positions": [
+        },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": 14665.0,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 3178.0,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 774.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 705.6,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": -271.4,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "8888",
-      "broker_name": "8888",
-      "stock_count": 5,
-      "is_rotation": true,
-      "total_net": -5957.5,
-      "positions": [
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": 4160.1,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": 974.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": -122.8,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": -3402.3,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "3481",
-          "stock_name": "群創光電",
-          "net_lot": -7566.9,
-          "side": "SELL"
-        }
-      ]
-    },
-    {
-      "broker_id": "6160",
-      "broker_name": "6160",
-      "stock_count": 5,
-      "is_rotation": true,
-      "total_net": 3196.5,
-      "positions": [
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": 2780.4,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 1050.2,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 326.9,
-          "side": "BUY"
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": -257.8,
-          "side": "SELL"
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": -703.2,
+          "net_lot": -17772.6,
           "side": "SELL"
         }
       ]
@@ -935,36 +863,114 @@
       "broker_name": "1360",
       "stock_count": 5,
       "is_rotation": true,
-      "total_net": -1509.6,
+      "total_net": -34784.5,
       "positions": [
         {
           "stock_id": "2603",
           "stock_name": "長榮",
-          "net_lot": 7560.8,
+          "net_lot": 8670.7,
           "side": "BUY"
         },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
-          "net_lot": 2359.6,
+          "net_lot": 2342.4,
           "side": "BUY"
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -727.2,
-          "side": "SELL"
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": -2941.5,
+          "net_lot": -2763.4,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -3890.8,
           "side": "SELL"
         },
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": -7761.3,
+          "net_lot": -39143.4,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "6160",
+      "broker_name": "6160",
+      "stock_count": 5,
+      "is_rotation": true,
+      "total_net": 18124.0,
+      "positions": [
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 16361.3,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": 1641.0,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": 1009.2,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": -280.7,
+          "side": "SELL"
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": -606.8,
+          "side": "SELL"
+        }
+      ]
+    },
+    {
+      "broker_id": "8840",
+      "broker_name": "8840",
+      "stock_count": 5,
+      "is_rotation": true,
+      "total_net": 14244.3,
+      "positions": [
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": 10856.0,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 2867.4,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2486",
+          "stock_name": "一詮",
+          "net_lot": 716.5,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 191.0,
+          "side": "BUY"
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -386.6,
           "side": "SELL"
         }
       ]

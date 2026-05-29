@@ -45,7 +45,51 @@
       },
       "composite_severity": 0,
       "trap_signal": false
+    },
+    {
+      "date": "2026-05-28",
+      "chip_score": 36,
+      "monitor_state": "NEUTRAL",
+      "whale_resonance": {
+        "direction": "BUY",
+        "count": 5,
+        "label": "STRONG",
+        "severity": 90
+      },
+      "pv_divergence": {
+        "type": "NORMAL",
+        "strength": 0.0,
+        "severity": 0
+      },
+      "lockup": {
+        "trust": 0,
+        "trust_label": "NO_LOCKUP",
+        "foreign": 0,
+        "foreign_label": "NO_LOCKUP",
+        "dual": false
+      },
+      "filtered_resonance": {
+        "direction": null,
+        "count": 0,
+        "total": 0,
+        "label": "NONE",
+        "severity": 0,
+        "high_confidence": false
+      },
+      "turn_summary": {
+        "bear_turn_count": 0,
+        "bull_turn_count": 6
+      },
+      "top6_summary": {
+        "dayhopper": 6,
+        "swing": 0,
+        "holder": 0,
+        "spike": 4,
+        "accelerating": 0
+      },
+      "composite_severity": 90,
+      "trap_signal": false
     }
   ],
-  "updated_at": "2026-05-28T13:26:50"
+  "updated_at": "2026-05-29T20:57:58"
 }
