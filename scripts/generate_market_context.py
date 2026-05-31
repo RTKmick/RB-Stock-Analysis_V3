@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 產出 data/market_context.json（TWSE 加權指數、三大法人、融資融券 + 市場狀態）。
-用法：python scripts/generate_market_context.py [--date YYYYMMDD]
+用法：python scripts/generate_market_context.py [--date YYYYMMDD] [--backfill-days N]
 """
 from __future__ import annotations
 
@@ -140,11 +140,18 @@ def compute_institutional_from_history(
     }
 
 
-def _fetch_twse(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
+def _fetch_twse(
+    url: str,
+    date_yyyymmdd: str,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
     try:
+        params: dict[str, Any] = {"response": "json", "date": date_yyyymmdd}
+        if extra_params:
+            params.update(extra_params)
         r = SESSION.get(
             url,
-            params={"response": "json", "date": date_yyyymmdd},
+            params=params,
             timeout=25,
             verify=False,
         )
@@ -160,9 +167,13 @@ def _fetch_twse(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
         return None
 
 
-def _fetch_twse_on_date(url: str, date_yyyymmdd: str) -> dict[str, Any] | None:
+def _fetch_twse_on_date(
+    url: str,
+    date_yyyymmdd: str,
+    extra_params: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
     """僅在 API 回傳 date 與請求日一致時採用（避免假日重複最近交易日）。"""
-    payload = _fetch_twse(url, date_yyyymmdd)
+    payload = _fetch_twse(url, date_yyyymmdd, extra_params)
     if not payload:
         return None
     api_date = str(payload.get("date") or "").strip()
@@ -252,26 +263,53 @@ def _row_net_amount(row: list[Any]) -> float:
     return 0.0
 
 
+def _bfi82u_day_params(date_yyyymmdd: str) -> dict[str, str]:
+    """BFI82U 須帶 type=day + dayDate，否則 TWSE 常回傳「最新交易日」導致歷史全重複。"""
+    return {"type": "day", "dayDate": date_yyyymmdd}
+
+
 def _fetch_institutional_day(date_yyyymmdd: str) -> dict[str, float] | None:
     payload = _fetch_twse_on_date(
-        "https://www.twse.com.tw/fund/BFI82U", date_yyyymmdd
+        "https://www.twse.com.tw/fund/BFI82U",
+        date_yyyymmdd,
+        extra_params=_bfi82u_day_params(date_yyyymmdd),
     )
     if not payload:
         return None
     rows = _table_rows(payload)
+    if not rows:
+        return None
+
     foreign = trust = dealer = 0.0
+    matched_names: list[str] = []
+
     for row in rows:
         name = str(row[0]).strip()
-        if not name or "合計" in name:
+        if not name or "合計" in name or "總計" in name:
             continue
         net = _row_net_amount(row)
-        if "外資及陸資" in name or "外陸資" in name:
+
+        # 判定順序：外資優先 → 投信 → 自營商
+        # 「外資自營商」與「外資及陸資(不含外資自營商)」都歸入 foreign
+        if "外資" in name:
             foreign += net
-        elif name == "投信":
-            trust = net
+            matched_names.append(f"foreign<-{name}")
+        elif "投信" in name:
+            trust += net
+            matched_names.append(f"trust<-{name}")
         elif "自營商" in name:
             dealer += net
+            matched_names.append(f"dealer<-{name}")
+
     three = foreign + trust + dealer
+
+    if foreign == 0.0 and trust == 0.0 and dealer == 0.0:
+        print(
+            f"[WARN] _fetch_institutional_day({date_yyyymmdd}) all zero. "
+            f"raw rows[0]={rows[0] if rows else None}"
+        )
+        return None
+
     return {
         "foreign": foreign,
         "trust": trust,
@@ -282,7 +320,9 @@ def _fetch_institutional_day(date_yyyymmdd: str) -> dict[str, float] | None:
 
 def _fetch_margin_day(date_yyyymmdd: str) -> dict[str, float] | None:
     payload = _fetch_twse_on_date(
-        "https://www.twse.com.tw/exchangeReport/MI_MARGN", date_yyyymmdd
+        "https://www.twse.com.tw/exchangeReport/MI_MARGN",
+        date_yyyymmdd,
+        extra_params={"type": "day", "dayDate": date_yyyymmdd},
     )
     if not payload:
         return None
@@ -371,7 +411,10 @@ def compute_market_state(
     return "RISK_OFF", "市場偏空，法人資金持續流出"
 
 
-def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
+def build_market_context(
+    as_of: datetime | None = None,
+    backfill_days: int = 20,
+) -> dict[str, Any]:
     end = as_of or _find_latest_trading_date()
     series = _fetch_taiex_series(end, 25)
     if len(series) < 2:
@@ -389,10 +432,11 @@ def build_market_context(as_of: datetime | None = None) -> dict[str, Any]:
     trend_20d = ((close - close_20d) / close_20d * 100.0) if close_20d else 0.0
     series_20d = closes[-20:]
 
+    target_days = max(20, int(backfill_days))
     fetched_rows: list[tuple[str, dict[str, float]]] = []
     d = end
     tries = 0
-    while len(fetched_rows) < 20 and tries < 50:
+    while len(fetched_rows) < target_days and tries < target_days * 3 + 30:
         ymd = d.strftime("%Y%m%d")
         day = _fetch_institutional_day(ymd)
         if day is not None:
@@ -526,6 +570,16 @@ def main() -> int:
         help="TWSE 失敗時保留既有 market_context.json（若存在）",
     )
     parser.add_argument(
+        "--backfill-days",
+        dest="backfill_days",
+        type=int,
+        default=20,
+        help=(
+            "從 end date 往前抓多少個交易日的法人資料寫入 inst_daily_history.json"
+            "（預設 20，建議首次補檔用 60）"
+        ),
+    )
+    parser.add_argument(
         "--no-history",
         action="store_true",
         help="不更新 data/signal_history.json",
@@ -536,7 +590,7 @@ def main() -> int:
         as_of = datetime.strptime(args.date, "%Y%m%d")
 
     try:
-        ctx = build_market_context(as_of)
+        ctx = build_market_context(as_of, backfill_days=args.backfill_days)
     except Exception as exc:
         if args.keep_on_fail and OUT_PATH.is_file():
             print(f"[WARN] {exc}")
@@ -548,6 +602,8 @@ def main() -> int:
     with open(OUT_PATH, "w", encoding="utf-8") as f:
         json.dump(ctx, f, ensure_ascii=False, indent=2)
     print(f"[OK] wrote {OUT_PATH}")
+    merged_hist_len = len(_load_inst_daily_history())
+    print(f"     inst_daily_history.json 累計筆數: {merged_hist_len}")
     inst = ctx.get("institutional") or {}
     margin = ctx.get("margin") or {}
     print(
