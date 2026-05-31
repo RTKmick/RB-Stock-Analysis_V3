@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Phase 19：聚合各檔 *_whale_track.json → data/market_pulse.json（市場大戶熱點）。
+Phase 19–20：聚合各檔 *_whale_track.json → data/market_pulse.json（市場大戶熱點 +
+分點協同集團、大盤大戶情緒摘要）。
 
 用法（專案根目錄）：
   python scripts/generate_market_pulse.py
@@ -89,7 +90,8 @@ def _stock_item(d: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _compute_broker_activity(data_dir: Path) -> list[dict[str, Any]]:
+def _build_broker_map(data_dir: Path) -> list[dict[str, Any]]:
+    """建立完整跨股活躍分點清單（不裁切 Top15），供協同偵測使用。"""
     broker_map: dict[str, dict[str, Any]] = {}
     paths = sorted(glob(str(data_dir / "*_whale_track.json")))
     for fpath in paths:
@@ -181,7 +183,103 @@ def _compute_broker_activity(data_dir: Path) -> list[dict[str, Any]]:
         )
 
     activity.sort(key=lambda x: (-x["stock_count"], -abs(float(x["total_net_lot"]))))
-    return activity[:15]
+    return activity
+
+
+def _compute_broker_activity(data_dir: Path) -> list[dict[str, Any]]:
+    return _build_broker_map(data_dir)[:15]
+
+
+def _compute_broker_synergy(broker_activity: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """買／賣方股票集合 Jaccard ≥ 0.5 且共同檔數 ≥ 2 的協同對。"""
+    buy_sets: dict[str, set[str]] = {}
+    sell_sets: dict[str, set[str]] = {}
+    meta: dict[str, dict[str, str]] = {}
+
+    for row in broker_activity:
+        bid = str(row.get("broker_id") or "").strip()
+        if not bid:
+            continue
+        buy_sets[bid] = {str(s.get("stock_id") or "").strip() for s in (row.get("buy_stocks") or []) if s.get("stock_id")}
+        sell_sets[bid] = {str(s.get("stock_id") or "").strip() for s in (row.get("sell_stocks") or []) if s.get("stock_id")}
+        meta[bid] = {
+            "broker_id": bid,
+            "broker_name": str(row.get("broker_name") or bid).strip() or bid,
+        }
+
+    ids = list(buy_sets.keys())
+    synergy_pairs: list[dict[str, Any]] = []
+
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            a, b2 = ids[i], ids[j]
+
+            sa, sb = buy_sets[a], buy_sets[b2]
+            if sa and sb:
+                inter = sa & sb
+                union = sa | sb
+                if len(inter) >= 2 and union:
+                    jaccard = round(len(inter) / len(union), 2)
+                    if jaccard >= 0.5:
+                        synergy_pairs.append(
+                            {
+                                "side": "BUY",
+                                "jaccard": jaccard,
+                                "shared_count": len(inter),
+                                "shared_stocks": sorted(inter),
+                                "broker_a": dict(meta[a]),
+                                "broker_b": dict(meta[b2]),
+                            }
+                        )
+
+            sa, sb = sell_sets[a], sell_sets[b2]
+            if sa and sb:
+                inter = sa & sb
+                union = sa | sb
+                if len(inter) >= 2 and union:
+                    jaccard = round(len(inter) / len(union), 2)
+                    if jaccard >= 0.5:
+                        synergy_pairs.append(
+                            {
+                                "side": "SELL",
+                                "jaccard": jaccard,
+                                "shared_count": len(inter),
+                                "shared_stocks": sorted(inter),
+                                "broker_a": dict(meta[a]),
+                                "broker_b": dict(meta[b2]),
+                            }
+                        )
+
+    synergy_pairs.sort(key=lambda x: (-float(x["jaccard"]), -int(x["shared_count"])))
+    return synergy_pairs[:20]
+
+
+def _compute_market_sentiment(
+    hot_buy: list[dict[str, Any]],
+    hot_sell: list[dict[str, Any]],
+    stocks: list[dict[str, Any]],
+) -> dict[str, Any]:
+    nb = len(hot_buy)
+    ns = len(hot_sell)
+    total = len(stocks)
+    strong_buy = sum(1 for s in hot_buy if str(s.get("severity_label") or "") == "STRONG")
+    strong_sell = sum(1 for s in hot_sell if str(s.get("severity_label") or "") == "STRONG")
+
+    if nb > ns * 1.5 or (nb >= 3 and ns == 0):
+        direction = "BULL"
+    elif ns > nb * 1.5 or (ns >= 3 and nb == 0):
+        direction = "BEAR"
+    else:
+        direction = "NEUTRAL"
+
+    return {
+        "direction": direction,
+        "hot_buy_count": nb,
+        "hot_sell_count": ns,
+        "strong_buy_count": strong_buy,
+        "strong_sell_count": strong_sell,
+        "coverage": total,
+    }
 
 
 def generate_market_pulse(data_dir: Path | None = None) -> dict[str, Any]:
@@ -215,12 +313,16 @@ def generate_market_pulse(data_dir: Path | None = None) -> dict[str, Any]:
         key=_sort_key_hot,
     )
 
+    full_activity = _build_broker_map(base)
+
     return {
         "updated": _latest_probe_date(stocks),
         "stock_count": len(stocks),
+        "market_sentiment": _compute_market_sentiment(hot_buy, hot_sell, stocks),
         "hot_buy": hot_buy,
         "hot_sell": hot_sell,
-        "broker_activity": _compute_broker_activity(base),
+        "broker_activity": full_activity[:15],
+        "broker_synergy": _compute_broker_synergy(full_activity),
     }
 
 
@@ -231,7 +333,8 @@ def main() -> int:
     nb = len(out.get("hot_buy") or [])
     ns = len(out.get("hot_sell") or [])
     nk = len(out.get("broker_activity") or [])
-    print(f"[OK] market_pulse.json: hot_buy={nb}, hot_sell={ns}, broker_activity={nk}")
+    nsy = len(out.get("broker_synergy") or [])
+    print(f"[OK] market_pulse.json: hot_buy={nb}, hot_sell={ns}, broker_activity={nk}, synergy_pairs={nsy}")
     if nb == 0 and ns == 0:
         print(
             "[WARN] hot_buy 與 hot_sell 皆為空：今日追蹤檔無 whale_resonance 共識（NONE 或未分方向）。"

@@ -431,11 +431,66 @@
       });
   }
 
+  function _renderMarketSentiment(ms) {
+    if (!ms) return '';
+    var dir = ms.direction;
+    var icon = dir === 'BULL' ? '🟢' : (dir === 'BEAR' ? '🔴' : '⚪');
+    var label = dir === 'BULL' ? '今日大戶偏多' : (dir === 'BEAR' ? '今日大戶偏空' : '今日大戶中立');
+    var detail = (ms.hot_buy_count != null ? ms.hot_buy_count : 0) + ' 檔熱買 / ' + (ms.hot_sell_count != null ? ms.hot_sell_count : 0) + ' 檔熱賣';
+    if (ms.strong_buy_count > 0) detail += '  STRONG×' + ms.strong_buy_count;
+    return '<div style="margin-bottom:10px;padding:6px 10px;background:#1a1a1a;border-radius:6px;font-size:0.85rem;">'
+      + icon + ' <strong>' + label + '</strong>　' + detail + '</div>';
+  }
+
+  function _renderPulseFilteredHint() {
+    return '<div style="margin-bottom:10px;font-size:0.72rem;color:#6b7280;line-height:1.35;">'
+      + '※ 「真主力 — / —」：本追蹤期間該檔 Top6 多為隔日沖分點（Phase 14），故真主力共識常為空；非欄位錯誤。'
+      + '</div>';
+  }
+
+  function _renderBrokerSynergy(list) {
+    var html = '<h6 style="color:#a78bfa;margin-top:14px;">🔗 分點協同集團（同步進出 Jaccard ≥ 0.5）</h6>';
+    if (!list || !list.length) {
+      html += '<div style="color:#6b7280;padding:8px;font-size:0.85rem;">無協同訊號</div>';
+      return html;
+    }
+    var buyPairs = list.filter(function(p) { return p.side === 'BUY'; });
+    var sellPairs = list.filter(function(p) { return p.side === 'SELL'; });
+
+    function _renderPairs(pairs, side) {
+      if (!pairs.length) return '';
+      var color = side === 'BUY' ? '#22c55e' : '#ef4444';
+      var sideLabel = side === 'BUY' ? '🟢 買方協同' : '🔴 賣方協同';
+      var h = '<div style="margin-bottom:6px;"><span style="color:' + color + ';font-size:0.8rem;font-weight:600;">' + sideLabel + '</span></div>';
+      pairs.forEach(function(p) {
+        var stocks = p.shared_stocks || [];
+        var stockNames = stocks.slice(0, 5).join(' / ');
+        h += '<div style="padding:8px;margin-bottom:6px;background:#1a1a1a;border-radius:4px;">';
+        h += '<div>';
+        h += '<strong>' + escapeHtml(String((p.broker_a && p.broker_a.broker_id) || '')) + ' ' + escapeHtml(String((p.broker_a && p.broker_a.broker_name) || '')) + '</strong>';
+        h += ' <span style="color:#9ca3af;">↔</span> ';
+        h += '<strong>' + escapeHtml(String((p.broker_b && p.broker_b.broker_id) || '')) + ' ' + escapeHtml(String((p.broker_b && p.broker_b.broker_name) || '')) + '</strong>';
+        h += '　<span style="color:#f1c40f;font-size:0.8rem;">J=' + Number(p.jaccard).toFixed(2) + '</span>';
+        h += '　<span style="color:#9ca3af;font-size:0.8rem;">' + p.shared_count + ' 檔同' + (side === 'BUY' ? '買' : '賣') + '</span>';
+        h += '</div>';
+        h += '<div style="font-size:0.78rem;color:#9ca3af;margin-top:3px;">└ ' + escapeHtml(stockNames) + (stocks.length > 5 ? '…' : '') + '</div>';
+        h += '</div>';
+      });
+      return h;
+    }
+
+    html += _renderPairs(buyPairs, 'BUY');
+    html += _renderPairs(sellPairs, 'SELL');
+    return html;
+  }
+
   function buildMarketPulsePanel() {
     if (!marketPulse) return '';
     var hb = marketPulse.hot_buy || [];
     var hs = marketPulse.hot_sell || [];
     var ba = marketPulse.broker_activity || [];
+    var bs = marketPulse.broker_synergy || [];
+    var ms = marketPulse.market_sentiment || null;
 
     var html = '<div class="market-pulse-panel" style="margin-top:24px;border:1px solid #333;border-radius:8px;padding:16px;background:#0f0f0f;">';
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
@@ -443,12 +498,16 @@
     html += '<span style="font-size:0.8rem;color:#9ca3af;">更新：' + escapeHtml(marketPulse.updated || '-') + '</span>';
     html += '</div>';
 
+    html += _renderMarketSentiment(ms);
+    html += _renderPulseFilteredHint();
+
     html += '<div class="row g-3 mb-3">';
     html += '<div class="col-md-6">' + _renderHotList(hb, 'BUY') + '</div>';
     html += '<div class="col-md-6">' + _renderHotList(hs, 'SELL') + '</div>';
     html += '</div>';
 
     html += _renderBrokerActivity(ba);
+    html += _renderBrokerSynergy(bs);
     html += '</div>';
     return html;
   }
