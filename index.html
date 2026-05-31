@@ -278,6 +278,7 @@
   <div id="marketBar"></div>
   <div id="comparePanel"></div>
   <div id="crossFlowPanel"></div>
+  <div id="marketPulsePanel"></div>
 
   <!-- 全域股票選擇器：所有分頁共用 -->
   <div class="row justify-content-center mb-3">
@@ -368,6 +369,7 @@
   const DEFAULT_STOCK = '2454';
   let manifest = { stock_ids: [], stocks: [] };
   var marketCtx = null;
+  var marketPulse = null;
   var allStockData = {};
   var compareStockOrder = [];
   let charts = { whale: null, radar: null, breadth: null, tornadoBuy: null, tornadoSell: null };
@@ -411,6 +413,104 @@
       .catch(function() {
         marketCtx = null;
       });
+  }
+
+  function loadMarketPulse() {
+    return fetch(DATA_BASE + '/market_pulse.json')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) {
+        marketPulse = d;
+        var host = document.getElementById('marketPulsePanel');
+        if (host) host.innerHTML = buildMarketPulsePanel();
+        return d;
+      })
+      .catch(function() {
+        marketPulse = null;
+        var host = document.getElementById('marketPulsePanel');
+        if (host) host.innerHTML = '';
+      });
+  }
+
+  function buildMarketPulsePanel() {
+    if (!marketPulse) return '';
+    var hb = marketPulse.hot_buy || [];
+    var hs = marketPulse.hot_sell || [];
+    var ba = marketPulse.broker_activity || [];
+
+    var html = '<div class="market-pulse-panel" style="margin-top:24px;border:1px solid #333;border-radius:8px;padding:16px;background:#0f0f0f;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">';
+    html += '<h5 style="margin:0;color:#f1c40f;">📡 市場大戶熱點</h5>';
+    html += '<span style="font-size:0.8rem;color:#9ca3af;">更新：' + escapeHtml(marketPulse.updated || '-') + '</span>';
+    html += '</div>';
+
+    html += '<div class="row g-3 mb-3">';
+    html += '<div class="col-md-6">' + _renderHotList(hb, 'BUY') + '</div>';
+    html += '<div class="col-md-6">' + _renderHotList(hs, 'SELL') + '</div>';
+    html += '</div>';
+
+    html += _renderBrokerActivity(ba);
+    html += '</div>';
+    return html;
+  }
+
+  function _renderHotList(list, side) {
+    var title = side === 'BUY' ? '🟢 大戶熱買榜' : '🔴 大戶熱賣榜';
+    var titleColor = side === 'BUY' ? '#22c55e' : '#ef4444';
+    var html = '<div><h6 style="color:' + titleColor + ';">' + title + '</h6>';
+    if (!list.length) {
+      html += '<div style="color:#6b7280;padding:8px;font-size:0.85rem;">無共識' + (side === 'BUY' ? '熱買' : '熱賣') + '訊號</div>';
+      return html + '</div>';
+    }
+    list.forEach(function(s) {
+      var icon = s.severity_label === 'STRONG' ? '⚡⚡' : '⚡';
+      var lockupText = s.lockup_score > 0 ? '鎖碼 ' + s.lockup_score : '鎖碼 —';
+      var filteredText = s.filtered_label !== 'NONE'
+        ? '真主力 ' + s.filtered_count + '/' + s.filtered_total
+        : '真主力 — / —';
+      html += '<div class="pulse-row" onclick="window.selectStock(\'' + escapeHtml(String(s.stock_id)) + '\')" style="cursor:pointer;padding:8px;margin-bottom:6px;background:#1a1a1a;border-radius:4px;">';
+      html += '<div style="display:flex;justify-content:space-between;">';
+      html += '<strong>' + escapeHtml(String(s.stock_id)) + ' ' + escapeHtml(String(s.stock_name)) + '</strong>';
+      html += '<span>' + icon + ' ' + s.consensus_count + '/' + s.consensus_total + '</span>';
+      html += '</div>';
+      html += '<div style="font-size:0.8rem;color:#9ca3af;margin-top:4px;">';
+      html += filteredText + '　' + lockupText;
+      if (s.action_signal) html += '　📊 ' + escapeHtml(String(s.action_signal));
+      html += '</div>';
+      html += '</div>';
+    });
+    return html + '</div>';
+  }
+
+  function _renderBrokerActivity(list) {
+    var html = '<h6 style="color:#60a5fa;margin-top:12px;">🏦 跨股活躍分點榜（Top6 出現次數）</h6>';
+    if (!list.length) {
+      html += '<div style="color:#6b7280;padding:8px;font-size:0.85rem;">無跨股活躍分點</div>';
+      return html;
+    }
+    list.slice(0, 10).forEach(function(b) {
+      var typeIcon = b.is_rotation ? '🔄 輪動' : (b.buy_count > 0 ? '🚀 全買' : '📉 全賣');
+      var netSign = b.total_net_lot >= 0 ? '+' : '';
+      html += '<div style="padding:8px;margin-bottom:6px;background:#1a1a1a;border-radius:4px;">';
+      html += '<div><strong>' + escapeHtml(String(b.broker_id)) + ' ' + escapeHtml(String(b.broker_name)) + '</strong>';
+      html += '　📊 ' + b.stock_count + ' 檔（買 ' + b.buy_count + ' / 賣 ' + b.sell_count + '）';
+      html += '　' + typeIcon + '　' + netSign + Math.round(b.total_net_lot).toLocaleString() + ' 張</div>';
+      if (b.buy_stocks && b.buy_stocks.length) {
+        html += '<div style="font-size:0.78rem;color:#22c55e;margin-top:2px;">└ 買：';
+        html += b.buy_stocks.slice(0, 3).map(function(s) {
+          return escapeHtml(String(s.stock_name)) + ' ' + (s.net_lot >= 0 ? '+' : '') + Math.round(s.net_lot);
+        }).join(' / ');
+        html += '</div>';
+      }
+      if (b.sell_stocks && b.sell_stocks.length) {
+        html += '<div style="font-size:0.78rem;color:#ef4444;margin-top:2px;">└ 賣：';
+        html += b.sell_stocks.slice(0, 3).map(function(s) {
+          return escapeHtml(String(s.stock_name)) + ' ' + Math.round(s.net_lot);
+        }).join(' / ');
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    return html;
   }
 
   function renderMarketBar(ctx) {
@@ -833,40 +933,39 @@
   function renderCrossFlow(data) {
     var host = document.getElementById('crossFlowPanel');
     if (!host) return;
-    var flows = data.flows || [];
-    if (flows.length === 0) {
-      host.innerHTML = '';
-      return;
+    var inner = '';
+    var flows = (data && data.flows) ? data.flows : [];
+    if (flows.length > 0) {
+      var rotations = flows.filter(function(f) { return f.is_rotation; });
+      if (rotations.length > 0) {
+        inner = '<div class="crossflow-panel">';
+        inner += '<div class="crossflow-title">🔀 跨股資金流向（' + (data.rotation_count || 0) + ' 個輪動大戶）</div>';
+        rotations.forEach(function(f) {
+          var bname = escapeHtml(String(f.broker_name || f.broker_id || ''));
+          inner += '<div class="crossflow-broker">';
+          inner += '<b style="color:#e5e7eb;">' + bname + '</b>';
+          inner += '<span class="rotation-tag">🔄 輪動</span>';
+          inner += '<span style="color:#6b7280;font-size:0.78rem;margin-left:8px;">涉及 ' + f.stock_count + ' 檔</span>';
+          inner += '<div style="margin-top:4px;">';
+          (f.positions || []).forEach(function(p) {
+            var nv = Number(p.net_lot);
+            var color = nv > 0 ? '#22c55e' : '#ef4444';
+            var sign = nv > 0 ? '+' : '';
+            var icon = nv > 0 ? '🟢' : '🔴';
+            var sn = escapeHtml(String(p.stock_name || p.stock_id || ''));
+            inner += '<span style="display:inline-block;margin-right:12px;font-size:0.82rem;">';
+            inner += icon + ' <span style="color:#9ca3af;">' + sn + '</span> ';
+            inner += '<span style="color:' + color + ';">' + sign + (isNaN(nv) ? '-' : nv.toFixed(0)) + '</span>';
+            inner += '</span>';
+          });
+          inner += '</div></div>';
+        });
+        inner += '</div>';
+      }
     }
-    var rotations = flows.filter(function(f) { return f.is_rotation; });
-    if (rotations.length === 0) {
-      host.innerHTML = '';
-      return;
-    }
-    var html = '<div class="crossflow-panel">';
-    html += '<div class="crossflow-title">🔀 跨股資金流向（' + (data.rotation_count || 0) + ' 個輪動大戶）</div>';
-    rotations.forEach(function(f) {
-      var bname = escapeHtml(String(f.broker_name || f.broker_id || ''));
-      html += '<div class="crossflow-broker">';
-      html += '<b style="color:#e5e7eb;">' + bname + '</b>';
-      html += '<span class="rotation-tag">🔄 輪動</span>';
-      html += '<span style="color:#6b7280;font-size:0.78rem;margin-left:8px;">涉及 ' + f.stock_count + ' 檔</span>';
-      html += '<div style="margin-top:4px;">';
-      (f.positions || []).forEach(function(p) {
-        var nv = Number(p.net_lot);
-        var color = nv > 0 ? '#22c55e' : '#ef4444';
-        var sign = nv > 0 ? '+' : '';
-        var icon = nv > 0 ? '🟢' : '🔴';
-        var sn = escapeHtml(String(p.stock_name || p.stock_id || ''));
-        html += '<span style="display:inline-block;margin-right:12px;font-size:0.82rem;">';
-        html += icon + ' <span style="color:#9ca3af;">' + sn + '</span> ';
-        html += '<span style="color:' + color + ';">' + sign + (isNaN(nv) ? '-' : nv.toFixed(0)) + '</span>';
-        html += '</span>';
-      });
-      html += '</div></div>';
-    });
-    html += '</div>';
-    host.innerHTML = html;
+    host.innerHTML = inner;
+    var mpHost = document.getElementById('marketPulsePanel');
+    if (mpHost) mpHost.innerHTML = buildMarketPulsePanel();
   }
   function initBootstrapTooltips() {
     if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
@@ -1952,7 +2051,7 @@
           }
         }
         var preloadIds = compareStockOrder.slice();
-        Promise.all([loadSignalStats(), loadMarketContext()])
+        Promise.all([loadSignalStats(), loadMarketContext(), loadMarketPulse()])
           .then(function() { return preloadAllStocks(preloadIds); })
           .then(loadDefaultStock)
           .catch(function() {

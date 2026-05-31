@@ -95,6 +95,15 @@ if errorlevel 1 (
 )
 
 echo.
+echo [1c] Phase 19: market_pulse.json ^(市場大戶熱點^) ...
+"%PYEXE%" scripts\generate_market_pulse.py
+if errorlevel 1 (
+    echo generate_market_pulse.py failed. Please check the error above.
+    pause
+    exit /b 1
+)
+
+echo.
 echo [2/6] Rebuilding data\manifest.json ...
 "%PYEXE%" sub-py\build_manifest.py
 
