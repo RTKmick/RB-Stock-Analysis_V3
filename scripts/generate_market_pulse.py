@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Phase 19–20：聚合各檔 *_whale_track.json → data/market_pulse.json（市場大戶熱點 +
-分點協同集團、大盤大戶情緒摘要）。
+Phase 19–21：聚合各檔 *_whale_track.json → data/market_pulse.json（市場大戶熱點、
+協同集團、情緒摘要）；每日快照寫入 data/market_pulse_history.json（60 天滾動）。
 
 用法（專案根目錄）：
   python scripts/generate_market_pulse.py
@@ -15,6 +15,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_PATH = ROOT / "data" / "market_pulse.json"
+HISTORY_PATH = ROOT / "data" / "market_pulse_history.json"
+MAX_HISTORY_DAYS = 60
 
 
 def _lockup_max_score(lockup: dict[str, Any]) -> int:
@@ -282,6 +284,59 @@ def _compute_market_sentiment(
     }
 
 
+def _append_pulse_history(pulse: dict[str, Any]) -> None:
+    """把今日 market_pulse 快照 append 到 history，同 date 覆蓋，保留 60 天。"""
+    date = str(pulse.get("updated") or "").strip()
+    if not date:
+        return
+
+    if HISTORY_PATH.is_file():
+        try:
+            raw = json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+            history: list[dict[str, Any]] = raw if isinstance(raw, list) else []
+        except Exception:
+            history = []
+    else:
+        history = []
+
+    raw_synergy = pulse.get("broker_synergy") or []
+    top_synergy: list[dict[str, Any]] = []
+    if isinstance(raw_synergy, list):
+        for p in raw_synergy[:3]:
+            if not isinstance(p, dict):
+                continue
+            ba = p.get("broker_a") or {}
+            bb = p.get("broker_b") or {}
+            if not isinstance(ba, dict) or not isinstance(bb, dict):
+                continue
+            top_synergy.append(
+                {
+                    "side": p.get("side"),
+                    "jaccard": p.get("jaccard"),
+                    "broker_a_id": ba.get("broker_id"),
+                    "broker_b_id": bb.get("broker_id"),
+                    "shared_count": p.get("shared_count"),
+                }
+            )
+
+    snapshot: dict[str, Any] = {
+        "date": date,
+        "market_sentiment": pulse.get("market_sentiment") or {},
+        "hot_buy_ids": [str(s.get("stock_id") or "").strip() for s in (pulse.get("hot_buy") or []) if s.get("stock_id")],
+        "hot_sell_ids": [str(s.get("stock_id") or "").strip() for s in (pulse.get("hot_sell") or []) if s.get("stock_id")],
+        "top_synergy": top_synergy,
+    }
+
+    history = [h for h in history if isinstance(h, dict) and str(h.get("date") or "").strip() != date]
+    history.append(snapshot)
+    history.sort(key=lambda x: str(x.get("date") or ""))
+    history = history[-MAX_HISTORY_DAYS:]
+
+    HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[OK] market_pulse_history.json  entries={len(history)}")
+
+
 def generate_market_pulse(data_dir: Path | None = None) -> dict[str, Any]:
     base = data_dir or (ROOT / "data")
     stocks: list[dict[str, Any]] = []
@@ -315,7 +370,7 @@ def generate_market_pulse(data_dir: Path | None = None) -> dict[str, Any]:
 
     full_activity = _build_broker_map(base)
 
-    return {
+    result: dict[str, Any] = {
         "updated": _latest_probe_date(stocks),
         "stock_count": len(stocks),
         "market_sentiment": _compute_market_sentiment(hot_buy, hot_sell, stocks),
@@ -324,6 +379,8 @@ def generate_market_pulse(data_dir: Path | None = None) -> dict[str, Any]:
         "broker_activity": full_activity[:15],
         "broker_synergy": _compute_broker_synergy(full_activity),
     }
+    _append_pulse_history(result)
+    return result
 
 
 def main() -> int:

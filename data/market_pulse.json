@@ -1,11 +1,11 @@
 {
-  "updated": "2026-05-28",
+  "updated": "2026-06-01",
   "stock_count": 8,
   "market_sentiment": {
     "direction": "BULL",
-    "hot_buy_count": 7,
+    "hot_buy_count": 6,
     "hot_sell_count": 0,
-    "strong_buy_count": 5,
+    "strong_buy_count": 4,
     "strong_sell_count": 0,
     "coverage": 8
   },
@@ -45,24 +45,6 @@
       "is_dual_lockup": false,
       "score_unified": 65.0,
       "action_signal": "EXIT_ALERT"
-    },
-    {
-      "stock_id": "2486",
-      "stock_name": "一詮",
-      "probe_date": "2026-05-28",
-      "consensus_dir": "BUY",
-      "consensus_count": 6,
-      "consensus_total": 6,
-      "severity_label": "STRONG",
-      "severity": 90,
-      "filtered_dir": null,
-      "filtered_count": 0,
-      "filtered_total": 0,
-      "filtered_label": "NONE",
-      "lockup_score": 0,
-      "is_dual_lockup": false,
-      "score_unified": 58.0,
-      "action_signal": "HOLD_WATCH"
     },
     {
       "stock_id": "3035",
@@ -140,13 +122,61 @@
   "hot_sell": [],
   "broker_activity": [
     {
+      "broker_id": "8440",
+      "broker_name": "摩根大通",
+      "stock_count": 7,
+      "buy_count": 5,
+      "sell_count": 2,
+      "is_rotation": true,
+      "total_net_lot": 21290.4,
+      "buy_stocks": [
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 2861.2
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": 17231.8
+        },
+        {
+          "stock_id": "2603",
+          "stock_name": "長榮",
+          "net_lot": 13859.5
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": 3456.5
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": 29607.9
+        }
+      ],
+      "sell_stocks": [
+        {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": -12025.8
+        },
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": -33700.7
+        }
+      ]
+    },
+    {
       "broker_id": "1480",
       "broker_name": "美商高盛",
-      "stock_count": 8,
+      "stock_count": 7,
       "buy_count": 5,
-      "sell_count": 3,
+      "sell_count": 2,
       "is_rotation": true,
-      "total_net_lot": -8302.1,
+      "total_net_lot": -7203.0,
       "buy_stocks": [
         {
           "stock_id": "2345",
@@ -181,11 +211,6 @@
           "net_lot": -65188.3
         },
         {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -1099.1
-        },
-        {
           "stock_id": "2603",
           "stock_name": "長榮",
           "net_lot": -3749.2
@@ -195,11 +220,11 @@
     {
       "broker_id": "9800",
       "broker_name": "元大",
-      "stock_count": 7,
-      "buy_count": 4,
+      "stock_count": 6,
+      "buy_count": 3,
       "sell_count": 3,
       "is_rotation": true,
-      "total_net_lot": -40360.1,
+      "total_net_lot": -42168.7,
       "buy_stocks": [
         {
           "stock_id": "2330",
@@ -215,11 +240,6 @@
           "stock_id": "2454",
           "stock_name": "聯發科",
           "net_lot": 9258.6
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 1808.6
         }
       ],
       "sell_stocks": [
@@ -241,57 +261,19 @@
       ]
     },
     {
-      "broker_id": "8440",
-      "broker_name": "摩根大通",
-      "stock_count": 6,
-      "buy_count": 5,
-      "sell_count": 1,
-      "is_rotation": true,
-      "total_net_lot": 33316.2,
-      "buy_stocks": [
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 2861.2
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 17231.8
-        },
-        {
-          "stock_id": "2603",
-          "stock_name": "長榮",
-          "net_lot": 13859.5
-        },
-        {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": 3456.5
-        },
-        {
-          "stock_id": "3481",
-          "stock_name": "群創",
-          "net_lot": 29607.9
-        }
-      ],
-      "sell_stocks": [
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": -33700.7
-        }
-      ]
-    },
-    {
       "broker_id": "1590",
       "broker_name": "花旗環球",
-      "stock_count": 5,
-      "buy_count": 1,
+      "stock_count": 6,
+      "buy_count": 2,
       "sell_count": 4,
       "is_rotation": true,
-      "total_net_lot": -39692.1,
+      "total_net_lot": -24154.6,
       "buy_stocks": [
+        {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": 15537.5
+        },
         {
           "stock_id": "2603",
           "stock_name": "長榮",
@@ -322,52 +304,19 @@
       ]
     },
     {
-      "broker_id": "5850",
-      "broker_name": "統一",
-      "stock_count": 5,
-      "buy_count": 4,
-      "sell_count": 1,
-      "is_rotation": true,
-      "total_net_lot": 24541.3,
-      "buy_stocks": [
-        {
-          "stock_id": "2330",
-          "stock_name": "台積電",
-          "net_lot": 18614.1
-        },
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": 2965.2
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 2504.1
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 796.2
-        }
-      ],
-      "sell_stocks": [
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": -338.3
-        }
-      ]
-    },
-    {
       "broker_id": "1470",
       "broker_name": "台灣摩根",
-      "stock_count": 4,
-      "buy_count": 1,
+      "stock_count": 5,
+      "buy_count": 2,
       "sell_count": 3,
       "is_rotation": true,
-      "total_net_lot": -134260.7,
+      "total_net_lot": -66755.6,
       "buy_stocks": [
+        {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": 67505.1
+        },
         {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
@@ -393,47 +342,19 @@
       ]
     },
     {
-      "broker_id": "1440",
-      "broker_name": "美林",
-      "stock_count": 4,
-      "buy_count": 1,
-      "sell_count": 3,
-      "is_rotation": true,
-      "total_net_lot": -96749.6,
-      "buy_stocks": [
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": 1742.7
-        }
-      ],
-      "sell_stocks": [
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -9629.2
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -1477.2
-        },
-        {
-          "stock_id": "3481",
-          "stock_name": "群創",
-          "net_lot": -87385.9
-        }
-      ]
-    },
-    {
       "broker_id": "1650",
       "broker_name": "瑞銀",
-      "stock_count": 4,
-      "buy_count": 1,
+      "stock_count": 5,
+      "buy_count": 2,
       "sell_count": 3,
       "is_rotation": true,
-      "total_net_lot": -64329.7,
+      "total_net_lot": -38098.2,
       "buy_stocks": [
+        {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": 26231.5
+        },
         {
           "stock_id": "3035",
           "stock_name": "智原",
@@ -455,6 +376,77 @@
           "stock_id": "3481",
           "stock_name": "群創",
           "net_lot": -30781.9
+        }
+      ]
+    },
+    {
+      "broker_id": "1360",
+      "broker_name": "港麥格理",
+      "stock_count": 5,
+      "buy_count": 2,
+      "sell_count": 3,
+      "is_rotation": true,
+      "total_net_lot": -30756.1,
+      "buy_stocks": [
+        {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": 12699.1
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": 2342.4
+        }
+      ],
+      "sell_stocks": [
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": -39143.4
+        },
+        {
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": -2763.4
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -3890.8
+        }
+      ]
+    },
+    {
+      "broker_id": "1440",
+      "broker_name": "美林",
+      "stock_count": 4,
+      "buy_count": 2,
+      "sell_count": 2,
+      "is_rotation": true,
+      "total_net_lot": -77361.9,
+      "buy_stocks": [
+        {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": 17910.5
+        },
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": 1742.7
+        }
+      ],
+      "sell_stocks": [
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": -9629.2
+        },
+        {
+          "stock_id": "3481",
+          "stock_name": "群創",
+          "net_lot": -87385.9
         }
       ]
     },
@@ -492,46 +484,79 @@
       ]
     },
     {
-      "broker_id": "1360",
-      "broker_name": "港麥格理",
+      "broker_id": "5850",
+      "broker_name": "統一",
       "stock_count": 4,
-      "buy_count": 1,
-      "sell_count": 3,
+      "buy_count": 3,
+      "sell_count": 1,
       "is_rotation": true,
-      "total_net_lot": -43455.2,
+      "total_net_lot": 23745.1,
       "buy_stocks": [
-        {
-          "stock_id": "3661",
-          "stock_name": "世芯-KY",
-          "net_lot": 2342.4
-        }
-      ],
-      "sell_stocks": [
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": -39143.4
+          "net_lot": 18614.1
         },
         {
           "stock_id": "2345",
           "stock_name": "智邦",
-          "net_lot": -2763.4
+          "net_lot": 2965.2
         },
         {
           "stock_id": "2454",
           "stock_name": "聯發科",
-          "net_lot": -3890.8
+          "net_lot": 2504.1
+        }
+      ],
+      "sell_stocks": [
+        {
+          "stock_id": "3661",
+          "stock_name": "世芯-KY",
+          "net_lot": -338.3
+        }
+      ]
+    },
+    {
+      "broker_id": "6160",
+      "broker_name": "中國信託",
+      "stock_count": 4,
+      "buy_count": 2,
+      "sell_count": 2,
+      "is_rotation": true,
+      "total_net_lot": 3887.9,
+      "buy_stocks": [
+        {
+          "stock_id": "2330",
+          "stock_name": "台積電",
+          "net_lot": 16361.3
+        },
+        {
+          "stock_id": "2454",
+          "stock_name": "聯發科",
+          "net_lot": 1641.0
+        }
+      ],
+      "sell_stocks": [
+        {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": -13507.6
+        },
+        {
+          "stock_id": "3035",
+          "stock_name": "智原",
+          "net_lot": -606.8
         }
       ]
     },
     {
       "broker_id": "9100",
       "broker_name": "群益",
-      "stock_count": 4,
+      "stock_count": 3,
       "buy_count": 2,
-      "sell_count": 2,
+      "sell_count": 1,
       "is_rotation": true,
-      "total_net_lot": 29784.1,
+      "total_net_lot": 30653.3,
       "buy_stocks": [
         {
           "stock_id": "2330",
@@ -546,11 +571,6 @@
       ],
       "sell_stocks": [
         {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -869.2
-        },
-        {
           "stock_id": "3661",
           "stock_name": "世芯-KY",
           "net_lot": -541.2
@@ -558,52 +578,42 @@
       ]
     },
     {
-      "broker_id": "6160",
-      "broker_name": "中國信託",
-      "stock_count": 4,
-      "buy_count": 3,
+      "broker_id": "9200",
+      "broker_name": "凱基",
+      "stock_count": 3,
+      "buy_count": 2,
       "sell_count": 1,
       "is_rotation": true,
-      "total_net_lot": 18404.7,
+      "total_net_lot": 9753.3,
       "buy_stocks": [
         {
           "stock_id": "2330",
           "stock_name": "台積電",
-          "net_lot": 16361.3
+          "net_lot": 17295.4
         },
         {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": 1641.0
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 1009.2
+          "stock_id": "2345",
+          "stock_name": "智邦",
+          "net_lot": 2322.5
         }
       ],
       "sell_stocks": [
         {
-          "stock_id": "3035",
-          "stock_name": "智原",
-          "net_lot": -606.8
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": -9864.6
         }
       ]
     },
     {
       "broker_id": "9268",
       "broker_name": "凱基台北",
-      "stock_count": 4,
-      "buy_count": 3,
+      "stock_count": 3,
+      "buy_count": 2,
       "sell_count": 1,
       "is_rotation": true,
-      "total_net_lot": -5827.5,
+      "total_net_lot": -7161.4,
       "buy_stocks": [
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 1333.9
-        },
         {
           "stock_id": "3035",
           "stock_name": "智原",
@@ -627,16 +637,11 @@
       "broker_id": "8880",
       "broker_name": "國泰綜合",
       "stock_count": 3,
-      "buy_count": 2,
-      "sell_count": 1,
+      "buy_count": 1,
+      "sell_count": 2,
       "is_rotation": true,
-      "total_net_lot": 17009.5,
+      "total_net_lot": 4937.1,
       "buy_stocks": [
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": 1638.8
-        },
         {
           "stock_id": "2603",
           "stock_name": "長榮",
@@ -645,36 +650,14 @@
       ],
       "sell_stocks": [
         {
+          "stock_id": "2301",
+          "stock_name": "光寶科",
+          "net_lot": -10433.6
+        },
+        {
           "stock_id": "3035",
           "stock_name": "智原",
           "net_lot": -719.5
-        }
-      ]
-    },
-    {
-      "broker_id": "1560",
-      "broker_name": "港商野村",
-      "stock_count": 3,
-      "buy_count": 0,
-      "sell_count": 3,
-      "is_rotation": false,
-      "total_net_lot": -6207.6,
-      "buy_stocks": [],
-      "sell_stocks": [
-        {
-          "stock_id": "2345",
-          "stock_name": "智邦",
-          "net_lot": -1693.3
-        },
-        {
-          "stock_id": "2454",
-          "stock_name": "聯發科",
-          "net_lot": -3265.4
-        },
-        {
-          "stock_id": "2486",
-          "stock_name": "一詮",
-          "net_lot": -1248.9
         }
       ]
     }
@@ -683,12 +666,11 @@
     {
       "side": "BUY",
       "jaccard": 1.0,
-      "shared_count": 4,
+      "shared_count": 3,
       "shared_stocks": [
         "2330",
         "2345",
-        "2454",
-        "2486"
+        "2454"
       ],
       "broker_a": {
         "broker_id": "9800",
@@ -704,16 +686,84 @@
       "jaccard": 1.0,
       "shared_count": 2,
       "shared_stocks": [
-        "2486",
-        "2603"
+        "2301",
+        "3661"
       ],
       "broker_a": {
-        "broker_id": "8880",
-        "broker_name": "國泰綜合"
+        "broker_id": "1470",
+        "broker_name": "台灣摩根"
       },
       "broker_b": {
-        "broker_id": "8840",
-        "broker_name": "玉山"
+        "broker_id": "1360",
+        "broker_name": "港麥格理"
+      }
+    },
+    {
+      "side": "BUY",
+      "jaccard": 1.0,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2301",
+        "3661"
+      ],
+      "broker_a": {
+        "broker_id": "1470",
+        "broker_name": "台灣摩根"
+      },
+      "broker_b": {
+        "broker_id": "1440",
+        "broker_name": "美林"
+      }
+    },
+    {
+      "side": "BUY",
+      "jaccard": 1.0,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2301",
+        "3661"
+      ],
+      "broker_a": {
+        "broker_id": "1360",
+        "broker_name": "港麥格理"
+      },
+      "broker_b": {
+        "broker_id": "1440",
+        "broker_name": "美林"
+      }
+    },
+    {
+      "side": "SELL",
+      "jaccard": 1.0,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2454",
+        "3481"
+      ],
+      "broker_a": {
+        "broker_id": "1440",
+        "broker_name": "美林"
+      },
+      "broker_b": {
+        "broker_id": "8960",
+        "broker_name": "上海匯豐"
+      }
+    },
+    {
+      "side": "SELL",
+      "jaccard": 1.0,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2301",
+        "3035"
+      ],
+      "broker_a": {
+        "broker_id": "6160",
+        "broker_name": "中國信託"
+      },
+      "broker_b": {
+        "broker_id": "8880",
+        "broker_name": "國泰綜合"
       }
     },
     {
@@ -731,24 +781,6 @@
       "broker_b": {
         "broker_id": "8888",
         "broker_name": "國泰敦南"
-      }
-    },
-    {
-      "side": "BUY",
-      "jaccard": 0.75,
-      "shared_count": 3,
-      "shared_stocks": [
-        "2330",
-        "2454",
-        "2486"
-      ],
-      "broker_a": {
-        "broker_id": "9800",
-        "broker_name": "元大"
-      },
-      "broker_b": {
-        "broker_id": "6160",
-        "broker_name": "中國信託"
       }
     },
     {
@@ -771,24 +803,6 @@
     },
     {
       "side": "BUY",
-      "jaccard": 0.75,
-      "shared_count": 3,
-      "shared_stocks": [
-        "2330",
-        "2454",
-        "2486"
-      ],
-      "broker_a": {
-        "broker_id": "5850",
-        "broker_name": "統一"
-      },
-      "broker_b": {
-        "broker_id": "6160",
-        "broker_name": "中國信託"
-      }
-    },
-    {
-      "side": "BUY",
       "jaccard": 0.67,
       "shared_count": 4,
       "shared_stocks": [
@@ -798,29 +812,46 @@
         "3481"
       ],
       "broker_a": {
-        "broker_id": "1480",
-        "broker_name": "美商高盛"
-      },
-      "broker_b": {
         "broker_id": "8440",
         "broker_name": "摩根大通"
+      },
+      "broker_b": {
+        "broker_id": "1480",
+        "broker_name": "美商高盛"
       }
     },
     {
-      "side": "SELL",
+      "side": "BUY",
       "jaccard": 0.67,
       "shared_count": 2,
       "shared_stocks": [
-        "2486",
-        "2603"
+        "2330",
+        "2454"
       ],
       "broker_a": {
-        "broker_id": "1480",
-        "broker_name": "美商高盛"
+        "broker_id": "9800",
+        "broker_name": "元大"
       },
       "broker_b": {
-        "broker_id": "700S",
-        "broker_name": "兆豐大同"
+        "broker_id": "6160",
+        "broker_name": "中國信託"
+      }
+    },
+    {
+      "side": "BUY",
+      "jaccard": 0.67,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2330",
+        "2345"
+      ],
+      "broker_a": {
+        "broker_id": "9800",
+        "broker_name": "元大"
+      },
+      "broker_b": {
+        "broker_id": "9200",
+        "broker_name": "凱基"
       }
     },
     {
@@ -836,8 +867,8 @@
         "broker_name": "台灣摩根"
       },
       "broker_b": {
-        "broker_id": "8960",
-        "broker_name": "上海匯豐"
+        "broker_id": "1440",
+        "broker_name": "美林"
       }
     },
     {
@@ -849,8 +880,8 @@
         "3481"
       ],
       "broker_a": {
-        "broker_id": "1440",
-        "broker_name": "美林"
+        "broker_id": "1470",
+        "broker_name": "台灣摩根"
       },
       "broker_b": {
         "broker_id": "8960",
@@ -875,6 +906,23 @@
       }
     },
     {
+      "side": "SELL",
+      "jaccard": 0.67,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2345",
+        "2454"
+      ],
+      "broker_a": {
+        "broker_id": "1360",
+        "broker_name": "港麥格理"
+      },
+      "broker_b": {
+        "broker_id": "1560",
+        "broker_name": "港商野村"
+      }
+    },
+    {
       "side": "BUY",
       "jaccard": 0.67,
       "shared_count": 2,
@@ -885,6 +933,40 @@
       "broker_a": {
         "broker_id": "9A00",
         "broker_name": "永豐金"
+      },
+      "broker_b": {
+        "broker_id": "9200",
+        "broker_name": "凱基"
+      }
+    },
+    {
+      "side": "BUY",
+      "jaccard": 0.67,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2330",
+        "2454"
+      ],
+      "broker_a": {
+        "broker_id": "5850",
+        "broker_name": "統一"
+      },
+      "broker_b": {
+        "broker_id": "6160",
+        "broker_name": "中國信託"
+      }
+    },
+    {
+      "side": "BUY",
+      "jaccard": 0.67,
+      "shared_count": 2,
+      "shared_stocks": [
+        "2330",
+        "2345"
+      ],
+      "broker_a": {
+        "broker_id": "5850",
+        "broker_name": "統一"
       },
       "broker_b": {
         "broker_id": "9200",
@@ -904,110 +986,8 @@
         "broker_name": "元大"
       },
       "broker_b": {
-        "broker_id": "9200",
-        "broker_name": "凱基"
-      }
-    },
-    {
-      "side": "BUY",
-      "jaccard": 0.5,
-      "shared_count": 2,
-      "shared_stocks": [
-        "2330",
-        "2345"
-      ],
-      "broker_a": {
-        "broker_id": "5850",
-        "broker_name": "統一"
-      },
-      "broker_b": {
-        "broker_id": "9200",
-        "broker_name": "凱基"
-      }
-    },
-    {
-      "side": "SELL",
-      "jaccard": 0.5,
-      "shared_count": 2,
-      "shared_stocks": [
-        "2454",
-        "3481"
-      ],
-      "broker_a": {
-        "broker_id": "1470",
-        "broker_name": "台灣摩根"
-      },
-      "broker_b": {
-        "broker_id": "1440",
-        "broker_name": "美林"
-      }
-    },
-    {
-      "side": "SELL",
-      "jaccard": 0.5,
-      "shared_count": 2,
-      "shared_stocks": [
-        "2330",
-        "3481"
-      ],
-      "broker_a": {
-        "broker_id": "1470",
-        "broker_name": "台灣摩根"
-      },
-      "broker_b": {
-        "broker_id": "1650",
-        "broker_name": "瑞銀"
-      }
-    },
-    {
-      "side": "SELL",
-      "jaccard": 0.5,
-      "shared_count": 2,
-      "shared_stocks": [
-        "2330",
-        "2454"
-      ],
-      "broker_a": {
-        "broker_id": "1470",
-        "broker_name": "台灣摩根"
-      },
-      "broker_b": {
-        "broker_id": "1360",
-        "broker_name": "港麥格理"
-      }
-    },
-    {
-      "side": "SELL",
-      "jaccard": 0.5,
-      "shared_count": 2,
-      "shared_stocks": [
-        "2454",
-        "2486"
-      ],
-      "broker_a": {
-        "broker_id": "1440",
-        "broker_name": "美林"
-      },
-      "broker_b": {
-        "broker_id": "1560",
-        "broker_name": "港商野村"
-      }
-    },
-    {
-      "side": "SELL",
-      "jaccard": 0.5,
-      "shared_count": 2,
-      "shared_stocks": [
-        "2330",
-        "2345"
-      ],
-      "broker_a": {
-        "broker_id": "1650",
-        "broker_name": "瑞銀"
-      },
-      "broker_b": {
-        "broker_id": "1360",
-        "broker_name": "港麥格理"
+        "broker_id": "9A00",
+        "broker_name": "永豐金"
       }
     },
     {
@@ -1019,8 +999,8 @@
         "2454"
       ],
       "broker_a": {
-        "broker_id": "1360",
-        "broker_name": "港麥格理"
+        "broker_id": "1590",
+        "broker_name": "花旗環球"
       },
       "broker_b": {
         "broker_id": "1560",

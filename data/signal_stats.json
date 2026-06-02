@@ -1,12 +1,12 @@
 {
-  "updated": "2026-05-31 19:00",
-  "total_records": 24,
-  "total_with_5d_return": 13,
+  "updated": "2026-06-02 19:43",
+  "total_records": 25,
+  "total_with_5d_return": 14,
   "total_with_10d_return": 6,
   "total_with_20d_return": 0,
   "by_signal": {
     "HOLD_WATCH": {
-      "count": 16,
+      "count": 17,
       "sample_size_5d": 9,
       "avg_return_5d_pct": null,
       "win_rate_5d": null,
@@ -19,7 +19,7 @@
     },
     "EXIT_ALERT": {
       "count": 8,
-      "sample_size_5d": 4,
+      "sample_size_5d": 5,
       "avg_return_5d_pct": null,
       "win_rate_5d": null,
       "sample_size_10d": 2,

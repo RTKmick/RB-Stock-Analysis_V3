@@ -257,6 +257,92 @@
           "selling_net": -6713.6
         }
       ]
+    },
+    {
+      "date": "2026-06-02",
+      "rotation_count": 35,
+      "top_rotators": [
+        {
+          "broker": "1440",
+          "stock_count": 8,
+          "buying": "光寶科",
+          "buying_net": 17910.5,
+          "selling": "群創",
+          "selling_net": -87385.9
+        },
+        {
+          "broker": "8880",
+          "stock_count": 8,
+          "buying": "長榮",
+          "buying_net": 16090.2,
+          "selling": "光寶科",
+          "selling_net": -10433.6
+        },
+        {
+          "broker": "8440",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 29607.9,
+          "selling": "台積電",
+          "selling_net": -33700.7
+        },
+        {
+          "broker": "9268",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 11976.4,
+          "selling": "光寶科",
+          "selling_net": -9806.0
+        },
+        {
+          "broker": "9200",
+          "stock_count": 8,
+          "buying": "台積電",
+          "buying_net": 17295.4,
+          "selling": "光寶科",
+          "selling_net": -9864.6
+        },
+        {
+          "broker": "1480",
+          "stock_count": 8,
+          "buying": "群創",
+          "buying_net": 51426.9,
+          "selling": "台積電",
+          "selling_net": -65188.3
+        },
+        {
+          "broker": "1470",
+          "stock_count": 7,
+          "buying": "光寶科",
+          "buying_net": 67505.1,
+          "selling": "群創",
+          "selling_net": -79803.5
+        },
+        {
+          "broker": "1590",
+          "stock_count": 7,
+          "buying": "光寶科",
+          "buying_net": 15537.5,
+          "selling": "台積電",
+          "selling_net": -37774.8
+        },
+        {
+          "broker": "9800",
+          "stock_count": 7,
+          "buying": "台積電",
+          "buying_net": 19864.3,
+          "selling": "群創",
+          "selling_net": -51424.3
+        },
+        {
+          "broker": "9100",
+          "stock_count": 7,
+          "buying": "長榮",
+          "buying_net": 17111.6,
+          "selling": "光寶科",
+          "selling_net": -6664.3
+        }
+      ]
     }
   ]
 }

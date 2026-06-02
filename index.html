@@ -370,6 +370,7 @@
   let manifest = { stock_ids: [], stocks: [] };
   var marketCtx = null;
   var marketPulse = null;
+  var marketPulseHistory = null;
   var allStockData = {};
   var compareStockOrder = [];
   let charts = { whale: null, radar: null, breadth: null, tornadoBuy: null, tornadoSell: null };
@@ -416,19 +417,24 @@
   }
 
   function loadMarketPulse() {
-    return fetch(DATA_BASE + '/market_pulse.json')
+    var pPulse = fetch(DATA_BASE + '/market_pulse.json')
       .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(d) {
-        marketPulse = d;
-        var host = document.getElementById('marketPulsePanel');
-        if (host) host.innerHTML = buildMarketPulsePanel();
-        return d;
-      })
-      .catch(function() {
-        marketPulse = null;
-        var host = document.getElementById('marketPulsePanel');
-        if (host) host.innerHTML = '';
-      });
+      .catch(function() { return null; });
+    var pHist = fetch(DATA_BASE + '/market_pulse_history.json')
+      .then(function(r) { return r.ok ? r.json() : []; })
+      .catch(function() { return []; });
+    return Promise.all([pPulse, pHist]).then(function(arr) {
+      marketPulse = arr[0];
+      marketPulseHistory = Array.isArray(arr[1]) ? arr[1] : [];
+      var host = document.getElementById('marketPulsePanel');
+      if (host) host.innerHTML = buildMarketPulsePanel();
+      return arr[0];
+    }).catch(function() {
+      marketPulse = null;
+      marketPulseHistory = [];
+      var host = document.getElementById('marketPulsePanel');
+      if (host) host.innerHTML = '';
+    });
   }
 
   function _renderMarketSentiment(ms) {
@@ -484,6 +490,73 @@
     return html;
   }
 
+  function _renderSentimentSparkline(history) {
+    if (!history || history.length < 2) return '';
+    var vals = history.map(function(h) {
+      var d = (h.market_sentiment || {}).direction || 'NEUTRAL';
+      return d === 'BULL' ? 1 : (d === 'BEAR' ? -1 : 0);
+    });
+    var W = 200, H = 40, pad = 4;
+    var n = vals.length;
+    var stepX = (W - pad * 2) / Math.max(n - 1, 1);
+    function toY(v) { return pad + (1 - v) / 2 * (H - pad * 2); }
+    var points = vals.map(function(v, i) {
+      return (pad + i * stepX).toFixed(1) + ',' + toY(v).toFixed(1);
+    }).join(' ');
+    var latestDir = (history[history.length - 1].market_sentiment || {}).direction || 'NEUTRAL';
+    var latestColor = latestDir === 'BULL' ? '#22c55e' : (latestDir === 'BEAR' ? '#ef4444' : '#9ca3af');
+    return '<svg width="' + W + '" height="' + H + '" style="vertical-align:middle;">'
+      + '<line x1="' + pad + '" y1="' + toY(0) + '" x2="' + (W - pad) + '" y2="' + toY(0)
+      + '" stroke="#333" stroke-width="0.5" stroke-dasharray="2,2"/>'
+      + '<polyline points="' + points + '" fill="none" stroke="' + latestColor + '" stroke-width="1.5"/>'
+      + '</svg>';
+  }
+
+  function _renderHotBuyFrequency(history) {
+    if (!history || !history.length) return '';
+    var freq = {};
+    history.forEach(function(h) {
+      (h.hot_buy_ids || []).forEach(function(id) {
+        var k = String(id || '').trim();
+        if (!k) return;
+        freq[k] = (freq[k] || 0) + 1;
+      });
+    });
+    var sorted = Object.keys(freq)
+      .map(function(id) { return { id: id, count: freq[id] }; })
+      .sort(function(a, b) { return b.count - a.count; })
+      .slice(0, 5);
+    if (!sorted.length) return '';
+    var total = history.length;
+    var html = '<div style="margin-top:10px;">';
+    html += '<div style="font-size:0.78rem;color:#9ca3af;margin-bottom:4px;">過去 ' + total + ' 天熱買頻率 Top5</div>';
+    sorted.forEach(function(item, idx) {
+      var pct = Math.round(item.count / total * 100);
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">';
+      html += '<span style="color:#9ca3af;font-size:0.75rem;width:14px;">' + (idx + 1) + '</span>';
+      html += '<span style="font-size:0.8rem;font-weight:600;width:48px;">' + escapeHtml(item.id) + '</span>';
+      html += '<div style="flex:1;background:#1a1a1a;border-radius:2px;height:6px;">'
+        + '<div style="width:' + pct + '%;background:#22c55e;height:6px;border-radius:2px;"></div>'
+        + '</div>';
+      html += '<span style="font-size:0.75rem;color:#9ca3af;width:32px;">' + item.count + 'd</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    return html;
+  }
+
+  function _renderPulseHistory(history) {
+    if (!history || history.length < 2) return '';
+    var html = '<div style="margin-top:14px;padding-top:10px;border-top:1px solid #2a2a2a;">';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">';
+    html += '<span style="font-size:0.85rem;color:#a78bfa;">📈 大戶情緒趨勢（近 ' + history.length + ' 天）</span>';
+    html += _renderSentimentSparkline(history);
+    html += '</div>';
+    html += _renderHotBuyFrequency(history);
+    html += '</div>';
+    return html;
+  }
+
   function buildMarketPulsePanel() {
     if (!marketPulse) return '';
     var hb = marketPulse.hot_buy || [];
@@ -508,6 +581,7 @@
 
     html += _renderBrokerActivity(ba);
     html += _renderBrokerSynergy(bs);
+    html += _renderPulseHistory(marketPulseHistory);
     html += '</div>';
     return html;
   }

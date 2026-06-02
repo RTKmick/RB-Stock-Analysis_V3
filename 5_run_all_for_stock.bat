@@ -64,7 +64,7 @@ echo ================================
 set "STOCK_IDS="
 set /p STOCK_IDS=Enter stock id^(s^) or press Enter for all tracked ^> 
 if "%STOCK_IDS%"=="" (
-    set "STOCK_IDS=2454 2486 3035 2330 2603 3661 2345 3481"
+    set "STOCK_IDS=2454 2301 3035 2330 2603 3661 2345 3481"
 )
 
 set "DAYS="
