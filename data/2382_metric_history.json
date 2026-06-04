@@ -1,0 +1,12 @@
+{
+  "stock_id": "2382",
+  "records": [
+    {
+      "date": "2026-06-03",
+      "concentration_5d": 44.6,
+      "pressure_ratio_5d": 0.5778,
+      "coherence_slope_5d": -0.166,
+      "top15_buy_stability_10d": 0.1854
+    }
+  ]
+}

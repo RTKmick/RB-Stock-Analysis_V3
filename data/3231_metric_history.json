@@ -1,0 +1,12 @@
+{
+  "stock_id": "3231",
+  "records": [
+    {
+      "date": "2026-06-03",
+      "concentration_5d": 51.24,
+      "pressure_ratio_5d": 0.8689,
+      "coherence_slope_5d": 0.125,
+      "top15_buy_stability_10d": 0.255
+    }
+  ]
+}

@@ -125,7 +125,7 @@ python scripts/sync_data_from_gdrive.py --output data/cache/tdr
   - `sub-py/`：更新券商主檔、geocode、`build_manifest.py`、**`analyze_signal_vs_returns.py`（Phase 1）**、**`ml_signal_winrate.py`（Phase 3 ML 勝率）** 等。
   - `bat/`：scraper、下載專案、Phase 1 / Phase 3 分析；可選：ngrok、Flask。
   - **`send_daily_report.py`（Phase 6）**：讀 `data/*_whale_track.json` + `market_context.json`，組成純文字日報；若已設定 **`TELEGRAM_BOT_TOKEN`**、**`TELEGRAM_CHAT_ID`**（與 `rb_tv_app.py` 相同，建議寫在 `.env`）則推送到 Telegram。未設定時僅列印摘要。`5_run_all_for_stock.bat` 在產生 `market_context.json` 後會自動呼叫一次。
-  - **`5_run_all_for_stock.bat`**：預設追蹤 8 檔（2454、2301、3035、2330、2603、3661、2345、3481）；直接按 Enter 即跑清單內全部股票；個股 FinMind 跑完後會執行 **`[1b] generate_cross_stock.py`** 更新 `data/cross_stock_flow.json`。
+  - **`5_run_all_for_stock.bat`**：預設追蹤 7 檔（2301 光寶科、2345 智邦、2382 廣達、2454 聯發科、2603 長榮、3231 緯創、3481 群創）；直接按 Enter 即跑清單內全部股票；個股 FinMind 跑完後會執行 **`[1b] generate_cross_stock.py`** 更新 `data/cross_stock_flow.json`。
 
 
 ### 建議流程（摘要）
@@ -180,12 +180,12 @@ python scripts/sync_data_from_gdrive.py --output data/cache/tdr
 **本機只跑 FinMind 與跨股彙整（不跑 Phase 1/3 時）**：
 
 ```bash
-python scraper_chip.py --stock_id 2330 --days 60
+python scraper_chip.py --stock_id 2382 --days 60
 python generate_cross_stock.py
 python sub-py/build_manifest.py
 ```
 
-追蹤清單內 8 檔可於 PowerShell 迴圈執行，或雙擊 `5_run_all_for_stock.bat` 並對提示直接按 Enter（預設 8 檔、`days=60`）。
+追蹤清單內 7 檔可於 PowerShell 迴圈執行，或雙擊 `5_run_all_for_stock.bat` 並對提示直接按 Enter（預設 7 檔、`days=60`）。
 
 ### Phase 10：大船轉向偵測（V2.0.6）
 

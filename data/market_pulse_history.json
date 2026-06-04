@@ -41,5 +41,48 @@
         "shared_count": 2
       }
     ]
+  },
+  {
+    "date": "2026-06-03",
+    "market_sentiment": {
+      "direction": "BULL",
+      "hot_buy_count": 4,
+      "hot_sell_count": 1,
+      "strong_buy_count": 3,
+      "strong_sell_count": 0,
+      "coverage": 7
+    },
+    "hot_buy_ids": [
+      "2382",
+      "2603",
+      "3481",
+      "2454"
+    ],
+    "hot_sell_ids": [
+      "3231"
+    ],
+    "top_synergy": [
+      {
+        "side": "SELL",
+        "jaccard": 1.0,
+        "broker_a_id": "1470",
+        "broker_b_id": "1440",
+        "shared_count": 3
+      },
+      {
+        "side": "SELL",
+        "jaccard": 1.0,
+        "broker_a_id": "1480",
+        "broker_b_id": "9268",
+        "shared_count": 2
+      },
+      {
+        "side": "BUY",
+        "jaccard": 1.0,
+        "broker_a_id": "1470",
+        "broker_b_id": "1650",
+        "shared_count": 2
+      }
+    ]
   }
 ]

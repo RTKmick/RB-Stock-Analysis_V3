@@ -1,15 +1,15 @@
 {
-  "updated": "2026-06-02 19:43",
-  "total_records": 25,
-  "total_with_5d_return": 14,
+  "updated": "2026-06-04 18:36",
+  "total_records": 27,
+  "total_with_5d_return": 19,
   "total_with_10d_return": 6,
   "total_with_20d_return": 0,
   "by_signal": {
     "HOLD_WATCH": {
-      "count": 17,
-      "sample_size_5d": 9,
-      "avg_return_5d_pct": null,
-      "win_rate_5d": null,
+      "count": 19,
+      "sample_size_5d": 12,
+      "avg_return_5d_pct": 1.66,
+      "win_rate_5d": 0.17,
       "sample_size_10d": 4,
       "avg_return_10d_pct": null,
       "win_rate_10d": null,
@@ -19,7 +19,7 @@
     },
     "EXIT_ALERT": {
       "count": 8,
-      "sample_size_5d": 5,
+      "sample_size_5d": 7,
       "avg_return_5d_pct": null,
       "win_rate_5d": null,
       "sample_size_10d": 2,
