@@ -429,6 +429,92 @@
           "selling_net": -4595.1
         }
       ]
+    },
+    {
+      "date": "2026-08-05",
+      "rotation_count": 36,
+      "top_rotators": [
+        {
+          "broker": "8880",
+          "stock_count": 7,
+          "buying": "廣達",
+          "buying_net": 58423.8,
+          "selling": "光寶科",
+          "selling_net": -10433.6
+        },
+        {
+          "broker": "1440",
+          "stock_count": 7,
+          "buying": "光寶科",
+          "buying_net": 17910.5,
+          "selling": "群創",
+          "selling_net": -87385.9
+        },
+        {
+          "broker": "8440",
+          "stock_count": 7,
+          "buying": "群創",
+          "buying_net": 29607.9,
+          "selling": "廣達",
+          "selling_net": -16538.3
+        },
+        {
+          "broker": "9268",
+          "stock_count": 7,
+          "buying": "群創",
+          "buying_net": 11976.4,
+          "selling": "緯創",
+          "selling_net": -16000.5
+        },
+        {
+          "broker": "9200",
+          "stock_count": 7,
+          "buying": "廣達",
+          "buying_net": 10175.5,
+          "selling": "光寶科",
+          "selling_net": -9864.6
+        },
+        {
+          "broker": "9100",
+          "stock_count": 6,
+          "buying": "廣達",
+          "buying_net": 36997.1,
+          "selling": "光寶科",
+          "selling_net": -6664.3
+        },
+        {
+          "broker": "1480",
+          "stock_count": 6,
+          "buying": "群創",
+          "buying_net": 51426.9,
+          "selling": "廣達",
+          "selling_net": -8091.5
+        },
+        {
+          "broker": "9600",
+          "stock_count": 6,
+          "buying": "廣達",
+          "buying_net": 30792.9,
+          "selling": "光寶科",
+          "selling_net": -23330.6
+        },
+        {
+          "broker": "9800",
+          "stock_count": 6,
+          "buying": "緯創",
+          "buying_net": 55761.8,
+          "selling": "群創",
+          "selling_net": -51424.3
+        },
+        {
+          "broker": "1360",
+          "stock_count": 6,
+          "buying": "光寶科",
+          "buying_net": 12699.1,
+          "selling": "廣達",
+          "selling_net": -4595.1
+        }
+      ]
     }
   ]
 }

@@ -14,6 +14,13 @@
       "pressure_ratio_5d": 0.4948,
       "coherence_slope_5d": 0.149,
       "top15_buy_stability_10d": 0.1507
+    },
+    {
+      "date": "2026-08-04",
+      "concentration_5d": 41.29,
+      "pressure_ratio_5d": 0.4937,
+      "coherence_slope_5d": -0.024,
+      "top15_buy_stability_10d": 0.1808
     }
   ]
 }

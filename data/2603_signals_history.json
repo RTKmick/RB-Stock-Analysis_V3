@@ -45,7 +45,51 @@
       },
       "composite_severity": 90,
       "trap_signal": false
+    },
+    {
+      "date": "2026-08-04",
+      "chip_score": 74,
+      "monitor_state": "ACCUMULATION",
+      "whale_resonance": {
+        "direction": "MIXED",
+        "count": 3,
+        "label": "NONE",
+        "severity": 0
+      },
+      "pv_divergence": {
+        "type": "NORMAL",
+        "strength": 0.0,
+        "severity": 0
+      },
+      "lockup": {
+        "trust": 0,
+        "trust_label": "NO_LOCKUP",
+        "foreign": 0,
+        "foreign_label": "NO_LOCKUP",
+        "dual": false
+      },
+      "filtered_resonance": {
+        "direction": null,
+        "count": 0,
+        "total": 0,
+        "label": "NONE",
+        "severity": 0,
+        "high_confidence": false
+      },
+      "turn_summary": {
+        "bear_turn_count": 0,
+        "bull_turn_count": 5
+      },
+      "top6_summary": {
+        "dayhopper": 6,
+        "swing": 0,
+        "holder": 0,
+        "spike": 0,
+        "accelerating": 0
+      },
+      "composite_severity": 0,
+      "trap_signal": false
     }
   ],
-  "updated_at": "2026-05-29T20:56:52"
+  "updated_at": "2026-08-05T17:24:59"
 }
